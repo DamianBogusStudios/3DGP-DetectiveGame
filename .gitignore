@@ -73,6 +73,9 @@ Game/DetectiveAI/Plugins/**/Intermediate/*
 # Cache files for the editor to use
 Game/DetectiveAI/DerivedDataCache/*
 
+# Ignore Art Folder
+Game/Art/*
+
 # Additional common ignore patterns
 *.log
 *.bak
