@@ -1,9 +1,9 @@
 
 
 
-#include "MPlayerController.h"
+#include "Controllers/MPlayerController.h"
+#include "Characters/BaseCharacter.h"
 #include "Camera/CameraComponent.h"
-#include "BaseCharacter.h"
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"

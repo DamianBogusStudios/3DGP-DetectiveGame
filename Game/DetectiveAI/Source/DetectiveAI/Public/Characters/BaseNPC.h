@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "InteractInterface.h"
+#include "Interfaces/InteractInterface.h"
 #include "BaseNPC.generated.h"
 
-class UDialogComponent;
+class UDialogueComponent;
 
 UCLASS()
 class DETECTIVEAI_API ABaseNPC : public ACharacter, public IInteractInterface
@@ -20,7 +20,7 @@ public:
 
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Interaction)
-	UDialogComponent* DialogComponent;
+	UDialogueComponent* DialogueComponent;
 
 protected:
 	// Called when the game starts or when spawned

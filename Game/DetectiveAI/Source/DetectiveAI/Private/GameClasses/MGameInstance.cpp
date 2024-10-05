@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "MGameInstance.h"
+#include "GameClasses/MGameInstance.h"
 #include "Engine/AssetManager.h"
-#include "OverlayMaterials.h"
+#include "Data/OverlayMaterials.h"
 
 UMaterial* UMGameInstance::GetOverlayMaterial(bool Interactable)
 {

@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "BaseCharacter.h"
+#include "Characters/BaseCharacter.h"
 #include "Components/SphereComponent.h"
-#include "InteractInterface.h"
+#include "Interfaces/InteractInterface.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter(const FObjectInitializer & ObjectInitializer)

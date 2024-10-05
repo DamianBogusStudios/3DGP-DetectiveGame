@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "DialogWidget.generated.h"
+#include "DialogueWidget.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class DETECTIVEAI_API UDialogWidget : public UUserWidget
+class DETECTIVEAI_API UDialogueWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	

@@ -2,9 +2,9 @@
 
 
 #include "Characters/BaseNPC.h"
-#include "MGameInstance.h"
+#include "GameClasses/MGameInstance.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "ActorComponents/DialogComponent.h"
+#include "ActorComponents/DialogueComponent.h"
 
 // Sets default values
 ABaseNPC::ABaseNPC()
@@ -12,7 +12,7 @@ ABaseNPC::ABaseNPC()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	DialogComponent = CreateDefaultSubobject<UDialogComponent>(TEXT("Dialog Component"));
+	DialogueComponent = CreateDefaultSubobject<UDialogueComponent>(TEXT("Dialog Component"));
 }
 
 // Called when the game starts or when spawned
@@ -37,9 +37,9 @@ void ABaseNPC::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void ABaseNPC::Interact_Implementation(AActor* Caller)
 {
-	if(DialogComponent)
+	if(DialogueComponent)
 	{
-		DialogComponent->StartDialog();
+		DialogueComponent->StartDialogue();
 	}
 }
 

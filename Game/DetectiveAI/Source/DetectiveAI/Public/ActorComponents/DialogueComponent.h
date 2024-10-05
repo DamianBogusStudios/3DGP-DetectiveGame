@@ -4,22 +4,22 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "DialogComponent.generated.h"
+#include "DialogueComponent.generated.h"
 
-class UDialogWidget;
+class UDialogueWidget;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class DETECTIVEAI_API UDialogComponent : public UActorComponent
+class DETECTIVEAI_API UDialogueComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	UDialogComponent();
+	UDialogueComponent();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UI)
-	TSubclassOf<UDialogWidget> DialogWidgetClass;
+	TSubclassOf<UDialogueWidget> DialogueWidgetClass;
 
 	UFUNCTION()
-	void StartDialog();
+	void StartDialogue();
 };

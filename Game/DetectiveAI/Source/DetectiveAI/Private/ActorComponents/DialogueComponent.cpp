@@ -1,31 +1,31 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "ActorComponents/DialogComponent.h"
+#include "ActorComponents/DialogueComponent.h"
 #include "Interfaces/DialogueHandler.h"
-#include "UI/DialogWidget.h"
+#include "UI/DialogueWidget.h"
 
 // Sets default values for this component's properties
-UDialogComponent::UDialogComponent()
+UDialogueComponent::UDialogueComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
 }
 
-void UDialogComponent::StartDialog()
+void UDialogueComponent::StartDialogue()
 {
-    if (DialogWidgetClass)
+    if (DialogueWidgetClass)
     {
         if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
         {
-            UDialogWidget* DialogWidget = CreateWidget<UDialogWidget>(PlayerController, DialogWidgetClass);
-            if (DialogWidget)
+            UDialogueWidget* DialogueWidget = CreateWidget<UDialogueWidget>(PlayerController, DialogueWidgetClass);
+            if (DialogueWidget)
             {
-                DialogWidget->AddToViewport();
+                DialogueWidget->AddToViewport();
                 
                 if(PlayerController->Implements<UDialogueHandler>())
                 {
-                    IDialogueHandler::Execute_StartDialogue(Cast<UDialogueHandler>(PlayerController), GetOwner(), DialogWidgetClass);
+                    IDialogueHandler::Execute_StartDialogue(PlayerController, GetOwner(), DialogueWidgetClass);
                 }
 
             }
