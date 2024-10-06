@@ -3,7 +3,6 @@
 
 #include "ActorComponents/DialogueComponent.h"
 #include "Subsystems/InteractionSystem.h"
-#include "Controllers/NPCController.h"
 
 // Sets default values for this component's properties
 UDialogueComponent::UDialogueComponent()
@@ -16,17 +15,6 @@ void UDialogueComponent::StartDialogue() const
     if (auto InteractionSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UInteractionSystem>())
     {
         InteractionSubsystem->RequestDialogueAction(Cast<APawn>(GetOwner()), DialogueTree);
-
-        if(APawn* Owner = Cast<APawn>(GetOwner()))
-        {
-            if(auto controller = Cast<ANPCController>(Owner->GetController()))
-            {
-                controller->OnDialogueRequested(DialogueTree, nullptr);
-
-            }
-
-        }
-
     }
 	else
     {

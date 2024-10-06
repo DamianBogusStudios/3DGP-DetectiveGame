@@ -67,7 +67,7 @@ void ABaseCharacter::SortFocusedActors()
 	float BestScore = -1; 
 	TSoftObjectPtr<AActor> CachedActor;
 
-	for (auto Actor : InteractableActors)
+	for (const auto Actor : InteractableActors)
 	{
 		float DistRatio = 1 - (FVector::DistSquared(GetActorLocation(), Actor->GetActorLocation()) / FMath::Square(MaxInterationDist));
 		float DotProduct = FVector::DotProduct(GetActorForwardVector(), Actor->GetActorForwardVector()) + 1;

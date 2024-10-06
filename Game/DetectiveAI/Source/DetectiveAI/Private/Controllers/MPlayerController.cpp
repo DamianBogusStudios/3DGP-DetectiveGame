@@ -7,11 +7,11 @@
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"
+#include "Subsystems/InteractionSystem.h"
 
 
 void AMPlayerController::BeginPlay()
 {
-	// Call the base class  
 	Super::BeginPlay();
 
 	if (APawn* ControlledPawn = GetPawn())
@@ -21,9 +21,23 @@ void AMPlayerController::BeginPlay()
 			CachedCameraRotation = FRotator(0, Camera->GetComponentRotation().Yaw, 0);
 		}
 	}
-	
-}
 
+	if (auto InteractionSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UInteractionSystem>())
+	{
+	 	InteractionSubsystem->OnRequestDialogueAction.AddDynamic(this, &AMPlayerController::OnDialogueRequested);
+	}
+
+}
+void AMPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+
+	if (auto InteractionSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UInteractionSystem>())
+	{
+		InteractionSubsystem->OnRequestDialogueAction.RemoveDynamic(this, &AMPlayerController::OnDialogueRequested);
+	}
+}
 
 void AMPlayerController::SetupInputComponent()
 {
@@ -87,7 +101,7 @@ void AMPlayerController::OnUnPossess()
 }
 
 
-void AMPlayerController::StartDialogue_Implementation(AActor* Caller, TSubclassOf<UUserWidget> WidgetClass)
+void AMPlayerController::OnDialogueRequested(APawn* Caller, UBehaviorTree* BT, UDialogueWidget* WidgetClass)
 {
 	if (auto SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{

@@ -7,7 +7,7 @@
 
 UMaterial* UMGameInstance::GetOverlayMaterial(bool Interactable)
 {
-    if (UAssetManager* AssetManager = UAssetManager::GetIfValid())
+    if (UAssetManager* AssetManager = UAssetManager::GetIfInitialized())
     {
         if (bMaterialsLoaded)
         {
@@ -20,8 +20,10 @@ UMaterial* UMGameInstance::GetOverlayMaterial(bool Interactable)
 }
 
 void UMGameInstance::Init()
-{ 
-    if (UAssetManager* AssetManager = UAssetManager::GetIfValid())
+{
+    Super::Init();
+
+    if (UAssetManager* AssetManager = UAssetManager::GetIfInitialized())
     {
         TArray<FName> Bundles;
 

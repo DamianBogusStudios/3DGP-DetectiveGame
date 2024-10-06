@@ -7,6 +7,7 @@
 #include "DialogueComponent.generated.h"
 
 class UDialogueWidget;
+class UBehaviorTree;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class DETECTIVEAI_API UDialogueComponent : public UActorComponent
@@ -16,10 +17,10 @@ class DETECTIVEAI_API UDialogueComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UDialogueComponent();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UI)
-	TSubclassOf<UDialogueWidget> DialogueWidgetClass;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AI)
+	UBehaviorTree* DialogueTree;
 
 	UFUNCTION()
-	void StartDialogue();
+	void StartDialogue() const;
 };

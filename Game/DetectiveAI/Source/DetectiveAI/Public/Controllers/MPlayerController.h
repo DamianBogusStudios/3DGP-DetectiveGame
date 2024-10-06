@@ -3,15 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Interfaces/DialogueHandler.h"
 #include "GameFramework/PlayerController.h"
 #include "MPlayerController.generated.h"
 
 
+class UDialogueWidget;
 class APawn;
 class ABaseCharacter;
 class UInputMappingContext;
 class UInputAction;
+class UBehaviorTree;
 struct FInputActionValue;
 
 UENUM(BlueprintType)
@@ -26,7 +27,7 @@ enum class EInputContext : uint8
  * 
  */
 UCLASS()
-class DETECTIVEAI_API AMPlayerController : public APlayerController, public IDialogueHandler
+class DETECTIVEAI_API AMPlayerController : public APlayerController//, public IDialogueHandler
 {
 	GENERATED_BODY()
 
@@ -43,16 +44,16 @@ public:
 	UPROPERTY()
 	TObjectPtr<ABaseCharacter> BaseCharacter;
 
-	/* IDialogueHandler */
-	void StartDialogue_Implementation(AActor* Caller, TSubclassOf<UUserWidget> WidgetClass);
-
+	UFUNCTION()
+	void OnDialogueRequested(APawn* Caller, UBehaviorTree* BT, UDialogueWidget* WidgetClass);
 
 
 protected:
 
 	virtual void SetupInputComponent() override;
 
-	virtual void BeginPlay();
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	void OnMoveInput(const FInputActionValue& Value);
 
