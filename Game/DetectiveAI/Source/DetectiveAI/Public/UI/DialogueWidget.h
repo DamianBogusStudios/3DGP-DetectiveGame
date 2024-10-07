@@ -9,6 +9,7 @@
 
 class USizeBox;
 class UTextBlock;
+class UListView;
 
 /**
  * 
@@ -30,13 +31,22 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<UTextBlock> SpeechText;
+
 	
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	TObjectPtr<UListView> ReplyListView;
 
 
 	UFUNCTION(BlueprintCallable)
 	void Speak(FString Text);
-
+	
+	UFUNCTION(BlueprintCallable)
+	void Reply(TArray<FString> TextReplies);
 
 	UFUNCTION()
 	void ToggleBoxes(bool IsSpeaking);
+
+	UFUNCTION()
+	void OptionSelected();
+	
 };

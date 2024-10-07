@@ -26,14 +26,5 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 		
 
-	UFUNCTION()
-	void OnDialogueRequested(UBehaviorTree* BT, UDialogueWidget* Widget);
-
-private:
-
-	UPROPERTY()
-	UBlackboardComponent* BlackboardComponent;
-
-
 
 };

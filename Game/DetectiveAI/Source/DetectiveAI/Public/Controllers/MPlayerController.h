@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputActionValue.h"
 #include "GameFramework/PlayerController.h"
 #include "MPlayerController.generated.h"
 
@@ -40,12 +41,18 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Default")
 	UInputAction* InteractAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Dialogue")
+	UInputAction* AdvanceAction;
 
 	UPROPERTY()
 	TObjectPtr<ABaseCharacter> BaseCharacter;
 
 	UFUNCTION()
-	void OnDialogueRequested(APawn* Caller, UBehaviorTree* BT, UDialogueWidget* WidgetClass);
+	void OnDialogueStarted(AActor* Caller, UDialogueWidget* WidgetClass);
+
+	UFUNCTION()
+	void OnDialogueFinished(AActor* Caller, UDialogueWidget* WidgetClass);
 
 
 protected:
@@ -59,6 +66,8 @@ protected:
 
 	void OnInteractInput(const FInputActionValue& Value);
 
+	void OnAdvanceInput(const FInputActionValue& Value);
+
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
 
@@ -67,6 +76,8 @@ private:
 	FRotator CachedCameraRotation;	
 
 	void BindDefaultContextActions();
+
+	void BindDialogueContextActions();
 
 
 };

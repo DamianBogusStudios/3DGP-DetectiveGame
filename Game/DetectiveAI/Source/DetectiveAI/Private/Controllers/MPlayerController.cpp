@@ -24,7 +24,8 @@ void AMPlayerController::BeginPlay()
 
 	if (auto InteractionSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UInteractionSystem>())
 	{
-	 	InteractionSubsystem->OnRequestDialogueAction.AddDynamic(this, &AMPlayerController::OnDialogueRequested);
+	 	InteractionSubsystem->OnStartDialogueAction.AddDynamic(this, &AMPlayerController::OnDialogueStarted);
+	 	InteractionSubsystem->OnFinishDialogueAction.AddDynamic(this, &AMPlayerController::OnDialogueFinished);
 	}
 
 }
@@ -35,7 +36,8 @@ void AMPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	if (auto InteractionSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UInteractionSystem>())
 	{
-		InteractionSubsystem->OnRequestDialogueAction.RemoveDynamic(this, &AMPlayerController::OnDialogueRequested);
+		InteractionSubsystem->OnStartDialogueAction.RemoveDynamic(this, &AMPlayerController::OnDialogueStarted);
+		InteractionSubsystem->OnFinishDialogueAction.RemoveDynamic(this, &AMPlayerController::OnDialogueFinished);
 	}
 }
 
@@ -52,6 +54,7 @@ void AMPlayerController::SetupInputComponent()
 	}
 
 	BindDefaultContextActions();
+	BindDialogueContextActions();
 }
 
 void AMPlayerController::BindDefaultContextActions()
@@ -62,7 +65,13 @@ void AMPlayerController::BindDefaultContextActions()
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &AMPlayerController::OnInteractInput);
 	}
 }
-
+void AMPlayerController::BindDialogueContextActions()
+{
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
+	{
+		EnhancedInputComponent->BindAction(AdvanceAction, ETriggerEvent::Triggered, this, &AMPlayerController::OnAdvanceInput);
+	}
+}
 
 void AMPlayerController::OnMoveInput(const FInputActionValue& Value)
 {
@@ -87,6 +96,15 @@ void AMPlayerController::OnInteractInput(const FInputActionValue& Value)
 	}
 }
 
+void AMPlayerController::OnAdvanceInput(const FInputActionValue& Value)
+{
+	if (auto InteractionSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UInteractionSystem>())
+	{
+		InteractionSubsystem->AdvanceDialogueAction();
+	}
+}
+
+
 void AMPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
@@ -101,13 +119,30 @@ void AMPlayerController::OnUnPossess()
 }
 
 
-void AMPlayerController::OnDialogueRequested(APawn* Caller, UBehaviorTree* BT, UDialogueWidget* WidgetClass)
+void AMPlayerController::OnDialogueStarted(AActor* Caller, UDialogueWidget* WidgetClass)
 {
 	if (auto SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		if (InputContextMap.Contains(EInputContext::Dialogue) && InputContextMap[EInputContext::Dialogue])
 		{
 			SubSystem->AddMappingContext(InputContextMap[EInputContext::Dialogue].Get(), 1);
+
+			bShowMouseCursor = true;
+			bEnableClickEvents = true;
+			bEnableMouseOverEvents = true;
+		}
+	}
+}
+
+void AMPlayerController::OnDialogueFinished(AActor* Caller, UDialogueWidget* WidgetClass)
+{
+	if (auto SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{
+		if (InputContextMap.Contains(EInputContext::Dialogue) && InputContextMap[EInputContext::Dialogue])
+		{
+			SubSystem->RemoveMappingContext(InputContextMap[EInputContext::Dialogue].Get()); 
+
+			bShowMouseCursor =  bEnableClickEvents =  bEnableMouseOverEvents = false;
 		}
 	}
 }

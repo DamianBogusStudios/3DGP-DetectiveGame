@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "DialogueComponent.generated.h"
+#include "UI/DialogueWidget.h"
 
 class UDialogueWidget;
 class UBehaviorTree;
@@ -23,4 +24,27 @@ public:
 
 	UFUNCTION()
 	void StartDialogue() const;
+
+	UFUNCTION()
+	void FinishDialogue() const;
+	
+	UFUNCTION()
+	void OnDialogueStarted(AActor* Caller, UDialogueWidget* Widget);
+
+	UFUNCTION()
+	void OnAdvanceDialogue(AActor* Caller, UDialogueWidget* Widget);
+
+	UFUNCTION()
+	void OnFinishDialogue(AActor* Caller, UDialogueWidget* Widget);
+
+protected:
+
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+private:
+
+	void BindDialogueDelegates();
+	void UnBindDialogueDelegates();
+
+	bool bInDialogue = false;
 };

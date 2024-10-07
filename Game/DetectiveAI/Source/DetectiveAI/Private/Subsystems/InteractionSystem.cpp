@@ -31,7 +31,7 @@ void UInteractionSystem::Deinitialize()
     Super::Deinitialize();
 }
 
-void UInteractionSystem::RequestDialogueAction(APawn* Caller, UBehaviorTree* BT) const
+void UInteractionSystem::RequestDialogueAction(AActor* Caller) const
 {
     if (DialogueWidgetClass)
     {
@@ -40,18 +40,34 @@ void UInteractionSystem::RequestDialogueAction(APawn* Caller, UBehaviorTree* BT)
             if (UDialogueWidget* DialogueWidget = CreateWidget<UDialogueWidget>(PlayerController, DialogueWidgetClass))
             {
                 DialogueWidget->AddToViewport();
-                OnRequestDialogueAction.Broadcast(Caller, BT, DialogueWidget);
+
+                ActiveActor = Caller;
+                DialogueWidgetInstance = DialogueWidget;
+                OnStartDialogueAction.Broadcast(Caller, DialogueWidget);
             }
         }
     }
     else
     {
-
 #if WITH_EDITOR
         FString Message = FString::Printf(TEXT("DialogueWidget class has not been set"));
         GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, Message);
 #endif
-
     }
+//mindreading.
+// combine sixaxis motors and triggers.
+}
 
+void UInteractionSystem::AdvanceDialogueAction() const
+{
+    OnAdvanceDialogueAction.Broadcast(ActiveActor, DialogueWidgetInstance);
+}
+
+void UInteractionSystem::FinishDialogueAction(AActor* Caller) const
+{
+    if(Caller == ActiveActor)
+    {
+        DialogueWidgetInstance->RemoveFromParent();
+        OnFinishDialogueAction.Broadcast(ActiveActor, DialogueWidgetInstance);
+    }
 }

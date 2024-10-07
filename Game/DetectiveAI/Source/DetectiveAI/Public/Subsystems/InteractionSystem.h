@@ -9,10 +9,9 @@
 
 class UDialogueWidget;
 class UBehaviorTree;
-class APawn;
+class AActor;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FRequestDialogueActionDelegate, APawn*, Caller, UBehaviorTree*, BT, 
-	UDialogueWidget*, Widget);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FDialogueActionDelegate, AActor*, Caller, UDialogueWidget*, DialogueWidget);
 
 /**
  * 
@@ -28,14 +27,32 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
-	UPROPERTY()
-	FRequestDialogueActionDelegate OnRequestDialogueAction;
+	// UPROPERTY()
+	// FRequestDialogueActionDelegate OnRequestDialogueAction;
+
+	UPROPERTY(BlueprintAssignable)
+	FDialogueActionDelegate OnStartDialogueAction;
+	
+	UPROPERTY(BlueprintAssignable)
+	FDialogueActionDelegate OnAdvanceDialogueAction;
+
+	UPROPERTY(BlueprintAssignable)
+	FDialogueActionDelegate OnFinishDialogueAction;
 
 	UFUNCTION(BlueprintCallable)
-	void RequestDialogueAction(APawn* Caller, UBehaviorTree* BT) const;
+	void RequestDialogueAction(AActor* Caller) const;
 
+	UFUNCTION(BlueprintCallable)
+	void AdvanceDialogueAction() const;
+
+	UFUNCTION(BlueprintCallable)
+	void FinishDialogueAction(AActor* Caller) const;
+	
 protected:
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Items)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Dialogue)
 	TSubclassOf<UDialogueWidget> DialogueWidgetClass;
+
+	AActor* ActiveActor;
+	UDialogueWidget* DialogueWidgetInstance;	
 };

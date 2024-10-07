@@ -63,5 +63,10 @@ void ABaseNPC::EndFocus_Implementation()
 	{
 		GetMesh()->SetOverlayMaterial(nullptr);
 	}
+
+	if(DialogueComponent)
+	{
+		DialogueComponent->FinishDialogue();
+	}
 }
 
