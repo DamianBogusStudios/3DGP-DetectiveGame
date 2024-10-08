@@ -21,7 +21,7 @@ void UDialogueComponent::BeginPlay()
 
 void UDialogueComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-    UnBindDialogueDelegates();
+ //   UnBindDialogueDelegates();
 }
 
 
@@ -73,6 +73,7 @@ void UDialogueComponent::FinishDialogue() const
     }
 }
 
+#pragma region Delegate Callbacks
 
 void UDialogueComponent::OnDialogueStarted(AActor* Caller, UDialogueWidget* Widget)
 {
@@ -82,14 +83,28 @@ void UDialogueComponent::OnDialogueStarted(AActor* Caller, UDialogueWidget* Widg
         
         auto Pawn = Cast<APawn>(Caller);
         auto Controller = Pawn->GetController<AAIController>();
-
-        auto BlackboardComponent = Controller->GetBlackboardComponent();
-        Controller->RunBehaviorTree(DialogueTree);
-        Controller->UseBlackboard(DialogueTree->GetBlackboardAsset(), BlackboardComponent);
-       
-        if (BlackboardComponent)
-        {
+        UBlackboardComponent* BlackboardComponent;
+      
+        if(Controller && Controller->UseBlackboard(DialogueTree->GetBlackboardAsset(), BlackboardComponent))
+        {                
             BlackboardComponent->SetValueAsObject("DialogueWidget", Widget);
+
+            
+            FString BoolValue = BlackboardComponent->GetValueAsBool("HasMetPlayer") ? "true" : "false";   
+            FString Message = FString::Printf(TEXT("HasMetPlayer %s"), *BoolValue);
+            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, Message);
+            
+            if(auto BrainComponent =Controller->GetBrainComponent())
+            {
+                if(auto BTComp =  Cast<UBehaviorTreeComponent>(BrainComponent))
+                {
+                    if(BTComp->GetCurrentTree() == DialogueTree)
+                    {
+                        Controller->BrainComponent->RestartLogic();
+                    }
+                }
+            }
+            Controller->RunBehaviorTree(DialogueTree);
         }
     }
 }
@@ -108,9 +123,34 @@ void UDialogueComponent::OnFinishDialogue(AActor* Caller, UDialogueWidget* Widge
     {
         bInDialogue = false;
         
+        auto Pawn = Cast<APawn>(Caller);
+        auto Controller = Pawn->GetController<AAIController>();
+
+        if(auto BlackboardComponent = Controller->GetBlackboardComponent())
+        {
+            BlackboardComponent->SetValueAsBool("HasMetPlayer", true);
+
+            FString BoolValue = BlackboardComponent->GetValueAsBool("HasMetPlayer") ? "true" : "false";   
+            FString Message = FString::Printf(TEXT("HasMetPlayer %s"), *BoolValue);
+            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, Message);
+        }
     }
 }
 
+FString UDialogueComponent::GetGreeting()
+{
+    auto Pawn = Cast<APawn>(GetOwner());
+    auto Controller = Pawn->GetController<AAIController>();
+
+    if(auto BlackboardComponent = Controller->GetBlackboardComponent())
+    {
+        auto bHasMet = BlackboardComponent->GetValueAsBool("HasMetPlayer");
+
+        if(bHasMet)
+            return FString("Hi Again");
+    }
 
 
-
+    return FString("Hi Detective");
+}
+#pragma endregion

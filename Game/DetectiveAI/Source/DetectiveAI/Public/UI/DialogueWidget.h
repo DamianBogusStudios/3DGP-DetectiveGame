@@ -11,6 +11,14 @@ class USizeBox;
 class UTextBlock;
 class UListView;
 
+UENUM(BlueprintType)
+enum class EDialogueVisibility : uint8
+{
+	EBotSpeaking,
+	EPlayerReply,
+	EHidden
+};
+
 /**
  * 
  */
@@ -36,15 +44,19 @@ public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<UListView> ReplyListView;
 
+	UFUNCTION(BlueprintCallable)
+	void ResetDialogueWidget();
 
+protected:
 	UFUNCTION(BlueprintCallable)
 	void Speak(FString Text);
 	
 	UFUNCTION(BlueprintCallable)
 	void Reply(TArray<FString> TextReplies);
 
+	
 	UFUNCTION()
-	void ToggleBoxes(bool IsSpeaking);
+	void ToggleBoxes(EDialogueVisibility DialogueVisibility);
 
 	UFUNCTION()
 	void OptionSelected();

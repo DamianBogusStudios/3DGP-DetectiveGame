@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "DialogueComponent.generated.h"
-#include "UI/DialogueWidget.h"
 
 class UDialogueWidget;
 class UBehaviorTree;
@@ -37,6 +36,9 @@ public:
 	UFUNCTION()
 	void OnFinishDialogue(AActor* Caller, UDialogueWidget* Widget);
 
+	UFUNCTION(BlueprintCallable)
+	FString GetGreeting();
+	
 protected:
 
 	virtual void BeginPlay() override;

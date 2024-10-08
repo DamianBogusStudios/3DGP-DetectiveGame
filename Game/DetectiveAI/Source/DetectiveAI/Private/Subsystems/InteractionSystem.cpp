@@ -31,19 +31,22 @@ void UInteractionSystem::Deinitialize()
     Super::Deinitialize();
 }
 
-void UInteractionSystem::RequestDialogueAction(AActor* Caller) const
+void UInteractionSystem::RequestDialogueAction(AActor* Caller)
 {
     if (DialogueWidgetClass)
     {
         if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
         {
-            if (UDialogueWidget* DialogueWidget = CreateWidget<UDialogueWidget>(PlayerController, DialogueWidgetClass))
+            if(!DialogueWidgetInstance)
             {
-                DialogueWidget->AddToViewport();
-
+                DialogueWidgetInstance = CreateWidget<UDialogueWidget>(PlayerController, DialogueWidgetClass);
+            }
+            
+            if (DialogueWidgetInstance)
+            {
+                DialogueWidgetInstance->AddToViewport();
                 ActiveActor = Caller;
-                DialogueWidgetInstance = DialogueWidget;
-                OnStartDialogueAction.Broadcast(Caller, DialogueWidget);
+                OnStartDialogueAction.Broadcast(Caller, DialogueWidgetInstance);
             }
         }
     }
@@ -63,11 +66,13 @@ void UInteractionSystem::AdvanceDialogueAction() const
     OnAdvanceDialogueAction.Broadcast(ActiveActor, DialogueWidgetInstance);
 }
 
-void UInteractionSystem::FinishDialogueAction(AActor* Caller) const
+void UInteractionSystem::FinishDialogueAction(AActor* Caller)
 {
     if(Caller == ActiveActor)
     {
+        DialogueWidgetInstance->ResetDialogueWidget();
         DialogueWidgetInstance->RemoveFromParent();
-        OnFinishDialogueAction.Broadcast(ActiveActor, DialogueWidgetInstance);
+        ActiveActor = nullptr;
+        OnFinishDialogueAction.Broadcast(Caller, DialogueWidgetInstance);
     }
 }

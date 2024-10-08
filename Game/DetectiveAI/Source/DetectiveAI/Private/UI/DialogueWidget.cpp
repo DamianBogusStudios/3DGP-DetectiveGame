@@ -11,8 +11,8 @@ void UDialogueWidget::Speak(FString Text)
 {
 	if(SpeechText)
 	{
-		ToggleBoxes(true);
 		SpeechText->SetText(FText::FromString(Text));
+		ToggleBoxes(EDialogueVisibility::EBotSpeaking);
 	}
 }
 
@@ -20,7 +20,6 @@ void UDialogueWidget::Reply(TArray<FString> TextReplies)
 {
 	if(ReplyListView)
 	{
-		ToggleBoxes(false);
 
 		ReplyListView->ClearListItems();
 
@@ -31,18 +30,28 @@ void UDialogueWidget::Reply(TArray<FString> TextReplies)
 			 ReplyListView->AddItem(ReplyObject);
 			 ReplyObject->ReplyEvent.AddDynamic(this, &UDialogueWidget::OptionSelected);
 		}
+		
+		ToggleBoxes(EDialogueVisibility::EPlayerReply);
 	}
 }
 
+void UDialogueWidget::ResetDialogueWidget()
+{
+	ToggleBoxes(EDialogueVisibility::EHidden);
+}
 
-void UDialogueWidget::ToggleBoxes(bool IsSpeaking)
+
+void UDialogueWidget::ToggleBoxes(EDialogueVisibility DialogueVisibility)
 {
 	if (SpeechBox)
-		SpeechBox->SetVisibility(IsSpeaking ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+		SpeechBox->SetVisibility(DialogueVisibility == EDialogueVisibility::EBotSpeaking
+			? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 
 	if (ReplyBox)
-		ReplyBox->SetVisibility(IsSpeaking ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
+		ReplyBox->SetVisibility(DialogueVisibility == EDialogueVisibility::EPlayerReply
+			? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 }
+
 void UDialogueWidget::OptionSelected()
 {
 	

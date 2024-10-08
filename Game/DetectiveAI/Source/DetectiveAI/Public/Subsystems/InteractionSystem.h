@@ -40,19 +40,22 @@ public:
 	FDialogueActionDelegate OnFinishDialogueAction;
 
 	UFUNCTION(BlueprintCallable)
-	void RequestDialogueAction(AActor* Caller) const;
+	void RequestDialogueAction(AActor* Caller);
 
 	UFUNCTION(BlueprintCallable)
 	void AdvanceDialogueAction() const;
 
 	UFUNCTION(BlueprintCallable)
-	void FinishDialogueAction(AActor* Caller) const;
+	void FinishDialogueAction(AActor* Caller);
 	
 protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Dialogue)
 	TSubclassOf<UDialogueWidget> DialogueWidgetClass;
 
-	AActor* ActiveActor;
-	UDialogueWidget* DialogueWidgetInstance;	
+	UPROPERTY()
+	TObjectPtr<AActor> ActiveActor;
+
+	UPROPERTY()
+	TObjectPtr<UDialogueWidget> DialogueWidgetInstance;	
 };
