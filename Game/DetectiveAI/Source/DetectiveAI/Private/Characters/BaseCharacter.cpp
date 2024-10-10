@@ -15,7 +15,7 @@ ABaseCharacter::ABaseCharacter(const FObjectInitializer & ObjectInitializer)
 	
 	InteractionSphere->SetupAttachment(RootComponent);
 }
-
+ 
 // Called when the game starts or when spawned
 void ABaseCharacter::BeginPlay()
 {

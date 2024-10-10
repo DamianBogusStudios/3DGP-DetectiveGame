@@ -12,5 +12,11 @@ public class DetectiveAITarget : TargetRules
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_4;
 		ExtraModuleNames.Add("DetectiveAI");
 		ExtraModuleNames.Add("CaseGenerator");
+		RegisterModulesCreatedByRider();
+	}
+
+	private void RegisterModulesCreatedByRider()
+	{
+		ExtraModuleNames.AddRange(new string[] { "InventorySystem" });
 	}
 }
