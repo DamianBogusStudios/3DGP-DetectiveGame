@@ -17,7 +17,9 @@ public class DetectiveAI : ModuleRules
 			"NavigationSystem",
 			"AIModule",
 			"Niagara",
-			"EnhancedInput"
+			"EnhancedInput",
+			"InventorySystem",
+			"CaseGenerator"
         });
     }
 }

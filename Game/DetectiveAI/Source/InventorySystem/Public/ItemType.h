@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
-#include "ItemType.generated.h"
+//#include "ItemType.generated.h"
 
 /**
  * 

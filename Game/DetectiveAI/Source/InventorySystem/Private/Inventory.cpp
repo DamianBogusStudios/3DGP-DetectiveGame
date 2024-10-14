@@ -29,7 +29,7 @@ void UInventory::InitialiseInventory()
 	
 		for (auto Subsystem : Subsystems)
 		{
-			if (Subsystem->Implements<IItemDataProvider>())
+			if (Subsystem->Implements<UItemDataProvider>())
 			{
 				DataProvider = TScriptInterface<IItemDataProvider>(Subsystem);
 				bInitialised = true;
