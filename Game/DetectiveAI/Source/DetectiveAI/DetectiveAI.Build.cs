@@ -19,7 +19,8 @@ public class DetectiveAI : ModuleRules
 			"Niagara",
 			"EnhancedInput",
 			"InventorySystem",
-			"CaseGenerator"
+			"CaseGenerator",
+			"OpenAI"
         });
     }
 }

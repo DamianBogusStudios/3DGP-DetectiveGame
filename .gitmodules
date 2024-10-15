@@ -1,0 +1,3 @@
+[submodule "Game/DetectiveAI/Plugins/Plugins/OpenAI"]
+	path = Game/DetectiveAI/Plugins/Plugins/OpenAI
+	url = https://github.com/life-exe/UnrealOpenAIPlugin
