@@ -10,7 +10,7 @@
 #include "Components/Button.h"
 #include "Components/VerticalBoxSlot.h"
 #include "FuncLib/OpenAIFuncLib.h"
-
+/*
 void UOpenAIWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -87,3 +87,4 @@ void UOpenAIWidget::OnRequestUpdated(const FMessage& Message, bool WasError)
 	// ChatWidgets.Last()->SetMessage(Message, WasError);
 	// ChatScrollBox->ScrollToEnd(); 
 }
+*/

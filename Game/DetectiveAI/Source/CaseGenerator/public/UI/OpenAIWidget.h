@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Provider/Types/CommonTypes.h"
-#include "ChatGPT/BaseService.h"
+//#include "Provider/Types/CommonTypes.h"
+//#include "ChatGPT/BaseService.h"
 #include "OpenAIWidget.generated.h"
 
-
+/*
 class UVerticalBox;
 class UScrollBox;
 class UEditableText;
@@ -21,32 +21,22 @@ class UGridPanel;
 class USaveSettings;
 class UTextBlock;
 class UAttachedFilesContainerWidget;
+*/
 
 /**
  * 
  */
-UCLASS(BlueprintType)
+UCLASS()
 class CASEGENERATOR_API UOpenAIWidget : public UUserWidget
 {
 	GENERATED_BODY()
-
+/*
 	protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "OpenAI")
     int32 MaxTokens{2000};
 
 protected:
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UVerticalBox> StartVerticalBox;
-
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UComboBoxString> ChatGPTModelComboBox;
-
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UVerticalBox> MessagesVerticalBox;
-
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UScrollBox> ChatScrollBox;
-
+    
     UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "OpenAI")
     TObjectPtr<UEditableText> UserInputTextBox;
 
@@ -100,5 +90,5 @@ private:
     void EnableControls(bool Enabled);
 
     FString GenerateFilePath() const;
-
+*/
 };

@@ -103,6 +103,28 @@ void UChatGPT::MakeRequest()
     Provider->CreateChatCompletion(ChatCompletion, Auth);
 }
 
+void UChatGPT::MakeStructuredRequest()
+{
+    TArray<FTools> AvailableTools;
+    // tools are currently are not supported by vision models
+    if (!UOpenAIFuncLib::ModelSupportsVision(OpenAIModel))
+    {
+        for (const auto& Service : Services)
+        {
+            AvailableTools.Add(FTools{UOpenAIFuncLib::OpenAIRoleToString(ERole::Function), Service->Function()});
+        }
+    }
+
+    FChatCompletion ChatCompletion;
+    ChatCompletion.Model = OpenAIModel;
+    ChatCompletion.Messages = ChatHistory;
+    ChatCompletion.Max_Completion_Tokens.Set(MaxCompletionTokens);
+    ChatCompletion.Stream = true;
+    ChatCompletion.Response_Format = ResponseFormat;
+    ChatCompletion.Tools = AvailableTools;
+    Provider->CreateChatCompletion(ChatCompletion, Auth);
+}
+
 void UChatGPT::HandleRequestCompletion()
 {
     ChatHistory.Add(AssistantMessage);

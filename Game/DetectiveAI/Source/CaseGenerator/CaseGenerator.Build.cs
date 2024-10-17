@@ -9,7 +9,8 @@ public class CaseGenerator: ModuleRules
             "Core",
             "CoreUObject",
             "Engine",
-            "OpenAI"
+            "OpenAI",
+            "UMG"
         });
     }
 }
