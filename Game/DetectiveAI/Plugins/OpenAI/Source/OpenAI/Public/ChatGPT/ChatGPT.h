@@ -39,6 +39,7 @@ public:
     FMessage GetAssistantMessage() const;
 
     void MakeRequest();
+    void MakeStructuredRequest(FChatCompletionResponseFormat ResponseFormat);
 
     void ClearHistory();
     TArray<FMessage> GetHistory() const;

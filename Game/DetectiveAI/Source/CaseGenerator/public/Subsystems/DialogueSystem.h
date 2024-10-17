@@ -3,24 +3,33 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Types/CommonCaseTypes.h"
+#include "Interfaces/DialogueProvider.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "DialogueSystem.generated.h"
 
 class UChatGPT;
+struct FActorDescription;
 struct FMessage;
+
 /**
  * 
  */
 UCLASS()
-class CASEGENERATOR_API UDialogueSystem : public UWorldSubsystem
+class CASEGENERATOR_API UDialogueSystem : public UWorldSubsystem, public IDialogueProvider
 {
 	GENERATED_BODY()
 
-	protected:
+public:
+	
+	virtual void RequestDialogueOptions(UObject* Caller, FActorDescription& ActorDescription) override;
+	virtual FMessageDelegate& GetResponseDelegate() override;
+	virtual FDialogueOptionsDelegate& GetDialogueOptionsDelegate() override;
+	
+protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "OpenAI")
 	int32 MaxTokens{2000};
 
-protected:	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
@@ -28,10 +37,10 @@ private:
 	UPROPERTY()
 	TObjectPtr<UChatGPT> ChatGPT;
 
-	// UPROPERTY()
-	// TObjectPtr<USaveSettings> SaveSettings;
+	FMessageDelegate OnMessageReceived;
+	FDialogueOptionsDelegate OnDialogueOptionsReceived;
 
-private:
+	UObject* DialogueRequestCaller;
 	
 	UFUNCTION()
 	void SendMessage(const FText& Text);

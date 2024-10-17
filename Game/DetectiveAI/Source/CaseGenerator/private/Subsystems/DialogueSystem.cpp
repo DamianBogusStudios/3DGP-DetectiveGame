@@ -1,17 +1,22 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
+#pragma once
 
 #include "Subsystems/DialogueSystem.h"
-
 #include "JsonObjectConverter.h"
 #include "ChatGPT/ChatGPT.h"
 #include "FuncLib/OpenAIFuncLib.h"
 #include "FuncLib/FileSystemFuncLib.h"
-#include "Types/CommonTypes.h"
+#include "Types/CommonCaseTypes.h"
+
 
 void UDialogueSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
     InitChatGPT();
+
+    
+    FString Message = FString::Printf(TEXT("DialogueSystem Initialised"));
+    GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, Message);
 }
 
 void UDialogueSystem::Deinitialize()
@@ -51,32 +56,65 @@ void UDialogueSystem::SendMessage(const FText& Text)
 
     ChatGPT->MakeRequest();
 }
-
 void UDialogueSystem::RequestDialogueOptions(const FString& ActorDescription)
 {
     FDialogueOptions DialogueOptions;
     FString OutputString;
 
-    FJsonObjectConverter::UStructToJsonObjectString(FDialogueOptions::StaticStruct(), DialogueOptions, OutputString);
-
-    
-        // TSharedRef<TJsonWriter<>> JsonWriter = TJsonWriterFactory<>::Create(&OutputString);
-        // FJsonSerializer::Serialize(DialogueOptions, JsonWriter);
-    
-    FChatCompletionResponseFormat ResponseFormat;
-    ResponseFormat.Type = "";
-    // UserMessage.Content = FString::Printf(TEXT(
-    //    "Based on the situation where %s, please provide three dialogue options in the following format:\n"
-    //    "{ \"options\": [ { \"id\": \"1\", \"text\": \"Option text 1\" }, { \"id\": \"2\", \"text\": \"Option text 2\" }, { \"id\": \"3\", \"text\": \"Option text 3\" } ] }"),
-    //    *NPCDescription);
+    if(FJsonObjectConverter::UStructToJsonObjectString(DialogueOptions, OutputString))
+    {
+        FChatCompletionResponseFormat ResponseFormat;
+        ResponseFormat.Type = "json_schema";//ActorDescription;
+               
+        FMessage Message;
+        Message.Role = UOpenAIFuncLib::OpenAIRoleToString(ERole::User);
+        Message.Content = FString("Based on the current game state create dialogue options for interacting with this NPC: ")
+        + ActorDescription;
+        
+        ChatGPT->AddMessage(Message);
+        ChatGPT->MakeStructuredRequest(ResponseFormat);
+    }
 }
-
 void UDialogueSystem::OnRequestCompleted()
 {
+
 }
 
 void UDialogueSystem::OnRequestUpdated(const FMessage& Message, bool WasError)
 {
-    //return msg.
+    if(WasError)
+    {
+        UE_LOG(LogTemp, Error, TEXT("DialogueSystem Error: %s"), *Message.Content);
+        return;
+    }
+    
+    UE_LOG(LogTemp, Display, TEXT("DialogueSystem: %s"), *Message.Content);
+
+    //TODO
+    //OnDialogueOptionsReceived.Broadcast();
+    //OnMessageReceived.Broadcast(LastActorDescription, "Placeholder Message");
 }
 
+
+#pragma region IDialogueProvider Interface
+
+void UDialogueSystem::RequestDialogueOptions(UObject* Caller, FActorDescription& ActorDescription)
+{
+    FString OutputString;
+    if(FJsonObjectConverter::UStructToJsonObjectString(ActorDescription, OutputString))
+    {
+        DialogueRequestCaller = Caller;
+        RequestDialogueOptions(OutputString);
+    }
+}
+
+FMessageDelegate& UDialogueSystem::GetResponseDelegate()
+{
+    return OnMessageReceived;
+}
+FDialogueOptionsDelegate& UDialogueSystem::GetDialogueOptionsDelegate()
+{
+    return OnDialogueOptionsReceived;
+}
+
+#pragma endregion

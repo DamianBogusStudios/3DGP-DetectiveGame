@@ -103,7 +103,7 @@ void UChatGPT::MakeRequest()
     Provider->CreateChatCompletion(ChatCompletion, Auth);
 }
 
-void UChatGPT::MakeStructuredRequest()
+void UChatGPT::MakeStructuredRequest(FChatCompletionResponseFormat ResponseFormat)
 {
     TArray<FTools> AvailableTools;
     // tools are currently are not supported by vision models

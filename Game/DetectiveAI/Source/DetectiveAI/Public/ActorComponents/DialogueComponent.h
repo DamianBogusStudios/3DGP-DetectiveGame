@@ -4,8 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Types/CommonCaseTypes.h"
 #include "DialogueComponent.generated.h"
 
+
+class IDialogueProvider;
 class UDialogueWidget;
 class UBehaviorTree;
 
@@ -19,8 +22,11 @@ public:
 	UDialogueComponent();
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AI)
-	UBehaviorTree* DialogueTree;
-
+	TObjectPtr<UBehaviorTree> DialogueTree;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NPC")
+	FActorDescription ActorDescription;
+	
 	UFUNCTION()
 	void StartDialogue() const;
 
@@ -36,6 +42,12 @@ public:
 	UFUNCTION()
 	void OnFinishDialogue(AActor* Caller, UDialogueWidget* Widget);
 
+	// UFUNCTION()
+	// void OnMessageReceived(TObjectPtr<UActorDescription>);
+
+	UFUNCTION()
+	void OnDialogueOptionsReceived(UObject* Caller, FDialogueOptions& DialogueOptions);
+	
 	UFUNCTION(BlueprintCallable)
 	FString GetGreeting();
 	
@@ -45,8 +57,10 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 private:
 
+	TScriptInterface<IDialogueProvider> DialogueProvider; 
+	bool bInDialogue = false;
+	
 	void BindDialogueDelegates();
 	void UnBindDialogueDelegates();
 
-	bool bInDialogue = false;
-};
+	};

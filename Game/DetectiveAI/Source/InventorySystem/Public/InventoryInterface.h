@@ -7,7 +7,7 @@
 #include "InventoryInterface.generated.h"
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI, Blueprintable)
+UINTERFACE(Blueprintable)
 class UInventoryInterface : public UInterface
 {
 	GENERATED_BODY()

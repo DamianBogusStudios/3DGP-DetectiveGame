@@ -7,6 +7,9 @@
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "UI/DialogueWidget.h"
+#include "Interfaces/DialogueProvider.h"
+#include "Types/CommonCaseTypes.h"
+
 
 // Sets default values for this component's properties
 UDialogueComponent::UDialogueComponent()
@@ -16,6 +19,7 @@ UDialogueComponent::UDialogueComponent()
 void UDialogueComponent::BeginPlay()
 {
     Super::BeginPlay();
+    
     BindDialogueDelegates();
 }
 
@@ -33,6 +37,17 @@ void UDialogueComponent::BindDialogueDelegates()
         InteractionSubsystem->OnAdvanceDialogueAction.AddDynamic(this, &UDialogueComponent::OnAdvanceDialogue);
         InteractionSubsystem->OnFinishDialogueAction.AddDynamic(this, &UDialogueComponent::OnFinishDialogue);
     }
+
+    for(auto Subsystem : GetWorld()->GetSubsystemArray<UWorldSubsystem>())
+    {
+        if(Subsystem->Implements<UDialogueProvider>())
+        {
+            DialogueProvider = TScriptInterface<IDialogueProvider>(Subsystem);
+            DialogueProvider->GetDialogueOptionsDelegate().AddDynamic(this, &UDialogueComponent::OnDialogueOptionsReceived);
+            break;
+        }
+    }
+
 }
 
 void UDialogueComponent::UnBindDialogueDelegates()
@@ -90,9 +105,7 @@ void UDialogueComponent::OnDialogueStarted(AActor* Caller, UDialogueWidget* Widg
             BlackboardComponent->SetValueAsObject("DialogueWidget", Widget);
 
             
-            FString BoolValue = BlackboardComponent->GetValueAsBool("HasMetPlayer") ? "true" : "false";   
-            FString Message = FString::Printf(TEXT("HasMetPlayer %s"), *BoolValue);
-            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, Message);
+            FString BoolValue = BlackboardComponent->GetValueAsBool("HasMetPlayer") ? "true" : "false";  
             
             if(auto BrainComponent =Controller->GetBrainComponent())
             {
@@ -105,9 +118,15 @@ void UDialogueComponent::OnDialogueStarted(AActor* Caller, UDialogueWidget* Widg
                 }
             }
             Controller->RunBehaviorTree(DialogueTree);
+
+            if(DialogueProvider)
+            {
+               DialogueProvider->RequestDialogueOptions(this, ActorDescription);
+            }
         }
     }
 }
+
 void UDialogueComponent::OnAdvanceDialogue(AActor* Caller, UDialogueWidget* Widget)
 {
     if(Caller == GetOwner())
@@ -153,4 +172,14 @@ FString UDialogueComponent::GetGreeting()
 
     return FString("Hi Detective");
 }
+
+void UDialogueComponent::OnDialogueOptionsReceived(UObject* Caller, FDialogueOptions& DialogueOptions)
+{
+    if(Caller == this)
+    {
+
+        
+    }
+}
+
 #pragma endregion
