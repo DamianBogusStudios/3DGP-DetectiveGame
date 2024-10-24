@@ -1,9 +1,8 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 #include "Handlers/GPTHandler.h"
-
-#include "AssetTypeCategories.h"
-#include "HttpGPTChatModule/Public/Tasks/HttpGPTChatRequest.h"
-#include "Types/CommonCaseTypes.h"
+#include "Utils/HttpGPTHelper.h"
+#include "Structures/HttpGPTChatTypes.h"
+#include "Tasks/HttpGPTChatRequest.h"
 
 #pragma region ILLMService
 void UGPTHandler::SendMessage(UObject* Caller, FString& Message)
@@ -33,7 +32,7 @@ void UGPTHandler::SendStructuredMessage(UObject* const WorldObject, const FStrin
 	/* forcing valid for now */
 	StructuredResponse.bIsValid = true;
 
-	Caller = WorldObject;
+	RequestCaller = WorldObject;
 	ProvidedSchemaStruct = Struct;
 	bStructuredMessageRequested = true;
 	SendMessageStructured(WorldObject, Message, StructuredResponse);
@@ -65,20 +64,20 @@ FStructuredMessageDelegate& UGPTHandler::GetStructuredMessageDelegate()
  	Request->Activate();
  }
 
- void UGPTHandler::SendMessagesDefault(const TArray<FHttpGPTChatMessage>& Messages)
- {
- }
-
- void UGPTHandler::SendMessageCustom(const FString& Message, const FHttpGPTCommonOptions& CommonOptions,
- 	const FHttpGPTChatOptions& ChatOptions)
- {
- }
-
- void UGPTHandler::SendMessagesCustom(const TArray<FHttpGPTChatMessage>& Messages,
- 	const FHttpGPTCommonOptions& CommonOptions, const FHttpGPTChatOptions& ChatOptions)
- {
- 	
- }
+ // void UGPTHandler::SendMessagesDefault(const TArray<FHttpGPTChatMessage>& Messages)
+ // {
+ // }
+ //
+ // void UGPTHandler::SendMessageCustom(const FString& Message, const FHttpGPTCommonOptions& CommonOptions,
+ // 	const FHttpGPTChatOptions& ChatOptions)
+ // {
+ // }
+ //
+ // void UGPTHandler::SendMessagesCustom(const TArray<FHttpGPTChatMessage>& Messages,
+ // 	const FHttpGPTCommonOptions& CommonOptions, const FHttpGPTChatOptions& ChatOptions)
+ // {
+ // 	
+ // }
 
 
 
@@ -92,7 +91,7 @@ FStructuredMessageDelegate& UGPTHandler::GetStructuredMessageDelegate()
 			if(bStructuredMessageRequested && ProvidedSchemaStruct)
 			{
 				FString Message = Choice.Message.Content;
-				OnStructuredMessageReceived.Broadcast(Caller, Message, ProvidedSchemaStruct);
+				OnStructuredMessageReceived.Broadcast(RequestCaller, Message, ProvidedSchemaStruct);
 				return;
 			}
 		}

@@ -2,7 +2,8 @@
 #pragma once
 
 #include "Subsystems/DialogueSystem.h"
-#include "JsonObjectConverter.h"
+
+#include "InterchangeResult.h"
 #include "Types/CommonCaseTypes.h"
 #include "Handlers/LLMServiceLocator.h"
 #include "Interfaces/LLMService.h"
@@ -11,8 +12,19 @@
 void UDialogueSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
+}
+
+void UDialogueSystem::Deinitialize()
+{
+    Super::Deinitialize();
+}
+
+void UDialogueSystem::OnWorldBeginPlay(UWorld& InWorld)
+{
+    Super::OnWorldBeginPlay(InWorld);
 
     LLMService = ULLMServiceLocator::GetService();
+    BindServiceCallbacks();
     
 #if UE_EDITOR
     FString Message = FString::Printf(TEXT("DialogueSystem Initialised"));
@@ -20,65 +32,81 @@ void UDialogueSystem::Initialize(FSubsystemCollectionBase& Collection)
 #endif
     
 }
-
-void UDialogueSystem::Deinitialize()
-{
-    Super::Deinitialize();
-}
 #pragma endregion
 
 #pragma region IDialogueProvider Interface
 
-void UDialogueSystem::RequestDialogueOptions(UObject* Caller, FActorDescription& ActorDescription)
+void UDialogueSystem::RequestSendMessage(UObject* Caller, FString& Message)
+{
+}
+
+void UDialogueSystem::RequestDialogueOptions(UObject* Caller, FActorDescription& ActorDescription, FDialogueOptionsDelegate& Delegate)
 {
     if(LLMService && LLMService.GetObject())
     {
         FString OutputString;
         if(FJsonObjectConverter::UStructToJsonObjectString(ActorDescription, OutputString))
         {
-            DialogueRequestCaller = Caller;
-
+            OnDialogueOptionsReceived = Delegate;
+            
             FString Message = "Generate dialogue options for the player to choose when interacting with this NPC using the structured output json format." + OutputString;
             LLMService->SendStructuredMessage(Caller, Message, FDialogueOptions::StaticStruct());
         }
     }
 }
-
-FMessageDelegate& UDialogueSystem::GetResponseDelegate()
-{
-    return OnMessageReceived;
-}
-FDialogueOptionsDelegate& UDialogueSystem::GetDialogueOptionsDelegate()
-{
-    return OnDialogueOptionsReceived;
-}
-
 #pragma endregion
 
 #pragma region Callbacks
-
-#pragma endregion
-
-#pragma region Conversion
-bool UDialogueSystem::ParseFromJsonToStruct(const FString& Content, UScriptStruct* Schema, TSharedPtr<void> StructInstance)
+void UDialogueSystem::BindServiceCallbacks()
 {
-    TSharedPtr<FJsonObject> JsonObject;
-    TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Content);
-
-    if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+    if(LLMService && LLMService.GetObject())
     {
-        // Allocate memory for the struct using TSharedPtr to manage the memory
-        StructInstance = TSharedPtr<void>(FMemory::Malloc(Schema->GetStructureSize()), FMemory::Free);
-        Schema->InitializeStruct(StructInstance.Get());
-
-        if(FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), Schema, &StructInstance, 0, 0))
-        {
-            return true;
-        }
-        StructInstance.Reset();
-		
+        LLMService->GetMessageDelegate().AddDynamic(this, &UDialogueSystem::MessagedReceived);
+        LLMService->GetStructuredMessageDelegate().AddDynamic(this, &UDialogueSystem::StructuredMessageReceived);
     }
+}
 
-    return false;
+void UDialogueSystem::MessagedReceived(UObject* Caller, FString& Message)
+{
+    
+}
+void UDialogueSystem::StructuredMessageReceived(UObject* Caller, FString& Message, UScriptStruct* Struct)
+{
+    if (Struct == FDialogueOptions::StaticStruct())
+    {
+        FDialogueOptions DialogueOptions;
+        if (ParseFromJsonToStruct(Message, Struct, DialogueOptions))
+        {
+            OnDialogueOptionsReceived.ExecuteIfBound(DialogueOptions);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Unable to Parse Dialogue Options"));    
+        }
+    }
 }
 #pragma endregion
+
+// #pragma region Conversion
+// bool UDialogueSystem::ParseFromJsonToStruct(const FString& Content, UScriptStruct* Schema, StructType& StructInstance)
+// {
+//     TSharedPtr<FJsonObject> JsonObject;
+//     TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Content);
+//
+//     if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+//     {
+//
+//        // StructInstance = TSharedPtr<void>(FMemory::Malloc(Schema->GetStructureSize()), FMemory::Free);
+//         //Schema->InitializeStruct(StructInstance.Get());
+//
+//         if(FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), Schema, &StructInstance, 0, 0))
+//         {
+//             return true;
+//         }
+//         //StructInstance.Reset();
+// 		
+//     }
+//
+//     return false;
+// }
+// #pragma endregion

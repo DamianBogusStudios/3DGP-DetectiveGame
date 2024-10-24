@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Types/CommonCaseTypes.h"
 #include "UObject/Interface.h"
 #include "DialogueProvider.generated.h"
 
@@ -27,9 +28,7 @@ class CASEGENERATOR_API IDialogueProvider
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	virtual void RequestDialogueOptions(UObject* Caller, FActorDescription& ActorDescription) = 0;
-	virtual FMessageDelegate& GetResponseDelegate() = 0;
-	virtual FDialogueOptionsDelegate& GetDialogueOptionsDelegate() = 0;
+	virtual void RequestDialogueOptions(UObject* Caller, FActorDescription& ActorDescription, FDialogueOptionsDelegate& Callback) = 0;
 
 	virtual void RequestSendMessage(UObject* Caller, FString& Message) = 0;
 };

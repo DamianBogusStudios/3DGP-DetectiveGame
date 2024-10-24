@@ -95,8 +95,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FStructuredMessageDelegate,
 	FString&, Message,
 	UScriptStruct*, StructSchema);
 
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FDialogueOptionsDelegate,
-	UObject*, Caller,
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDialogueOptionsDelegate,
 	FDialogueOptions&, DialogueOptions);
+
 #pragma endregion 

@@ -38,16 +38,18 @@ void UDialogueComponent::BindDialogueDelegates()
         InteractionSubsystem->OnAdvanceDialogueAction.AddDynamic(this, &UDialogueComponent::OnAdvanceDialogue);
         InteractionSubsystem->OnFinishDialogueAction.AddDynamic(this, &UDialogueComponent::OnFinishDialogue);
     }
-
+    
     for(auto Subsystem : GetWorld()->GetSubsystemArray<UWorldSubsystem>())
     {
         if(Subsystem->Implements<UDialogueProvider>())
         {
             DialogueProvider = TScriptInterface<IDialogueProvider>(Subsystem);
-            DialogueProvider->GetDialogueOptionsDelegate().AddDynamic(this, &UDialogueComponent::OnDialogueOptionsReceived);
+            DialogueOptionsDelegate.BindDynamic(this, &UDialogueComponent::OnDialogueOptionsReceived);
+            //DialogueProvider->GetDialogueOptionsDelegate().AddDynamic(this, &UDialogueComponent::OnDialogueOptionsReceived);
             break;
         }
     }
+
 
 }
 
@@ -120,9 +122,9 @@ void UDialogueComponent::OnDialogueStarted(AActor* Caller, UDialogueWidget* Widg
             }
             Controller->RunBehaviorTree(DialogueTree);
 
-            if(DialogueProvider)
+            if(DialogueOptions.OptionOne.IsEmpty() && DialogueProvider)
             {
-                DialogueProvider->RequestDialogueOptions(this, ActorDescription);
+                DialogueProvider->RequestDialogueOptions(this, ActorDescription, DialogueOptionsDelegate);
             }
         }
     }
@@ -173,14 +175,18 @@ FString UDialogueComponent::GetGreeting()
 
     return FString("Hi Detective");
 }
-
-void UDialogueComponent::OnDialogueOptionsReceived(UObject* Caller, FDialogueOptions& DialogueOptions)
+FDialogueOptions UDialogueComponent::GetDialogueOptions()
 {
-    if(Caller == this)
-    {
-
-        
-    }
+    return DialogueOptions;
 }
+
+void UDialogueComponent::OnDialogueOptionsReceived(FDialogueOptions& InDialogueOptions)
+{
+    UE_LOG(LogTemp, Log, TEXT("DialogueComponent: DialogueOptions Received"));
+     
+    DialogueOptions = InDialogueOptions;
+}
+
+
 
 #pragma endregion

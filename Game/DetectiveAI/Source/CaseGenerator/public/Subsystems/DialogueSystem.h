@@ -5,10 +5,11 @@
 #include "CoreMinimal.h"
 #include "Types/CommonCaseTypes.h"
 #include "Interfaces/DialogueProvider.h"
+#include "JsonObjectConverter.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "DialogueSystem.generated.h"
 
-class ULLMService;
+class ILLMService;
 struct FActorDescription;
 struct FMessage;
 
@@ -21,30 +22,45 @@ class CASEGENERATOR_API UDialogueSystem : public UWorldSubsystem, public IDialog
 	GENERATED_BODY()
 
 public:
-	//virtual void RequestSendMessage(UObject* Caller, FString& Message) override;
-	virtual void RequestDialogueOptions(UObject* Caller, FActorDescription& ActorDescription) override;
-	virtual FMessageDelegate& GetResponseDelegate() override;
-	virtual FDialogueOptionsDelegate& GetDialogueOptionsDelegate() override;
-	
+	virtual void RequestSendMessage(UObject* Caller, FString& Message) override;
+	virtual void RequestDialogueOptions(UObject* Caller, FActorDescription& ActorDescription, FDialogueOptionsDelegate& Delegate) override;
+
 protected:
 	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
+	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 private:
 
 	UPROPERTY()
 	TScriptInterface<ILLMService> LLMService;
 
+	void BindServiceCallbacks();
+
+	UFUNCTION()
+	void MessagedReceived(UObject* Caller, FString& Message);
+	UFUNCTION()
+	void StructuredMessageReceived(UObject* Caller, FString& Message, UScriptStruct* Struct);
+	
 	FMessageDelegate OnMessageReceived;
 	FDialogueOptionsDelegate OnDialogueOptionsReceived;
-
-	UObject* DialogueRequestCaller;
 	
+	template<typename StructType>
+	bool ParseFromJsonToStruct(const FString& Content, UScriptStruct* Schema, StructType& StructInstance)
+	{
+		TSharedPtr<FJsonObject> JsonObject;
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Content);
 
-	bool ParseFromJsonToStruct(const FString& Content, UScriptStruct* Schema, TSharedPtr<void> StructInstance);
+		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+		{
+			if(FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), Schema, &StructInstance, 0, 0))
+			{
+				return true;
+			}
+		}
 
-
-	
+		return false;
+	}
 
 };

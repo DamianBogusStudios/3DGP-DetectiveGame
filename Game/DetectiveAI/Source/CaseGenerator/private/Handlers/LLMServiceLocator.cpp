@@ -6,6 +6,8 @@
 #include "Interfaces/LLMService.h"
 #include "Settings/LLMSettings.h"
 
+TScriptInterface<ILLMService> ULLMServiceLocator::Service;
+
 TScriptInterface<ILLMService> ULLMServiceLocator::GetService()
 {
 	if(!Service)
@@ -17,16 +19,16 @@ TScriptInterface<ILLMService> ULLMServiceLocator::GetService()
 
 void ULLMServiceLocator::InitializeService()
 {
-	if(ULLMSettings* Settings = GetMutableDefault<ULLMSettings>())
+
+	if(const ULLMSettings* Settings = GetDefault<ULLMSettings>())
 	{
 		switch (Settings->ActiveLLM)
 		{
 		case EActiveLLM::ChatGPT:
+		default:
 			auto Handler = NewObject<UGPTHandler>();
 			Service.SetObject(Handler);
 			Service.SetInterface(Cast<ILLMService>(Handler));
-			break;
-		default:
 			break;
 		}
 	}

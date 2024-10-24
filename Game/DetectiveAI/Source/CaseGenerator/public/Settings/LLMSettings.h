@@ -13,10 +13,11 @@ enum EActiveLLM
 	Llama,
 	Claude	
 };
-/**
- * 
- */
-UCLASS(Config = CaseGenerator, DefaultConfig, meta = (DisplayName = "LLM Settings"))
+
+// /**
+//  * 
+//  */
+UCLASS(Config = Game, DefaultConfig, meta = (DisplayName = "LLM Settings"))
 class CASEGENERATOR_API ULLMSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()

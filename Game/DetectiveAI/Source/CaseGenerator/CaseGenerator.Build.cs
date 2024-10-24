@@ -10,6 +10,8 @@ public class CaseGenerator: ModuleRules
             "CoreUObject",
             "Engine",
             "UMG",
+            "DeveloperSettings",
+            "Json",
             "JsonUtilities",
             "HttpGPTChatModule",
             "HttpGPTCommonModule"

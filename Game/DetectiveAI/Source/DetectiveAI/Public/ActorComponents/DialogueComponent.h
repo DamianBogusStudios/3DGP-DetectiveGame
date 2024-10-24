@@ -26,6 +26,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NPC")
 	FActorDescription ActorDescription;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NPC")
+	FDialogueOptions DialogueOptions;
 	
 	UFUNCTION()
 	void StartDialogue() const;
@@ -46,10 +49,16 @@ public:
 	// void OnMessageReceived(TObjectPtr<UActorDescription>);
 
 	UFUNCTION()
-	void OnDialogueOptionsReceived(UObject* Caller, FDialogueOptions& DialogueOptions);
+	void OnDialogueOptionsReceived(FDialogueOptions& InDialogueOptions);
 	
 	UFUNCTION(BlueprintCallable)
 	FString GetGreeting();
+
+	UFUNCTION(BlueprintCallable)
+	FDialogueOptions GetDialogueOptions();
+	
+
+	FDialogueOptionsDelegate DialogueOptionsDelegate;
 	
 protected:
 
