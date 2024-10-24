@@ -5,6 +5,7 @@
 #include "Subsystems/InteractionSystem.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "AIController.h"
+#include "JsonObjectConverter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "UI/DialogueWidget.h"
 #include "Interfaces/DialogueProvider.h"
@@ -121,7 +122,7 @@ void UDialogueComponent::OnDialogueStarted(AActor* Caller, UDialogueWidget* Widg
 
             if(DialogueProvider)
             {
-               DialogueProvider->RequestDialogueOptions(this, ActorDescription);
+                DialogueProvider->RequestDialogueOptions(this, ActorDescription);
             }
         }
     }

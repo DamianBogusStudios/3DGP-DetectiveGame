@@ -6,6 +6,7 @@
 #include "Engine/GameInstance.h"
 #include "MGameInstance.generated.h"
 
+class ULLMServiceLocator;
 class UMaterial;
 class UOverlayMaterials;
 
@@ -19,7 +20,7 @@ class DETECTIVEAI_API UMGameInstance : public UGameInstance
 
 
 public:
-
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FPrimaryAssetId OverlayMaterials;
 

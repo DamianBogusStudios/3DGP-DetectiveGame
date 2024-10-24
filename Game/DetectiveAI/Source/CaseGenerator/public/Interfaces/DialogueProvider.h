@@ -30,4 +30,6 @@ public:
 	virtual void RequestDialogueOptions(UObject* Caller, FActorDescription& ActorDescription) = 0;
 	virtual FMessageDelegate& GetResponseDelegate() = 0;
 	virtual FDialogueOptionsDelegate& GetDialogueOptionsDelegate() = 0;
+
+	virtual void RequestSendMessage(UObject* Caller, FString& Message) = 0;
 };

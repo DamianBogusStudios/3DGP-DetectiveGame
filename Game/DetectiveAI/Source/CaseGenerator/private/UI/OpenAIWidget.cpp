@@ -3,13 +3,13 @@
 
 #include "UI/OpenAIWidget.h"
 
-#include "ChatGPT/ChatGPT.h"
+//#include "ChatGPT/ChatGPT.h"
 #include "Components/VerticalBox.h"
 #include "Components/ScrollBox.h"
 #include "Components/EditableText.h"
 #include "Components/Button.h"
 #include "Components/VerticalBoxSlot.h"
-#include "FuncLib/OpenAIFuncLib.h"
+//#include "FuncLib/OpenAIFuncLib.h"
 /*
 void UOpenAIWidget::NativeConstruct()
 {

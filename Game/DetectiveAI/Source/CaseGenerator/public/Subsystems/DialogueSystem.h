@@ -8,7 +8,7 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "DialogueSystem.generated.h"
 
-class UChatGPT;
+class ULLMService;
 struct FActorDescription;
 struct FMessage;
 
@@ -21,35 +21,30 @@ class CASEGENERATOR_API UDialogueSystem : public UWorldSubsystem, public IDialog
 	GENERATED_BODY()
 
 public:
-	
+	//virtual void RequestSendMessage(UObject* Caller, FString& Message) override;
 	virtual void RequestDialogueOptions(UObject* Caller, FActorDescription& ActorDescription) override;
 	virtual FMessageDelegate& GetResponseDelegate() override;
 	virtual FDialogueOptionsDelegate& GetDialogueOptionsDelegate() override;
 	
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "OpenAI")
-	int32 MaxTokens{2000};
-
+	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
 private:
+
 	UPROPERTY()
-	TObjectPtr<UChatGPT> ChatGPT;
+	TScriptInterface<ILLMService> LLMService;
 
 	FMessageDelegate OnMessageReceived;
 	FDialogueOptionsDelegate OnDialogueOptionsReceived;
 
 	UObject* DialogueRequestCaller;
 	
-	UFUNCTION()
-	void SendMessage(const FText& Text);
 
-	void RequestDialogueOptions(const FString& ActorDescription);
+	bool ParseFromJsonToStruct(const FString& Content, UScriptStruct* Schema, TSharedPtr<void> StructInstance);
+
+
 	
-	void InitChatGPT();
-
-	void OnRequestCompleted();
-	void OnRequestUpdated(const FMessage& Message, bool WasError);
 
 };

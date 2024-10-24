@@ -20,7 +20,7 @@ public class DetectiveAI : ModuleRules
 			"EnhancedInput",
 			"InventorySystem",
 			"CaseGenerator",
-			"OpenAI"
+			"JsonUtilities"
         });
     }
 }

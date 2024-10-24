@@ -9,10 +9,10 @@ public class CaseGenerator: ModuleRules
             "Core",
             "CoreUObject",
             "Engine",
-            "OpenAI",
             "UMG",
-            "Json",
-            "JsonUtilities"
+            "JsonUtilities",
+            "HttpGPTChatModule",
+            "HttpGPTCommonModule"
         });
     }
 }

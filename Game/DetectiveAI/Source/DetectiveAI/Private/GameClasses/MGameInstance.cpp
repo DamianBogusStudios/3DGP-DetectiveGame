@@ -5,6 +5,20 @@
 #include "Engine/AssetManager.h"
 #include "Data/OverlayMaterials.h"
 
+void UMGameInstance::Init()
+{
+    Super::Init();
+
+    if (UAssetManager* AssetManager = UAssetManager::GetIfInitialized())
+    {
+        TArray<FName> Bundles;
+
+        FStreamableDelegate Delegate = FStreamableDelegate::CreateUObject(this, &UMGameInstance::OnMaterialsLoaded, OverlayMaterials);
+
+        AssetManager->LoadPrimaryAsset(OverlayMaterials, Bundles, Delegate);
+    }
+}
+
 UMaterial* UMGameInstance::GetOverlayMaterial(bool Interactable)
 {
     if (UAssetManager* AssetManager = UAssetManager::GetIfInitialized())
@@ -19,19 +33,6 @@ UMaterial* UMGameInstance::GetOverlayMaterial(bool Interactable)
     return nullptr;
 }
 
-void UMGameInstance::Init()
-{
-    Super::Init();
-
-    if (UAssetManager* AssetManager = UAssetManager::GetIfInitialized())
-    {
-        TArray<FName> Bundles;
-
-        FStreamableDelegate Delegate = FStreamableDelegate::CreateUObject(this, &UMGameInstance::OnMaterialsLoaded, OverlayMaterials);
-
-        AssetManager->LoadPrimaryAsset(OverlayMaterials, Bundles, Delegate);
-    }
-}
 
 void UMGameInstance::OnMaterialsLoaded(FPrimaryAssetId Id)
 {

@@ -42,18 +42,18 @@ enum class EPlayerFamiliarity : uint8
 	Partner
 };
 
-USTRUCT(BlueprintType)
+USTRUCT(BlueprintType, meta = (Tooltip = "dialogue options for player to pick when interacting with this NPC"))
 struct CASEGENERATOR_API  FDialogueOptions
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Meta = (Tooltip = "First Dialogue Option"))
 	FString OptionOne;
 	
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Meta = (Tooltip = "Second Dialogue Option"))
 	FString OptionTwo;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Meta = (Tooltip = "Third Dialogue Option"))
 	FString OptionThree;
 };
 
@@ -88,7 +88,13 @@ struct CASEGENERATOR_API FActorDescription
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMessageDelegate,
 	UObject*, Caller,
-	FString, Message);
+	FString&, Message);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FStructuredMessageDelegate,
+	UObject*, Caller,
+	FString&, Message,
+	UScriptStruct*, StructSchema);
+
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FDialogueOptionsDelegate,
 	UObject*, Caller,
