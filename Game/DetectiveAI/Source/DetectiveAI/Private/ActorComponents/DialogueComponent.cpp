@@ -2,13 +2,13 @@
 
 
 #include "ActorComponents/DialogueComponent.h"
-#include "Subsystems/InteractionSystem.h"
+#include "Subsystems/UISystem.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "AIController.h"
-#include "JsonObjectConverter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "UI/DialogueWidget.h"
 #include "Interfaces/DialogueProvider.h"
+#include "Settings/InteractionSettings.h"
 #include "Types/CommonCaseTypes.h"
 
 
@@ -32,14 +32,14 @@ void UDialogueComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UDialogueComponent::BindDialogueDelegates()
 {
-    if (auto InteractionSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UInteractionSystem>())
+    if (auto UI = GetWorld()->GetGameInstance()->GetSubsystem<UUISystem>())
     {
-        InteractionSubsystem->OnStartDialogueAction.AddDynamic(this, &UDialogueComponent::OnDialogueStarted);
-        InteractionSubsystem->OnAdvanceDialogueAction.AddDynamic(this, &UDialogueComponent::OnAdvanceDialogue);
-        InteractionSubsystem->OnFinishDialogueAction.AddDynamic(this, &UDialogueComponent::OnFinishDialogue);
+        UI->OnStartUIAction.AddDynamic(this, &UDialogueComponent::OnDialogueStarted);
+        UI->OnAdvanceUIAction.AddDynamic(this, &UDialogueComponent::OnAdvanceDialogue);
+        UI->OnFinishUIAction.AddDynamic(this, &UDialogueComponent::OnFinishDialogue);
     }
     
-    for(auto Subsystem : GetWorld()->GetSubsystemArray<UWorldSubsystem>())
+    for(auto Subsystem : GetWorld()->GetGameInstance()->GetSubsystemArray<UGameInstanceSubsystem>())
     {
         if(Subsystem->Implements<UDialogueProvider>())
         {
@@ -55,20 +55,21 @@ void UDialogueComponent::BindDialogueDelegates()
 
 void UDialogueComponent::UnBindDialogueDelegates()
 {
-    if (auto InteractionSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UInteractionSystem>())
+    if (auto UI = GetWorld()->GetGameInstance()->GetSubsystem<UUISystem>())
     {
-        InteractionSubsystem->OnStartDialogueAction.RemoveDynamic(this, &UDialogueComponent::OnDialogueStarted);
-        InteractionSubsystem->OnAdvanceDialogueAction.RemoveDynamic(this, &UDialogueComponent::OnAdvanceDialogue);
-        InteractionSubsystem->OnFinishDialogueAction.RemoveDynamic(this, &UDialogueComponent::OnFinishDialogue);
+        UI->OnStartUIAction.RemoveDynamic(this, &UDialogueComponent::OnDialogueStarted);
+        UI->OnAdvanceUIAction.RemoveDynamic(this, &UDialogueComponent::OnAdvanceDialogue);
+        UI->OnFinishUIAction.RemoveDynamic(this, &UDialogueComponent::OnFinishDialogue);
     }
 }
 
 
 void UDialogueComponent::StartDialogue() const
 {
-    if (auto InteractionSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UInteractionSystem>())
+    if (auto UI = GetWorld()->GetGameInstance()->GetSubsystem<UUISystem>())
     {
-        InteractionSubsystem->RequestDialogueAction(GetOwner());
+        UI->RequestStartWidget(GetOwner(), EWidgetType::NPCDialogue);
+        // InteractionSubsystem->RequestDialogueAction(GetOwner());
     }
 	else
     {
@@ -84,16 +85,16 @@ void UDialogueComponent::FinishDialogue() const
 {
     if(bInDialogue)
     {
-        if (auto InteractionSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UInteractionSystem>())
+        if (auto UI = GetWorld()->GetGameInstance()->GetSubsystem<UUISystem>())
         {
-            InteractionSubsystem->FinishDialogueAction(GetOwner());
+            UI->RequestFinishWidget(GetOwner(), EWidgetType::NPCDialogue);
         }
     }
 }
 
 #pragma region Delegate Callbacks
 
-void UDialogueComponent::OnDialogueStarted(AActor* Caller, UDialogueWidget* Widget)
+void UDialogueComponent::OnDialogueStarted(AActor* Caller, UUserWidget* Widget)
 {
     if(Caller == GetOwner())
     {
@@ -130,7 +131,7 @@ void UDialogueComponent::OnDialogueStarted(AActor* Caller, UDialogueWidget* Widg
     }
 }
 
-void UDialogueComponent::OnAdvanceDialogue(AActor* Caller, UDialogueWidget* Widget)
+void UDialogueComponent::OnAdvanceDialogue(AActor* Caller, UUserWidget* Widget)
 {
     if(Caller == GetOwner())
     {
@@ -139,7 +140,7 @@ void UDialogueComponent::OnAdvanceDialogue(AActor* Caller, UDialogueWidget* Widg
 }
 
 
-void UDialogueComponent::OnFinishDialogue(AActor* Caller, UDialogueWidget* Widget)
+void UDialogueComponent::OnFinishDialogue(AActor* Caller, UUserWidget* Widget)
 {
     if(Caller == GetOwner())
     {

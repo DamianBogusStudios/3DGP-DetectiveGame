@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Interfaces/WidgetCleanupInterface.h"
 #include "DialogueWidget.generated.h"
 
 
@@ -23,7 +24,7 @@ enum class EDialogueVisibility : uint8
  * 
  */
 UCLASS()
-class DETECTIVEAI_API UDialogueWidget : public UUserWidget
+class DETECTIVEAI_API UDialogueWidget : public UUserWidget, public IWidgetCleanupInterface
 {
 	GENERATED_BODY()
 
@@ -47,6 +48,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ResetDialogueWidget();
 
+
+	virtual void Cleanup_Implementation() override;
+	
 protected:
 	UFUNCTION(BlueprintCallable)
 	void Speak(FString Text);

@@ -25,6 +25,11 @@
 			"Name": "InventorySystem",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "CaseGeneratorEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
@@ -39,6 +44,5 @@
 			"Name": "HttpGPT",
 			"Enabled": true
 		}
-		
 	]
 }

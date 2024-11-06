@@ -7,9 +7,10 @@ public class DetectiveAI : ModuleRules
 	public DetectiveAI(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		bAllowConfidentialPlatformDefines = true;
 
-        PublicDependencyModuleNames.AddRange(new string[] 
-		{ 
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
 			"Core",
 			"CoreUObject",
 			"Engine",
@@ -21,6 +22,6 @@ public class DetectiveAI : ModuleRules
 			"InventorySystem",
 			"CaseGenerator",
 			"JsonUtilities"
-        });
-    }
+		});
+	}
 }

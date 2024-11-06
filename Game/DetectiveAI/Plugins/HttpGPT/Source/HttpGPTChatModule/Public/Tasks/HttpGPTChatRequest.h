@@ -41,14 +41,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HttpGPT | Chat | Default",
 			meta = (BlueprintInternalUseOnly = "true", WorldContext = "WorldContextObject", DisplayName = "Send Message with Default Options",
 				AutoCreateRefTerm = "Functions"))
-	static UHttpGPTChatRequest* SendMessageStructured(UObject* const WorldContextObject, const FString& Message,
+	static UHttpGPTChatRequest* SendMessagesStructured(UObject* const WorldContextObject, const TArray<FHttpGPTChatMessage>& Messages,
 														   const TArray<FHttpGPTFunction>& Functions , const FHttpGPTStructuredResponse StructuredResponse);
 	
-	UFUNCTION(BlueprintCallable, Category = "HttpGPT | Chat | Default",
-		meta = (BlueprintInternalUseOnly = "true", WorldContext = "WorldContextObject", DisplayName = "Send Message with Default Options",
-			AutoCreateRefTerm = "Functions"))
-	static UHttpGPTChatRequest* SendMessage_DefaultOptions(UObject* const WorldContextObject, const FString& Message,
-	                                                       const TArray<FHttpGPTFunction>& Functions);
+	// UFUNCTION(BlueprintCallable, Category = "HttpGPT | Chat | Default",
+	// 	meta = (BlueprintInternalUseOnly = "true", WorldContext = "WorldContextObject", DisplayName = "Send Message with Default Options",
+	// 		AutoCreateRefTerm = "Functions"))
+	// static UHttpGPTChatRequest* SendMessage_DefaultOptions(UObject* const WorldContextObject, const FString& Message,
+	//                                                        const TArray<FHttpGPTFunction>& Functions);
 
 	UFUNCTION(BlueprintCallable, Category = "HttpGPT | Chat | Default",
 		meta = (BlueprintInternalUseOnly = "true", WorldContext = "WorldContextObject", DisplayName = "Send Messages with Default Options",

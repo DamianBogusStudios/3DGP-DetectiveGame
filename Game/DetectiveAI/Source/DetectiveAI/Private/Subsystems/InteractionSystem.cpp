@@ -4,6 +4,7 @@
 #include "Subsystems/InteractionSystem.h"
 #include "Settings/InteractionSettings.h"
 #include "UI/DialogueWidget.h"
+#include "UI/LockpickMiniGame.h"
 
 bool UInteractionSystem::ShouldCreateSubsystem(UObject* Outer) const
 {
@@ -16,7 +17,8 @@ void UInteractionSystem::Initialize(FSubsystemCollectionBase& Collection)
 
 	if (const UInteractionSettings* Settings = GetDefault<UInteractionSettings>())
 	{
-		DialogueWidgetClass = Settings->GetDialogueWidgetClass();
+	//	DialogueWidgetClass = Settings->GetDialogueWidgetClass();
+	 //   LockpickMiniGameClass = Settings->GetLockpickMiniGameClass();
 	}
 
 #if WITH_EDITOR
@@ -29,6 +31,33 @@ void UInteractionSystem::Initialize(FSubsystemCollectionBase& Collection)
 void UInteractionSystem::Deinitialize()
 {
     Super::Deinitialize();
+}
+
+void UInteractionSystem::RequestLockpickMiniGame(AActor* Caller)
+{
+    if (LockpickMiniGameClass)
+    {
+        if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+        {
+            if(!LockpickMiniGameInstance)
+            {
+                LockpickMiniGameInstance = CreateWidget<ULockpickMiniGame>(PlayerController, LockpickMiniGameClass);
+            }
+            
+            if (LockpickMiniGameInstance)
+            {
+                LockpickMiniGameInstance->AddToViewport();
+            }
+        }
+    }
+    else
+    {
+#if WITH_EDITOR
+        FString Message = FString::Printf(TEXT("MiniGame class has not been set"));
+        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, Message);
+#endif
+    }
+    
 }
 
 void UInteractionSystem::RequestDialogueAction(AActor* Caller)
@@ -57,8 +86,6 @@ void UInteractionSystem::RequestDialogueAction(AActor* Caller)
         GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, Message);
 #endif
     }
-//mindreading.
-// combine sixaxis motors and triggers.
 }
 
 void UInteractionSystem::AdvanceDialogueAction() const

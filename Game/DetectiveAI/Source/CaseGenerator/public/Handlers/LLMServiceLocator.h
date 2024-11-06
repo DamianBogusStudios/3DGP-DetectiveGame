@@ -17,9 +17,13 @@ class CASEGENERATOR_API ULLMServiceLocator : public UObject
 	
 public:
 	static TScriptInterface<ILLMService> GetService();
-	
+	static void Cleanup();
 private:
 	
 	static TScriptInterface<ILLMService> Service;
+	static TScriptInterface<ILLMService> NullService;
+	
 	static void InitializeService();
+
+	virtual void BeginDestroy() override;
 };

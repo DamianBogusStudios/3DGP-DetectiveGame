@@ -35,6 +35,12 @@ void UDialogueWidget::Reply(TArray<FString> TextReplies)
 	}
 }
 
+void UDialogueWidget::Cleanup_Implementation()
+{
+	ResetDialogueWidget();
+}
+
+
 void UDialogueWidget::ResetDialogueWidget()
 {
 	ToggleBoxes(EDialogueVisibility::EHidden);

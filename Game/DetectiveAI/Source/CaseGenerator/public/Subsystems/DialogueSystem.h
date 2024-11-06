@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Types/CommonCaseTypes.h"
 #include "Interfaces/DialogueProvider.h"
-#include "JsonObjectConverter.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "DialogueSystem.generated.h"
 
@@ -17,7 +16,7 @@ struct FMessage;
  * 
  */
 UCLASS()
-class CASEGENERATOR_API UDialogueSystem : public UWorldSubsystem, public IDialogueProvider
+class CASEGENERATOR_API UDialogueSystem : public UGameInstanceSubsystem, public IDialogueProvider
 {
 	GENERATED_BODY()
 
@@ -30,7 +29,8 @@ protected:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
-	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
+
+	//virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 private:
 
 	UPROPERTY()
@@ -45,22 +45,5 @@ private:
 	
 	FMessageDelegate OnMessageReceived;
 	FDialogueOptionsDelegate OnDialogueOptionsReceived;
-	
-	template<typename StructType>
-	bool ParseFromJsonToStruct(const FString& Content, UScriptStruct* Schema, StructType& StructInstance)
-	{
-		TSharedPtr<FJsonObject> JsonObject;
-		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Content);
-
-		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
-		{
-			if(FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), Schema, &StructInstance, 0, 0))
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
 
 };

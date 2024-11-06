@@ -39,17 +39,17 @@ UHttpGPTChatRequest* UHttpGPTChatRequest::EditorTask(const TArray<FHttpGPTChatMe
 
 /* refactored this section to include structured responses */
 
-UHttpGPTChatRequest* UHttpGPTChatRequest::SendMessageStructured(UObject* const WorldContextObject, const FString& Message, const TArray<FHttpGPTFunction>& Functions
+UHttpGPTChatRequest* UHttpGPTChatRequest::SendMessagesStructured(UObject* const WorldContextObject, const TArray<FHttpGPTChatMessage>& Messages, const TArray<FHttpGPTFunction>& Functions
 																	,const FHttpGPTStructuredResponse StructuredResponse )
 {
-	return SendMessage_CustomOptions(WorldContextObject, Message, Functions, StructuredResponse, FHttpGPTCommonOptions(), FHttpGPTChatOptions());
+	return SendMessages_CustomOptions(WorldContextObject, Messages, Functions, StructuredResponse, FHttpGPTCommonOptions(), FHttpGPTChatOptions());
 }
 
-UHttpGPTChatRequest* UHttpGPTChatRequest::SendMessage_DefaultOptions(UObject* const WorldContextObject, const FString& Message,
-                                                                     const TArray<FHttpGPTFunction>& Functions)
-{
-	return SendMessage_CustomOptions(WorldContextObject, Message, Functions, FHttpGPTStructuredResponse(), FHttpGPTCommonOptions(), FHttpGPTChatOptions());
-}
+// UHttpGPTChatRequest* UHttpGPTChatRequest::SendMessage_DefaultOptions(UObject* const WorldContextObject, const FString& Message,
+//                                                                      const TArray<FHttpGPTFunction>& Functions)
+// {
+// 	return SendMessage_CustomOptions(WorldContextObject, Message, Functions, FHttpGPTStructuredResponse(), FHttpGPTCommonOptions(), FHttpGPTChatOptions());
+// }
 
 UHttpGPTChatRequest* UHttpGPTChatRequest::SendMessages_DefaultOptions(UObject* const WorldContextObject, const TArray<FHttpGPTChatMessage>& Messages,
                                                                       const TArray<FHttpGPTFunction>& Functions)

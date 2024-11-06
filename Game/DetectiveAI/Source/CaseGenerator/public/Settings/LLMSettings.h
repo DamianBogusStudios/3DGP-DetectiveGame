@@ -13,7 +13,6 @@ enum EActiveLLM
 	Llama,
 	Claude	
 };
-
 // /**
 //  * 
 //  */
@@ -25,7 +24,10 @@ class CASEGENERATOR_API ULLMSettings : public UDeveloperSettings
 	
 public:
 
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "LLM", AdvancedDisplay)
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "LLM")
 	TEnumAsByte<EActiveLLM> ActiveLLM;
-
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "LLM", meta = (MultiLine="true"))
+	FString CustomInstructions;
+	
 };

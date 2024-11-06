@@ -203,6 +203,14 @@ const EHttpGPTPropertyType UHttpGPTHelper::CPPToPropertyType(const FString Type)
 	{
 		return EHttpGPTPropertyType::Boolean;
 	}
+	if (Type.Contains("array", ESearchCase::IgnoreCase))
+	{
+		return EHttpGPTPropertyType::Array;
+	}
+	if(!Type.IsEmpty() && Type[0] == 'E')
+	{
+		return EHttpGPTPropertyType::String;
+	}
 
 	return EHttpGPTPropertyType::Boolean;
 }

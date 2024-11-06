@@ -7,6 +7,7 @@
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"
+#include "PlayStation/DualSenseController.h"
 #include "Subsystems/InteractionSystem.h"
 
 
@@ -14,6 +15,10 @@ void AMPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//if ps5 dev kit
+	DualSense = NewObject<UDualSenseController>(this, UDualSenseController::StaticClass());
+	DualSense->SetLightBarColour(FColor::Yellow);
+	
 	if (APawn* ControlledPawn = GetPawn())
 	{
 		if(UCameraComponent* Camera = ControlledPawn->GetComponentByClass<UCameraComponent>())

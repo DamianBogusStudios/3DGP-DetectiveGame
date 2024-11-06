@@ -7,6 +7,7 @@
 #include "InteractionSystem.generated.h"
 
 
+class ULockpickMiniGame;
 class UDialogueWidget;
 class UBehaviorTree;
 class AActor;
@@ -43,6 +44,9 @@ public:
 	void RequestDialogueAction(AActor* Caller);
 
 	UFUNCTION(BlueprintCallable)
+	void RequestLockpickMiniGame(AActor* Caller);
+	
+	UFUNCTION(BlueprintCallable)
 	void AdvanceDialogueAction() const;
 
 	UFUNCTION(BlueprintCallable)
@@ -53,9 +57,15 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Dialogue)
 	TSubclassOf<UDialogueWidget> DialogueWidgetClass;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Dialogue)
+	TSubclassOf<ULockpickMiniGame> LockpickMiniGameClass;
+
 	UPROPERTY()
 	TObjectPtr<AActor> ActiveActor;
 
 	UPROPERTY()
-	TObjectPtr<UDialogueWidget> DialogueWidgetInstance;	
+	TObjectPtr<UDialogueWidget> DialogueWidgetInstance;
+	
+	UPROPERTY()
+	TObjectPtr<ULockpickMiniGame> LockpickMiniGameInstance;	
 };

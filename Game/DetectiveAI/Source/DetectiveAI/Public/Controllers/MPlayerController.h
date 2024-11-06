@@ -8,6 +8,7 @@
 #include "MPlayerController.generated.h"
 
 
+class UDualSenseController;
 class UDialogueWidget;
 class APawn;
 class ABaseCharacter;
@@ -73,6 +74,8 @@ protected:
 
 private:
 
+	UDualSenseController* DualSense;
+	
 	FRotator CachedCameraRotation;	
 
 	void BindDefaultContextActions();

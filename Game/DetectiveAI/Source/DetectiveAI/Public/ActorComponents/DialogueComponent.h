@@ -37,13 +37,13 @@ public:
 	void FinishDialogue() const;
 	
 	UFUNCTION()
-	void OnDialogueStarted(AActor* Caller, UDialogueWidget* Widget);
+	void OnDialogueStarted(AActor* Caller, UUserWidget* Widget);
 
 	UFUNCTION()
-	void OnAdvanceDialogue(AActor* Caller, UDialogueWidget* Widget);
+	void OnAdvanceDialogue(AActor* Caller, UUserWidget* Widget);
 
 	UFUNCTION()
-	void OnFinishDialogue(AActor* Caller, UDialogueWidget* Widget);
+	void OnFinishDialogue(AActor* Caller, UUserWidget* Widget);
 
 	// UFUNCTION()
 	// void OnMessageReceived(TObjectPtr<UActorDescription>);
