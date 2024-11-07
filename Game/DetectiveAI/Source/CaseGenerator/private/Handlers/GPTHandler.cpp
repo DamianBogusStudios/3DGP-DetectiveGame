@@ -2,10 +2,15 @@
 #include "Handlers/GPTHandler.h"
 
 #include "AssetTypeCategories.h"
+#include "KismetCastingUtils.h"
 #include "Utils/HttpGPTHelper.h"
 #include "Structures/HttpGPTChatTypes.h"
 #include "Tasks/HttpGPTChatRequest.h"
 
+/*function forward declarations*/
+// FHttpGPTStructuredResponse UStructToStructuredResponse(const UScriptStruct* StructType);
+// TSharedPtr<FJsonObject> FunctionPropertyToJson(const FHttpGPTFunctionProperty& Prop);
+// TSharedPtr<FJsonObject> StructuredResponseToJson(const FHttpGPTStructuredResponse& StructuredResponse);
 
 
 UGPTHandler::UGPTHandler()
@@ -60,7 +65,6 @@ FString UGPTHandler::GetDescription(const FProperty& InProperty)
 	UE_LOG(LogTemp, Warning, TEXT("Row '%s' does not exist in the DataTable."), *RowName);
 	return "";
 }
-
 FHttpGPTFunctionProperty UGPTHandler::FPropertyToHttpFunctionProperty(const FProperty& InProperty, const FString& InDescription)
 {
 	FHttpGPTFunctionProperty HttpProperty;
@@ -74,6 +78,13 @@ FHttpGPTFunctionProperty UGPTHandler::FPropertyToHttpFunctionProperty(const FPro
 	{
 		if (const FArrayProperty* ArrayProperty = CastField<FArrayProperty>(&InProperty))
 		{
+			HttpProperty.InnerType = UHttpGPTHelper::CPPToPropertyType(ArrayProperty->Inner->GetCPPType());
+
+			if (const FStructProperty* StructProperty = CastField<FStructProperty>(ArrayProperty->Inner))
+			{
+				HttpProperty.InnerTypeSchema = StructProperty->Struct;
+			}
+			
 			EnumProperty = CastField<FEnumProperty>(ArrayProperty->Inner);
 		}
 	}
@@ -92,16 +103,16 @@ FHttpGPTFunctionProperty UGPTHandler::FPropertyToHttpFunctionProperty(const FPro
 			}
 		}
 	}
-	else if (const FByteProperty* ByteProperty = CastField<FByteProperty>(&InProperty))
-	{
-		if (const UEnum* Enum = ByteProperty->GetIntPropertyEnum())
-		{
-			for (int32 i = 0; i < Enum->NumEnums() - 1; ++i)
-			{
-				HttpProperty.Enum.Add(Enum->GetNameByIndex(i));
-			}
-		}
-	}
+	// else if (const FByteProperty* ByteProperty = CastField<FByteProperty>(&InProperty))
+	// {
+	// 	if (const UEnum* Enum = ByteProperty->GetIntPropertyEnum())
+	// 	{
+	// 		for (int32 i = 0; i < Enum->NumEnums() - 1; ++i)
+	// 		{
+	// 			HttpProperty.Enum.Add(Enum->GetNameByIndex(i));
+	// 		}
+	// 	}
+	// }
 
 	return HttpProperty;
 }
@@ -121,7 +132,99 @@ FHttpGPTFunctionProperty  UGPTHandler::FunctionParamToHttpFunctionProperty(const
 	}
 	return HttpProperty;
 }
+FHttpGPTStructuredResponse UGPTHandler::UStructToStructuredResponse(const UScriptStruct* StructType, bool Nested)
+{
+	FHttpGPTStructuredResponse StructuredResponse;
 	
+	StructuredResponse.Name = StructType->GetFName();  
+	StructuredResponse.Description = GetDescription(StructType);
+	StructuredResponse.bNestedSchema = Nested;
+	
+	for(TFieldIterator<FProperty> PropIt(StructType); PropIt; ++PropIt)
+	{
+		auto Property = *PropIt;
+		FHttpGPTFunctionProperty HttpProperty = FPropertyToHttpFunctionProperty(*Property, GetDescription(*Property));
+			
+		StructuredResponse.Properties.Add(HttpProperty);
+		StructuredResponse.RequiredProperties.Add(HttpProperty.Name);
+	}
+	
+	return  StructuredResponse;
+}
+TSharedPtr<FJsonObject> UGPTHandler::FunctionPropertyToJson(const FHttpGPTFunctionProperty& Prop)
+{
+	const TSharedPtr<FJsonObject> PropertyJson = MakeShared<FJsonObject>();
+		
+	PropertyJson->SetStringField("type", UHttpGPTHelper::PropertyTypeToName(Prop.Type).ToString());
+	PropertyJson->SetStringField("description", Prop.Description);
+
+	if(Prop.Type == EHttpGPTPropertyType::Array && Prop.InnerType == EHttpGPTPropertyType::Object)
+	{
+		FHttpGPTStructuredResponse InnerSchema = UStructToStructuredResponse(Prop.InnerTypeSchema, true);
+		PropertyJson->SetObjectField("items", StructuredResponseToJson(InnerSchema));
+	}
+	if (Prop.Enum.Num() > 0)
+	{
+		TArray<TSharedPtr<FJsonValue>> EnumValues;
+		for (const FName& EnumValue : Prop.Enum)
+		{
+			EnumValues.Add(MakeShared<FJsonValueString>(EnumValue.ToString()));
+		}
+		PropertyJson->SetArrayField("enum", EnumValues);
+	}
+	return PropertyJson;
+	
+}
+TSharedPtr<FJsonObject> UGPTHandler::StructuredResponseToJson(const FHttpGPTStructuredResponse& StructuredResponse)
+{
+	const TSharedPtr<FJsonObject> JsonSchema = MakeShared<FJsonObject>();
+
+		/* json prefix info */
+		JsonSchema->SetStringField("name", StructuredResponse.Name.ToString());
+		JsonSchema->SetStringField("description", StructuredResponse.Description);
+	
+	
+	/* properties */
+	const TSharedPtr<FJsonObject> ParametersJson = MakeShared<FJsonObject>();
+	ParametersJson->SetStringField("type", "object");
+	
+	const TSharedPtr<FJsonObject> PropertiesJson = MakeShared<FJsonObject>();
+
+	for (const FHttpGPTFunctionProperty& Property : StructuredResponse.Properties)
+	{
+		auto PropertyJson = FunctionPropertyToJson(Property);
+		PropertiesJson->SetObjectField(Property.Name.ToString(), PropertyJson);
+	}
+	
+	ParametersJson->SetObjectField("properties", PropertiesJson);
+
+	/* required parameters */
+	TArray<TSharedPtr<FJsonValue>> RequiredJsonArray;
+	for (const FName& RequiredProperty : StructuredResponse.RequiredProperties)
+	{
+		RequiredJsonArray.Add(MakeShared<FJsonValueString>(RequiredProperty.ToString()));
+	}
+	ParametersJson->SetArrayField("required", RequiredJsonArray);
+
+
+	/* add parameters to final json schema*/
+	ParametersJson->SetBoolField("additionalProperties", false);
+	ParametersJson->SetBoolField("strict", true);
+
+	if(StructuredResponse.bNestedSchema)
+	{
+		return ParametersJson;
+	}
+	
+	JsonSchema->SetObjectField("schema", ParametersJson);
+	const TSharedPtr<FJsonObject> StructuredResponseJson = MakeShared<FJsonObject>();
+
+	StructuredResponseJson->SetStringField("type", "json_schema");
+	StructuredResponseJson->SetObjectField("json_schema", JsonSchema);
+	
+	return StructuredResponseJson;
+}
+
 #pragma endregion
 
 #pragma region ILLMService
@@ -161,27 +264,13 @@ void UGPTHandler::SendMessage(UObject* Caller, FString& Message)
 
 void UGPTHandler::SendStructuredMessage(UObject* const WorldObject, const FString& Message, UScriptStruct* Struct)
 {	
-	FHttpGPTStructuredResponse StructuredResponse;
+	auto StructuredResponse = UStructToStructuredResponse(Struct);
+	auto ResponseSchema = StructuredResponseToJson(StructuredResponse);
 	
-	StructuredResponse.Name = Struct->GetFName();  
-	StructuredResponse.Description = GetDescription(Struct);
-
-	
-	for(TFieldIterator<FProperty> PropIt(Struct); PropIt; ++PropIt)
-	{
-		auto Property = *PropIt;
-		FHttpGPTFunctionProperty HttpProperty = FPropertyToHttpFunctionProperty(*Property, GetDescription(*Property));
-			
-		StructuredResponse.Properties.Add(HttpProperty);
-		StructuredResponse.RequiredProperties.Add(HttpProperty.Name);
-	}
-	/* forcing valid for now */
-	StructuredResponse.bIsValid = true;
-
 	RequestCaller = WorldObject;
 	ProvidedSchemaStruct = Struct;
 	AddMessageToHistory(WorldObject, EHttpGPTChatRole::User, Message);
-	SendMessageStructured(WorldObject, *GetChatHistory(WorldObject), StructuredResponse);
+	SendMessageStructured(WorldObject, *GetChatHistory(WorldObject), ResponseSchema);
 	Functions.Empty();
 }
 
@@ -205,6 +294,16 @@ FFunctionCallDelegate& UGPTHandler::GetFunctionCalledDelegate()
 #pragma endregion ILLMService
 
 
+void UGPTHandler::SendMessageStructured(UObject* const WorldObject, const TArray<FHttpGPTChatMessage>& Messages,
+	TSharedPtr<FJsonObject> ResponseSchema)
+{
+	bStructuredMessageRequested = true;
+	auto Request = UHttpGPTChatRequest::SendMessagesStructured(WorldObject, Messages, GetFunctions(), ResponseSchema);
+	BindCallbacks(Request);
+	Request->Activate(); 	
+}
+
+/* obsolete */
  void UGPTHandler::SendMessageStructured(UObject* const WorldObject, const TArray<FHttpGPTChatMessage>& Messages,
  	const FHttpGPTStructuredResponse& StructuredResponse)
  {

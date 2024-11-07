@@ -75,6 +75,7 @@ TSharedPtr<FJsonValue> FHttpGPTChatMessage::GetMessage() const
 	return MakeShared<FJsonValueObject>(JsonObject);
 }
 
+
 FHttpGPTChatOptions::FHttpGPTChatOptions()
 {
 	SetDefaults();

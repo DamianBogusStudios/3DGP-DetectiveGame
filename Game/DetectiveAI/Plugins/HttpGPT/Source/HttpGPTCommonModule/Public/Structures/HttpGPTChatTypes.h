@@ -33,12 +33,18 @@ struct HTTPGPTCOMMONMODULE_API FHttpGPTFunctionProperty
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "HttpGPT | Chat", Meta = (DisplayName = "Type"))
 	EHttpGPTPropertyType Type = EHttpGPTPropertyType::String;
-
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "HttpGPT | Chat", Meta = (DisplayName = "Description"))
 	FString Description;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "HttpGPT | Chat", Meta = (DisplayName = "Enum"))
 	TArray<FName> Enum;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "HttpGPT | Chat", Meta = (DisplayName = "Inner Type"))
+	EHttpGPTPropertyType InnerType = EHttpGPTPropertyType::String;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "HttpGPT | Chat", Meta = (DisplayName = "Inner Schema"))
+	UScriptStruct* InnerTypeSchema;
 };
 
 USTRUCT(BlueprintType, Category = "HttpGPT | Chat", Meta = (DisplayName = "HttpGPT Function"))
@@ -98,9 +104,9 @@ struct HTTPGPTCOMMONMODULE_API FHttpGPTStructuredResponse
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "HttpGPT | Chat", Meta = (DisplayName = "Required Properties"))
 	TArray<FName> RequiredProperties;
-	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "HttpGPT | Chat", Meta = (DisplayName = "Valid"))
-	bool bIsValid = false;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "HttpGPT | Chat", Meta = (DisplayName = "Check if nested"))
+	bool bNestedSchema = false;
 };
 
 

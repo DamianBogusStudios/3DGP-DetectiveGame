@@ -37,7 +37,13 @@ UHttpGPTChatRequest* UHttpGPTChatRequest::EditorTask(const TArray<FHttpGPTChatMe
 }
 #endif
 
+/* need to handle this on my end and just send through a completed json.*/
 /* refactored this section to include structured responses */
+UHttpGPTChatRequest* UHttpGPTChatRequest::SendMessagesStructured(UObject* const WorldContextObject, const TArray<FHttpGPTChatMessage>& Messages, const TArray<FHttpGPTFunction>& Functions
+																	,TSharedPtr<FJsonObject> ResponseSchema)
+{
+	return SendMessages_CustomOptions(WorldContextObject, Messages, Functions, ResponseSchema, FHttpGPTCommonOptions(), FHttpGPTChatOptions());
+}
 
 UHttpGPTChatRequest* UHttpGPTChatRequest::SendMessagesStructured(UObject* const WorldContextObject, const TArray<FHttpGPTChatMessage>& Messages, const TArray<FHttpGPTFunction>& Functions
 																	,const FHttpGPTStructuredResponse StructuredResponse )
@@ -54,7 +60,7 @@ UHttpGPTChatRequest* UHttpGPTChatRequest::SendMessagesStructured(UObject* const 
 UHttpGPTChatRequest* UHttpGPTChatRequest::SendMessages_DefaultOptions(UObject* const WorldContextObject, const TArray<FHttpGPTChatMessage>& Messages,
                                                                       const TArray<FHttpGPTFunction>& Functions)
 {
-	return SendMessages_CustomOptions(WorldContextObject, Messages, Functions, FHttpGPTStructuredResponse(), FHttpGPTCommonOptions(), FHttpGPTChatOptions());
+	return SendMessages_CustomOptions(WorldContextObject, Messages, Functions, nullptr, FHttpGPTCommonOptions(), FHttpGPTChatOptions());
 }
 
 UHttpGPTChatRequest* UHttpGPTChatRequest::SendMessage_CustomOptions(UObject* const WorldContextObject, const FString& Message,
@@ -97,6 +103,24 @@ UHttpGPTChatRequest* UHttpGPTChatRequest::SendMessages_CustomOptions(UObject* co
 
 	return NewAsyncTask;
 }
+
+
+UHttpGPTChatRequest* UHttpGPTChatRequest::SendMessages_CustomOptions(UObject* const WorldContextObject, const TArray<FHttpGPTChatMessage>& Messages,
+																	 const TArray<FHttpGPTFunction>& Functions, TSharedPtr<FJsonObject> ResponseSchema,
+																	 const FHttpGPTCommonOptions CommonOptions, const FHttpGPTChatOptions ChatOptions)
+{
+	UHttpGPTChatRequest* const NewAsyncTask = NewObject<UHttpGPTChatRequest>();
+	NewAsyncTask->Messages = Messages;
+	NewAsyncTask->CommonOptions = CommonOptions;
+	NewAsyncTask->ChatOptions = ChatOptions;
+	NewAsyncTask->Functions = Functions;
+	NewAsyncTask->ResponseSchema = ResponseSchema;
+
+	NewAsyncTask->RegisterWithGameInstance(WorldContextObject);
+
+	return NewAsyncTask;
+}
+
 
 /***********************************************************/
 
@@ -208,9 +232,9 @@ FString UHttpGPTChatRequest::SetRequestContent()
 			JsonRequest->SetArrayField("functions", FunctionsJson);
 		}
 		
-		if(UHttpGPTHelper::ModelSupportsStructuredResponse(GetChatOptions().Model) && StructuredResponse.bIsValid)
+		if(UHttpGPTHelper::ModelSupportsStructuredResponse(GetChatOptions().Model) && ResponseSchema.IsValid() /* check if response schema is valid by checking if its empty*/)
 		{
-			JsonRequest->SetObjectField("response_format", SerializeStructuredResponse());
+			JsonRequest->SetObjectField("response_format", ResponseSchema);
 		}
 	}
 	else
@@ -234,63 +258,49 @@ FString UHttpGPTChatRequest::SetRequestContent()
 
 TSharedPtr<FJsonObject> UHttpGPTChatRequest::SerializeStructuredResponse() const
 {
-	const TSharedPtr<FJsonObject> JsonSchema = MakeShared<FJsonObject>();
+	return nullptr;
+	//const TSharedPtr<FJsonObject> JsonSchema = MakeShared<FJsonObject>();
 
-	/* json prefix info */
-	//JsonSchema->SetStringField("type", "json_schema");
-	JsonSchema->SetStringField("name", StructuredResponse.Name.ToString());
-	JsonSchema->SetStringField("description", StructuredResponse.Description);
+	// /* json prefix info */
+	// JsonSchema->SetStringField("name", StructuredResponse.Name.ToString());
+	// JsonSchema->SetStringField("description", StructuredResponse.Description);
+	//
+	// /* properties */
+	// const TSharedPtr<FJsonObject> ParametersJson = MakeShared<FJsonObject>();
+	// ParametersJson->SetStringField("type", "object");
+	//
+	// const TSharedPtr<FJsonObject> PropertiesJson = MakeShared<FJsonObject>();
+	//
+	// for (const FHttpGPTFunctionProperty& Property : StructuredResponse.Properties)
+	// {
+	// 	auto PropertyJson = Property.ToJson();
+	// 	PropertiesJson->SetObjectField(Property.Name.ToString(), PropertyJson);
+	// }
+	//
+	// ParametersJson->SetObjectField("properties", PropertiesJson);
+	//
+	//
+	// /* required parameters */
+	//
+	// TArray<TSharedPtr<FJsonValue>> RequiredJsonArray;
+	// for (const FName& RequiredProperty : StructuredResponse.RequiredProperties)
+	// {
+	// 	RequiredJsonArray.Add(MakeShared<FJsonValueString>(RequiredProperty.ToString()));
+	// }
+	// ParametersJson->SetArrayField("required", RequiredJsonArray);
+	//
+	//
+	// /* add parameters to final json schema*/
+	// JsonSchema->SetObjectField("schema", ParametersJson);
+	// ParametersJson->SetBoolField("additionalProperties", false);
+	// ParametersJson->SetBoolField("strict", true);
+	//
+	// const TSharedPtr<FJsonObject> StructuredResponseJson = MakeShared<FJsonObject>();
+	//
+	// StructuredResponseJson->SetStringField("type", "json_schema");
+	// StructuredResponseJson->SetObjectField("json_schema", JsonSchema);
 	
-	/* properties */
-	const TSharedPtr<FJsonObject> ParametersJson = MakeShared<FJsonObject>();
-	ParametersJson->SetStringField("type", "object");
-	
-	const TSharedPtr<FJsonObject> PropertiesJson = MakeShared<FJsonObject>();
-
-	for (const FHttpGPTFunctionProperty& Property : StructuredResponse.Properties)
-	{
-		const TSharedPtr<FJsonObject> PropertyJson = MakeShared<FJsonObject>();
-		
-		PropertyJson->SetStringField("type", UHttpGPTHelper::PropertyTypeToName(Property.Type).ToString());
-		PropertyJson->SetStringField("description", Property.Description);
-
-		if (Property.Enum.Num() > 0)
-		{
-			TArray<TSharedPtr<FJsonValue>> EnumValues;
-			for (const FName& EnumValue : Property.Enum)
-			{
-				EnumValues.Add(MakeShared<FJsonValueString>(EnumValue.ToString()));
-			}
-			PropertyJson->SetArrayField("enum", EnumValues);
-		}
-		
-		PropertiesJson->SetObjectField(Property.Name.ToString(), PropertyJson);
-	}
-	
-	ParametersJson->SetObjectField("properties", PropertiesJson);
-
-
-	/* required parameters */
-
-	TArray<TSharedPtr<FJsonValue>> RequiredJsonArray;
-	for (const FName& RequiredProperty : StructuredResponse.RequiredProperties)
-	{
-		RequiredJsonArray.Add(MakeShared<FJsonValueString>(RequiredProperty.ToString()));
-	}
-	ParametersJson->SetArrayField("required", RequiredJsonArray);
-
-
-	/* add parameters to final json schema*/
-	JsonSchema->SetObjectField("schema", ParametersJson);
-	ParametersJson->SetBoolField("additionalProperties", false);
-	ParametersJson->SetBoolField("strict", true);
-	
-	const TSharedPtr<FJsonObject> StructuredResponseJson = MakeShared<FJsonObject>();
-
-	StructuredResponseJson->SetStringField("type", "json_schema");
-	StructuredResponseJson->SetObjectField("json_schema", JsonSchema);
-	
-	return StructuredResponseJson;
+	//return StructuredResponseJson;
 }
 
 

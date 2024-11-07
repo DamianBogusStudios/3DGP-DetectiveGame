@@ -65,7 +65,7 @@ void UCaseSystem::GenerateActor()
 {
 	if(CaseFile.Actors.Num() >= NumberOfActors)
 	{
-		GenerateConnections();
+		GenerateClues();
 		return;
 	}
 	FString Prompt = "";
@@ -91,6 +91,14 @@ void UCaseSystem::GenerateConnections()
 	//FString Prompt = "";
     
 }
+void UCaseSystem::GenerateClues()
+{
+	int32 NumClues = FMath::RandRange(6, 12);
+
+	FString Prompt = FString::Printf(TEXT("Generate a collection of %d clues related to the case with the provided schema"), NumClues);
+	
+	LLMService->SendStructuredMessage(this, Prompt, FClueCollection::StaticStruct());
+}
 
 void UCaseSystem::RandomiseInitialParams()
 {
@@ -109,7 +117,6 @@ void UCaseSystem::StructuredMessageReceived(UObject* Caller, FString& Message, U
 	if(Caller != this)
 		return;
 	
-	//Actor Created
 	if(Struct == FActorDescription::StaticStruct())
 	{
 		FActorDescription ActorDescription;
@@ -118,6 +125,14 @@ void UCaseSystem::StructuredMessageReceived(UObject* Caller, FString& Message, U
 			CaseFile.Actors.Add(ActorDescription);
 			GeneratedActorSchemas.Add(Message);
 			GenerateActor();
+		}
+	}
+	if(Struct == FClueCollection::StaticStruct())
+	{
+		FClueCollection ClueCollection;
+		if (UGenAIUtilities::JsonToUStruct(Message, Struct, &ClueCollection))
+		{
+			CaseFile.Clues = ClueCollection.Clues;
 		}
 	}
 }

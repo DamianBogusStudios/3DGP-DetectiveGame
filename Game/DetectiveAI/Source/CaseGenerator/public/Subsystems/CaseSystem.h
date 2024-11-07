@@ -35,6 +35,7 @@ private:
 	void BindServiceCallbacks();
 	void GenerateCase();
 	void GenerateActor();
+	void GenerateClues();
 	void GenerateConnections();
 	void RandomiseInitialParams();
 

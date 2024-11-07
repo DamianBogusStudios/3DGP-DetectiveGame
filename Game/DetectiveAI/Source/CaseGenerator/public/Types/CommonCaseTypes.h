@@ -52,6 +52,16 @@ enum class EMurderWeapon : uint8
 };
 
 UENUM(BlueprintType)
+enum class EClueType : uint8
+{
+	WitnessTestimony,
+	Forensic,
+	Item,
+	DigitalRecording,
+	MAX UMETA(Hidden)
+};
+
+UENUM(BlueprintType)
 enum class EGender : uint8
 {
 	Male,
@@ -135,15 +145,33 @@ struct CASEGENERATOR_API FActorDescription
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (LLMDescription = "Roles that the character has in the stories, can have multiple"))
 	TArray<EActorRole> Roles;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EPlayerFamiliarity PlayerFamiliarity;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EVictimFamiliarity VictimFamiliarity;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (LLMDescription = "Description of the current world and knowledge from the perspective of this character. Some characters may know more than others. can be later used in dialogue to acquire information"))
 	FString Context; 
+};
+
+USTRUCT(BlueprintType, meta = (LLMDescription = "A clue as it pertains to the case."))
+struct CASEGENERATOR_API FClue
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Meta = (LLMDescription = "The type of clue that this is"))
+	EClueType ClueType;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Meta = (LLMDescription = "detailed description of the context of this clue in the case"))
+	FString Description;
+};
+
+USTRUCT(BlueprintType, meta = (LLMDescription = "Collection of Known clues in a case"))
+struct CASEGENERATOR_API FClueCollection
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FClue> Clues;
 };
 
 USTRUCT(BlueprintType)
@@ -159,6 +187,9 @@ struct CASEGENERATOR_API FCaseFile
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FActorDescription> Actors;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FClue> Clues;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (LLMDescription = "Description of the current world. In this object the knowledge is absolute and contains all details about the case."))
 	FString Context;

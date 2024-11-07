@@ -212,7 +212,7 @@ const EHttpGPTPropertyType UHttpGPTHelper::CPPToPropertyType(const FString Type)
 		return EHttpGPTPropertyType::String;
 	}
 
-	return EHttpGPTPropertyType::Boolean;
+	return EHttpGPTPropertyType::Object;
 }
 
 const TArray<FName> UHttpGPTHelper::GetAvailableGPTModels()

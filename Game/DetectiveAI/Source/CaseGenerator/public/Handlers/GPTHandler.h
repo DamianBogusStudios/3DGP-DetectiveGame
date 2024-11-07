@@ -64,9 +64,9 @@ private:
 	
 	
 	bool bStructuredMessageRequested = false;
-	
 	void SendMessageDefault(UObject* const WorldObject, const TArray<FHttpGPTChatMessage>& Messages);
 	void SendMessageStructured(UObject* const WorldObject, const TArray<FHttpGPTChatMessage>& Messages, const FHttpGPTStructuredResponse& StructuredResponse);
+	void SendMessageStructured(UObject* const WorldObject, const TArray<FHttpGPTChatMessage>& Messages, TSharedPtr<FJsonObject> StructuredResponseSchema);
 
 	/* chat history functions */
 	void AddMessageToHistory(UObject* const WorldObject, const EHttpGPTChatRole Role, const FString& Message);
@@ -74,8 +74,16 @@ private:
 
 	/* helper functions */
 	TArray<FHttpGPTFunction> GetFunctions();
-	static FHttpGPTFunctionProperty FPropertyToHttpFunctionProperty(const FProperty& InProperty, const FString& InDescription);
-	static FHttpGPTFunctionProperty FunctionParamToHttpFunctionProperty(const FName& InName, const FString& InDescription, const FString& InType, const UEnum* InEnum);
+	
+	FHttpGPTFunctionProperty FPropertyToHttpFunctionProperty(const FProperty& InProperty, const FString& InDescription);
+	FHttpGPTFunctionProperty FunctionParamToHttpFunctionProperty(const FName& InName, const FString& InDescription, const FString& InType, const UEnum* InEnum);
+	FHttpGPTStructuredResponse UStructToStructuredResponse(const UScriptStruct* StructType, bool Nested = false);
+	TSharedPtr<FJsonObject> FunctionPropertyToJson(const FHttpGPTFunctionProperty& Prop);
+	TSharedPtr<FJsonObject> StructuredResponseToJson(const FHttpGPTStructuredResponse& StructuredResponse);
+	
+	
+	
+
 	FString GetDescription(const FProperty& InProperty);
 	FString GetDescription(const UScriptStruct* InStruct);
 	

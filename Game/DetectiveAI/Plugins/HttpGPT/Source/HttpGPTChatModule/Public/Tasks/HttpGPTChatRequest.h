@@ -38,6 +38,10 @@ public:
 	static UHttpGPTChatRequest* EditorTask(const TArray<FHttpGPTChatMessage>& Messages, const FHttpGPTChatOptions& Options);
 #endif
 
+	
+	static UHttpGPTChatRequest* SendMessagesStructured(UObject* const WorldContextObject, const TArray<FHttpGPTChatMessage>& Messages,
+														   const TArray<FHttpGPTFunction>& Functions , TSharedPtr<FJsonObject> ResponseSchema);
+	
 	UFUNCTION(BlueprintCallable, Category = "HttpGPT | Chat | Default",
 			meta = (BlueprintInternalUseOnly = "true", WorldContext = "WorldContextObject", DisplayName = "Send Message with Default Options",
 				AutoCreateRefTerm = "Functions"))
@@ -82,6 +86,13 @@ public:
 														   const FHttpGPTStructuredResponse StructuredResponse,
 														   const FHttpGPTCommonOptions CommonOptions,
 														   const FHttpGPTChatOptions ChatOptions);
+	
+	
+	static UHttpGPTChatRequest* SendMessages_CustomOptions(UObject* const WorldContextObject, const TArray<FHttpGPTChatMessage>& Messages,
+														   const TArray<FHttpGPTFunction>& Functions,
+														   TSharedPtr<FJsonObject> ResponseSchema,
+														   const FHttpGPTCommonOptions CommonOptions,
+														   const FHttpGPTChatOptions ChatOptions);
 
 	UFUNCTION(BlueprintPure, Category = "HttpGPT | Chat")
 	const FHttpGPTChatOptions GetChatOptions() const;
@@ -91,6 +102,7 @@ protected:
 	TArray<FHttpGPTFunction> Functions;
 	FHttpGPTChatOptions ChatOptions;
 	FHttpGPTStructuredResponse StructuredResponse;
+	TSharedPtr<FJsonObject> ResponseSchema;
 
 	virtual bool CanActivateTask() const override;
 	virtual bool CanBindProgress() const override;
