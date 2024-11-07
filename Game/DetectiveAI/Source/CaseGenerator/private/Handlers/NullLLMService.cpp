@@ -3,18 +3,31 @@
 
 #include "Handlers/NullLLMService.h"
 
-void UNullLLMService::SendCustomInstructions(UObject* Caller, FString& Message)
+// void UNullLLMService::SendCustomInstructions(UObject* Caller, FString& Message)
+// {
+// }
+//
+// void UNullLLMService::SendMessage(UObject* Caller, FString& Message)
+// {
+// 	//null
+// }
+//
+// void UNullLLMService::SendStructuredMessage(UObject* const WorldObject, const FString& Message, UScriptStruct* Struct)
+// {
+// 	//null;
+// }
+
+void UNullLLMService::SendCustomInstructions(UObject* const Caller, const FString& Message)
 {
 }
 
-void UNullLLMService::SendMessage(UObject* Caller, FString& Message)
+void UNullLLMService::SendMessage(UObject* const Caller, const FString& Message, FMessageDelegate& Delegate)
 {
-	//null
 }
 
-void UNullLLMService::SendStructuredMessage(UObject* const WorldObject, const FString& Message, UScriptStruct* Struct)
+void UNullLLMService::SendStructuredMessage(UObject* const WorldObject, const FString& Message, UScriptStruct* Struct,
+	FStructuredMessageDelegate& Delegate)
 {
-	//null;
 }
 
 void UNullLLMService::AddFunction(const FName& InName, const FString& InDescription)
@@ -26,17 +39,17 @@ void UNullLLMService::AddFunctionParam(const FName& FuncName, const FName& InNam
 {
 }
 
-FMessageDelegate& UNullLLMService::GetMessageDelegate()
-{
-	return MessageDelegate;
-}
-
-FStructuredMessageDelegate& UNullLLMService::GetStructuredMessageDelegate()
-{
-	return StructuredMessageDelegate;
-}
-
-FFunctionCallDelegate& UNullLLMService::GetFunctionCalledDelegate()
-{
-	return FunctionCalledDelegate;
-}
+// FMessageDelegate& UNullLLMService::GetMessageDelegate()
+// {
+// 	return MessageDelegate;
+// }
+//
+// FStructuredMessageDelegate& UNullLLMService::GetStructuredMessageDelegate()
+// {
+// 	return StructuredMessageDelegate;
+// }
+//
+// FFunctionCallDelegate& UNullLLMService::GetFunctionCalledDelegate()
+// {
+// 	return FunctionCalledDelegate;
+// }

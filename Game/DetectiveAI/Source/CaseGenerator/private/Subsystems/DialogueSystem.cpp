@@ -8,35 +8,13 @@
 #include "Interfaces/LLMService.h"
 
 #pragma region Setup
-void UDialogueSystem::Initialize(FSubsystemCollectionBase& Collection)
+void UDialogueSystem::PostInit()
 {
-    Super::Initialize(Collection);
-
-    LLMService = ULLMServiceLocator::GetService();
-    BindServiceCallbacks();
-    
 #if UE_EDITOR
     FString Message = FString::Printf(TEXT("DialogueSystem Initialised"));
     GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, Message);
 #endif
 }
-
-void UDialogueSystem::Deinitialize()
-{
-    Super::Deinitialize();
-
-    ULLMServiceLocator::Cleanup();
-}
-
-void UDialogueSystem::BindServiceCallbacks()
-{
-    if(LLMService && LLMService.GetObject())
-    {
-        LLMService->GetMessageDelegate().AddDynamic(this, &UDialogueSystem::MessagedReceived);
-        LLMService->GetStructuredMessageDelegate().AddDynamic(this, &UDialogueSystem::StructuredMessageReceived);
-    }
-}
-
 #pragma endregion
 
 #pragma region IDialogueProvider Interface
@@ -55,18 +33,19 @@ void UDialogueSystem::RequestDialogueOptions(UObject* Caller, FActorDescription&
             OnDialogueOptionsReceived = Delegate;
             
             FString Message = "Generate dialogue options for the player to choose when interacting with this NPC using the structured output json format." + OutputString;
-            LLMService->SendStructuredMessage(Caller, Message, FDialogueOptions::StaticStruct());
+            SendStructuredMessage(Message, FDialogueOptions::StaticStruct());
+            //LLMService->SendStructuredMessage(Caller, Message, FDialogueOptions::StaticStruct());
         }
     }
 }
 #pragma endregion
 
 #pragma region Callbacks
-void UDialogueSystem::MessagedReceived(UObject* Caller, FString& Message)
+void UDialogueSystem::MessageReceived(FString& Message)
 {
     
 }
-void UDialogueSystem::StructuredMessageReceived(UObject* Caller, FString& Message, UScriptStruct* Struct)
+void UDialogueSystem::StructuredMessageReceived(FString& Message, UScriptStruct* Struct)
 {
     if (Struct == FDialogueOptions::StaticStruct())
     {

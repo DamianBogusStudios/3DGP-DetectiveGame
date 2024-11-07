@@ -8,7 +8,6 @@
 #include "DialogueProvider.generated.h"
 
 struct FActorDescription;
-class FMessageDelegate;
 class FDialogueOptionsDelegate;
 
 // This class does not need to be modified.

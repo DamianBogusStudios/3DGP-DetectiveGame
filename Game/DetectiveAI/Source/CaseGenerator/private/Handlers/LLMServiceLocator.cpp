@@ -41,7 +41,7 @@ void ULLMServiceLocator::InitializeService()
 	{
 		UObject* Handler;
 		
-		switch (Settings->ActiveLLM)
+		switch (Settings->GetActiveLLM())
 		{
 		case EActiveLLM::ChatGPT:
 			Handler = NewObject<UGPTHandler>();

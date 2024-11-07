@@ -19,5 +19,7 @@ public:
 	static bool JsonToUStruct(const FString& Content, const UScriptStruct* Schema, void* OutStruct);
 
 	static bool UStructToJsonObjectString(const UScriptStruct* InStructType, const void* InStruct, FString& OutJsonString);
+
+	
 	
 };

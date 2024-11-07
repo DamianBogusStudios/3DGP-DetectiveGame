@@ -3,12 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Types/CommonCaseTypes.h"
 #include "UObject/Interface.h"
 #include "LLMService.generated.h"
-
-class FFunctionCallDelegate;
-class FStructuredMessageDelegate;
-class FMessageDelegate;
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
@@ -28,17 +25,26 @@ class CASEGENERATOR_API ILLMService
 public:
 
 	/* requests */
-	virtual void SendCustomInstructions(UObject* Caller, FString& Message) = 0;
+	virtual void SendCustomInstructions(UObject* const Caller,const FString& Message) = 0;
 
-	virtual void SendMessage(UObject* Caller, FString& Message) = 0;
-	virtual void SendStructuredMessage(UObject* const WorldObject, const FString& Message,  UScriptStruct* Struct) = 0;
+	virtual void SendMessage( UObject* const Caller, const FString& Message,
+				FMessageDelegate& Delegate) = 0;
+
+	virtual void SendStructuredMessage(UObject* const Caller, const FString& Message, UScriptStruct* StructSchema,
+				 FStructuredMessageDelegate& Delegate) = 0;
+
+
+	
+	// virtual void SendStructuredMessage(UObject* const WorldObject, const FString& Message,  UScriptStruct* Struct) = 0;
 
 	virtual void AddFunction(const FName& InName, const FString& InDescription) = 0;
 	virtual void AddFunctionParam(const FName& FuncName, const FName& InName, const FString& InDescription, const FString& InType, const UEnum* InEnum) = 0;
 	
+	
 
+	
 	/* delegates */
-	virtual FMessageDelegate& GetMessageDelegate() = 0;
-	virtual FStructuredMessageDelegate& GetStructuredMessageDelegate() = 0;
-	virtual FFunctionCallDelegate& GetFunctionCalledDelegate() = 0;
+	// virtual FMessageDelegate& GetMessageDelegate() = 0;
+	// virtual FStructuredMessageDelegate& GetStructuredMessageDelegate() = 0;
+	// virtual FFunctionCallDelegate& GetFunctionCalledDelegate() = 0;
 };

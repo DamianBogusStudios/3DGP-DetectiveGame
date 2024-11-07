@@ -3,8 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Data/PromptConfigData.h"
 #include "Engine/DeveloperSettings.h"
 #include "LLMSettings.generated.h"
+
+class UPromptConfigData;
 
 UENUM(BlueprintType)
 enum EActiveLLM
@@ -21,13 +24,30 @@ class CASEGENERATOR_API ULLMSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 	
-	
+private:
+
+	UPROPERTY(Config, EditDefaultsOnly, Category = "LLM")
+	TEnumAsByte<EActiveLLM> ActiveLLM;
+
+	UPROPERTY(Config, EditDefaultsOnly, Category = "LLM")
+	TSoftObjectPtr<UPromptConfigData> PromptConfigData;
+
 public:
 
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "LLM")
-	TEnumAsByte<EActiveLLM> ActiveLLM;
+	TEnumAsByte<EActiveLLM> GetActiveLLM() const
+	{
+		return ActiveLLM;
+	}
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "LLM", meta = (MultiLine="true"))
-	FString CustomInstructions;
+	UPromptConfigData* GetPromptConfigData() const
+	{
+		if (!PromptConfigData.IsValid())
+		{
+			return PromptConfigData.LoadSynchronous();
+		}
+		return PromptConfigData.Get();
+	}
+	// UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "LLM", meta = (MultiLine="true"))
+	// FString CustomInstructions;
 	
 };

@@ -163,7 +163,7 @@ TSharedPtr<FJsonObject> UGPTHandler::FunctionPropertyToJson(const FHttpGPTFuncti
 		FHttpGPTStructuredResponse InnerSchema = UStructToStructuredResponse(Prop.InnerTypeSchema, true);
 		PropertyJson->SetObjectField("items", StructuredResponseToJson(InnerSchema));
 	}
-	if (Prop.Enum.Num() > 0)
+	else if (Prop.Enum.Num() > 0)
 	{
 		TArray<TSharedPtr<FJsonValue>> EnumValues;
 		for (const FName& EnumValue : Prop.Enum)
@@ -172,6 +172,7 @@ TSharedPtr<FJsonObject> UGPTHandler::FunctionPropertyToJson(const FHttpGPTFuncti
 		}
 		PropertyJson->SetArrayField("enum", EnumValues);
 	}
+	
 	return PropertyJson;
 	
 }
@@ -249,49 +250,85 @@ void UGPTHandler::AddFunctionParam(const FName& FuncName, const FName& InName, c
 }
 
 
-void UGPTHandler::SendCustomInstructions(UObject* Caller, FString& Message)
+void UGPTHandler::SendCustomInstructions(UObject* const Caller, const FString& Message)
 {
 	AddMessageToHistory(Caller, EHttpGPTChatRole::System, Message);
 }
 
-void UGPTHandler::SendMessage(UObject* Caller, FString& Message)
+void UGPTHandler::SendMessage(UObject* const Caller, const FString& Message, FMessageDelegate& Delegate)
 {
-	RequestCaller = Caller;
+	FMessageRequest Request = FMessageRequest(Caller, Message, nullptr);
+	Request.OnMessageReceived = Delegate;
 	AddMessageToHistory(Caller, EHttpGPTChatRole::User, Message);
-	SendMessageDefault(Caller, *GetChatHistory(Caller));
-	Functions.Empty();
+	AddNewRequest(Request);
 }
 
-void UGPTHandler::SendStructuredMessage(UObject* const WorldObject, const FString& Message, UScriptStruct* Struct)
-{	
-	auto StructuredResponse = UStructToStructuredResponse(Struct);
-	auto ResponseSchema = StructuredResponseToJson(StructuredResponse);
+void UGPTHandler::SendStructuredMessage(UObject* const WorldObject, const FString& Message, UScriptStruct* Struct,
+	 FStructuredMessageDelegate& Delegate)
+{
+	FMessageRequest Request = FMessageRequest(WorldObject, Message, Struct);
+	Request.OnStructuredMessageReceived = Delegate;
 	
-	RequestCaller = WorldObject;
-	ProvidedSchemaStruct = Struct;
 	AddMessageToHistory(WorldObject, EHttpGPTChatRole::User, Message);
-	SendMessageStructured(WorldObject, *GetChatHistory(WorldObject), ResponseSchema);
-	Functions.Empty();
+	AddNewRequest(Request);
 }
 
-
-
-FMessageDelegate& UGPTHandler::GetMessageDelegate()
-{
-	return OnMessageReceived;
-}
-
-FStructuredMessageDelegate& UGPTHandler::GetStructuredMessageDelegate()
-{
-	return OnStructuredMessageReceived;
-}
-
-FFunctionCallDelegate& UGPTHandler::GetFunctionCalledDelegate()
-{
-	return OnFunctionCalled;
-}
+// FMessageDelegate& UGPTHandler::GetMessageDelegate()
+// {
+// 	return OnMessageReceived;
+// }
+//
+// FStructuredMessageDelegate& UGPTHandler::GetStructuredMessageDelegate()
+// {
+// 	return OnStructuredMessageReceived;
+// }
+//
+// FFunctionCallDelegate& UGPTHandler::GetFunctionCalledDelegate()
+// {
+// 	return OnFunctionCalled;
+// }
 
 #pragma endregion ILLMService
+
+#pragma region Request Queue Management
+
+void UGPTHandler::AddNewRequest(FMessageRequest& Request)
+{
+	RequestQueue.Add(Request);
+	if(RequestQueue.Num() == 1)
+	{
+		ProcessNextRequest();
+	}
+}
+
+
+void UGPTHandler::ProcessNextRequest()
+{
+	const auto& Request = RequestQueue.Top();
+
+	UObject* Caller = Request.Caller.Get();
+
+	if(Caller == nullptr) //calling object is no longer valid.
+	{
+		RequestQueue.Pop();
+		return;
+	}
+	
+	if(Request.StructSchema == nullptr)
+	{
+		SendMessageDefault(Caller, *GetChatHistory(Caller));
+	}
+	else
+	{
+		auto StructuredResponse = UStructToStructuredResponse(Request.StructSchema);
+		auto ResponseSchema = StructuredResponseToJson(StructuredResponse);
+			
+		SendMessageStructured(Caller, *GetChatHistory(Caller), ResponseSchema);
+	}
+
+}
+
+#pragma endregion
 
 
 void UGPTHandler::SendMessageStructured(UObject* const WorldObject, const TArray<FHttpGPTChatMessage>& Messages,
@@ -304,14 +341,14 @@ void UGPTHandler::SendMessageStructured(UObject* const WorldObject, const TArray
 }
 
 /* obsolete */
- void UGPTHandler::SendMessageStructured(UObject* const WorldObject, const TArray<FHttpGPTChatMessage>& Messages,
- 	const FHttpGPTStructuredResponse& StructuredResponse)
- {
-	bStructuredMessageRequested = true;
- 	auto Request = UHttpGPTChatRequest::SendMessagesStructured(WorldObject, Messages, GetFunctions(), StructuredResponse);
- 	BindCallbacks(Request);
- 	Request->Activate(); 	
- }
+ // void UGPTHandler::SendMessageStructured(UObject* const WorldObject, const TArray<FHttpGPTChatMessage>& Messages,
+ // 	const FHttpGPTStructuredResponse& StructuredResponse)
+ // {
+	// bStructuredMessageRequested = true;
+ // 	auto Request = UHttpGPTChatRequest::SendMessagesStructured(WorldObject, Messages, GetFunctions(), StructuredResponse);
+ // 	BindCallbacks(Request);
+ // 	Request->Activate(); 	
+ // }
 
 void UGPTHandler::SendMessageDefault(UObject* const WorldObject, const TArray<FHttpGPTChatMessage>& Messages)
  {
@@ -338,7 +375,7 @@ TArray<FHttpGPTFunction> UGPTHandler::GetFunctions()
 
 #pragma region Chat History
 
-void UGPTHandler::AddMessageToHistory(UObject* const WorldObject, const EHttpGPTChatRole Role, const FString& Message)
+void UGPTHandler::AddMessageToHistory(TWeakObjectPtr<UObject> WorldObject, const EHttpGPTChatRole Role, const FString& Message)
 {
 	if(ChatMessages.Contains(WorldObject))
 	{
@@ -352,7 +389,7 @@ void UGPTHandler::AddMessageToHistory(UObject* const WorldObject, const EHttpGPT
 	}
 }
 
-TArray<FHttpGPTChatMessage>* UGPTHandler::GetChatHistory(UObject* const WorldObject)
+TArray<FHttpGPTChatMessage>* UGPTHandler::GetChatHistory(TWeakObjectPtr<UObject> WorldObject)
 {
 	if (!ChatMessages.Contains(WorldObject))
 	{
@@ -372,43 +409,37 @@ TArray<FHttpGPTChatMessage>* UGPTHandler::GetChatHistory(UObject* const WorldObj
 	{		
 		if(Choice.FinishReason.IsEqual("stop", ENameCase::IgnoreCase))
 		{
-			FString Message = Choice.Message.Content;
-			AddMessageToHistory(RequestCaller, EHttpGPTChatRole::Assistant, Message);
+			const auto& Request = RequestQueue.Pop();
 			
-			if(bStructuredMessageRequested && ProvidedSchemaStruct)
-			{
-				OnStructuredMessageReceived.Broadcast(RequestCaller, Message, ProvidedSchemaStruct);
-			}
-			else
-			{
-				OnMessageReceived.Broadcast(RequestCaller, Message);
-			}
+			FString Message = Choice.Message.Content;
+			AddMessageToHistory(Request.Caller, EHttpGPTChatRole::Assistant, Message);
 
+			Request.ExecuteCallbacks(Message);
 		}
 
-		if(Choice.FinishReason.IsEqual("function_call", ENameCase::IgnoreCase))
-		{
-			FString Message = Choice.Message.Content;
-			AddMessageToHistory(RequestCaller, EHttpGPTChatRole::Function, Message);
-			
-			FHttpGPTFunctionCall FuncCall = Choice.Message.FunctionCall;
-			TArray<FString> ArgNames;
-			TArray<FString> ArgValues;
-
-			TSharedPtr<FJsonObject> JsonObject;
-			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(FuncCall.Arguments);
-
-			if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
-			{
-				for (auto& Element : JsonObject->Values)
-				{
-					ArgNames.Add(Element.Key);
-					ArgValues.Add(Element.Value->AsString());
-				}
-			}
-
-			OnFunctionCalled.Broadcast(RequestCaller, Message, FuncCall.Name,ArgNames, ArgValues);
-		}
+		// if(Choice.FinishReason.IsEqual("function_call", ENameCase::IgnoreCase))
+		// {
+		// 	FString Message = Choice.Message.Content;
+		// 	AddMessageToHistory(RequestCaller, EHttpGPTChatRole::Function, Message);
+		// 	
+		// 	FHttpGPTFunctionCall FuncCall = Choice.Message.FunctionCall;
+		// 	TArray<FString> ArgNames;
+		// 	TArray<FString> ArgValues;
+		//
+		// 	TSharedPtr<FJsonObject> JsonObject;
+		// 	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(FuncCall.Arguments);
+		//
+		// 	if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+		// 	{
+		// 		for (auto& Element : JsonObject->Values)
+		// 		{
+		// 			ArgNames.Add(Element.Key);
+		// 			ArgValues.Add(Element.Value->AsString());
+		// 		}
+		// 	}
+		//
+		// 	OnFunctionCalled.Broadcast(RequestCaller, Message, FuncCall.Name,ArgNames, ArgValues);
+		// }
 	}
 }
 

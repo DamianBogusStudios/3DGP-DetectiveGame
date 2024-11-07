@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "CommonCaseTypes.generated.h"
 
+
+
 /* used for runtime lookup */
 
 USTRUCT(BlueprintType)
@@ -111,7 +113,7 @@ enum class EVictimFamiliarity : uint8
 	Victim
 };
 
-USTRUCT(BlueprintType, meta = (LLMDescription = "dialogue options for player to pick when interacting with this NPC"))
+USTRUCT(BlueprintType)
 struct CASEGENERATOR_API  FDialogueOptions
 {
 	GENERATED_BODY()
@@ -126,7 +128,7 @@ struct CASEGENERATOR_API  FDialogueOptions
 	FString OptionThree;
 };
 
-USTRUCT(BlueprintType, meta = (LLMDescription = "Description of a character in the case."))
+USTRUCT(BlueprintType)
 struct CASEGENERATOR_API FActorDescription
 {
 	GENERATED_BODY()
@@ -153,7 +155,7 @@ struct CASEGENERATOR_API FActorDescription
 	FString Context; 
 };
 
-USTRUCT(BlueprintType, meta = (LLMDescription = "A clue as it pertains to the case."))
+USTRUCT(BlueprintType)
 struct CASEGENERATOR_API FClue
 {
 	GENERATED_BODY()
@@ -165,7 +167,7 @@ struct CASEGENERATOR_API FClue
 	FString Description;
 };
 
-USTRUCT(BlueprintType, meta = (LLMDescription = "Collection of Known clues in a case"))
+USTRUCT(BlueprintType)
 struct CASEGENERATOR_API FClueCollection
 {
 	GENERATED_BODY()
@@ -173,6 +175,25 @@ struct CASEGENERATOR_API FClueCollection
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FClue> Clues;
 };
+
+USTRUCT(BlueprintType)
+struct CASEGENERATOR_API FActorContext
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString KnowledgeBase;
+};
+	
+USTRUCT(BlueprintType, meta = (LLMDescription = "A collection for each actors knowledge base. it includes details about clues and other actors in a narratively cohesive manner"))
+struct CASEGENERATOR_API FContextCollection
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Meta = (LLMDescription = "Same order as generated actors, index[0] == victim, etc."))
+	TArray<FActorContext> KnowledgeBases;
+};
+	
 
 USTRUCT(BlueprintType)
 struct CASEGENERATOR_API FCaseFile
@@ -197,16 +218,14 @@ struct CASEGENERATOR_API FCaseFile
 
 #pragma region DELEGATES
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMessageDelegate,
-	UObject*, Caller,
-	FString&, Message);
+DECLARE_DELEGATE_OneParam(FMessageDelegate,
+	FString& /* Message */ );
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FStructuredMessageDelegate,
-	UObject*, Caller,
-	FString&, Message,
-	UScriptStruct*, StructSchema);
+DECLARE_DELEGATE_TwoParams(FStructuredMessageDelegate,
+	FString& /*Message*/,
+	UScriptStruct* /* StructSchema*/);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FFunctionCallDelegate,
+DECLARE_DYNAMIC_DELEGATE_FiveParams(FFunctionCallDelegate,
 	UObject*, Caller,
 	FString&, Message,
 	FName&, FunctionName,

@@ -21,7 +21,17 @@ void UMetaDataGenerator::SetTableData()
 	{
 		UScriptStruct* Struct = *It;
 		UE_LOG(LogTemp, Log, TEXT("Inspecting Struct: %s"), *Struct->GetName());
-				
+
+		if(Struct->HasMetaData(TEXT("LLMDescription")))
+		{
+			FString Description = Struct->GetMetaData(TEXT("LLMDescription"));
+
+			FDescriptionTableRow RowEntry;
+			RowEntry.Description = *Description;
+			
+			DataTable->AddRow(FName(Struct->GetName()), RowEntry);
+		}
+		
 		for (TFieldIterator<FProperty> PropIt(Struct); PropIt; ++PropIt)
 		{
 			FProperty* Property = *PropIt;
