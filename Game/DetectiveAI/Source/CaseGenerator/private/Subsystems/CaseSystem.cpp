@@ -12,58 +12,43 @@
 #pragma region Initalisation
 void UCaseSystem::PostInit()
 {
-	// Super::Initialize(Collection);
-
-	// LLMService = ULLMServiceLocator::GetService();
-
-	// GetConfigFiles();
-	// BindCallbacks();
-	GenerateCase();
-	
 #if UE_EDITOR
-	FString Message = FString::Printf(TEXT("CaseSystem Initialised"));
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, Message);
 	UE_LOG(LogTemp, Display, TEXT("CaseSystem Initialised"));
 #endif
+	
+	GenerateCase();
 }
-
-// void UCaseSystem::Deinitialize()
-// {
-// 	Super::Deinitialize();
-//
-// 	ULLMServiceLocator::Cleanup();
-// }
-//
-// void UCaseSystem::GetConfigFiles()
-// {
-// 	if(const ULLMSettings* Settings = GetDefault<ULLMSettings>())
-// 	{
-// 		PromptConfig = Settings->GetPromptConfigData();
-// 	}
-// }
-
-// void UCaseSystem::BindCallbacks()
-// {
-// 	MessageDelegate.BindUObject(this, &UCaseSystem::MessagedReceived);
-// 	StructuredMessageDelegate.BindUObject(this, &UCaseSystem::StructuredMessageReceived);
-// }
 #pragma endregion
 
 #pragma region Generation
 void UCaseSystem::GenerateCase()
 {
-	if(LLMService && LLMService.GetObject())
-	{ 
-		RandomiseInitialParams();
+	GenStartTime = FPlatformTime::Seconds();	
+	RandomiseInitialParams();
 			
-		FString CustomInstructions = PromptConfig->CustomInstructions;
-		CustomInstructions.ReplaceInline(TEXT("{Motive}"), *UEnum::GetValueAsString(CaseFile.Motive));
-		CustomInstructions.ReplaceInline(TEXT("{MurderWeapon}"), *UEnum::GetValueAsString(CaseFile.MurderWeapon));
+	FString CustomInstructions = PromptConfig->CustomInstructions;
+	CustomInstructions.ReplaceInline(TEXT("{Motive}"), *UEnum::GetValueAsString(CaseFile.Motive));
+	CustomInstructions.ReplaceInline(TEXT("{MurderWeapon}"), *UEnum::GetValueAsString(CaseFile.MurderWeapon));
 			
-		SendCustomInstructions( CustomInstructions);
-		GenerateActor();
-	}
+	SendCustomInstructions( CustomInstructions);
+	GenerateActor();
 }
+
+void UCaseSystem::FinishGeneration()
+{
+	//TODO add some checks for the casefile to see if its valid.
+
+	OnCaseGenerationFinished.Broadcast(FPlatformTime::Seconds() - GenStartTime);
+
+#if UE_EDITOR
+	UE_LOG(LogTemp, Display, TEXT("Case Generation Finished In: %f"), (FPlatformTime::Seconds() - GenStartTime));
+#endif
+	
+	OnActorsGenerated.Broadcast(CaseFile.Actors);
+	OnCluesGenerated.Broadcast(CaseFile.Clues);
+	OnCaseDetailsGenerated.Broadcast(CaseFile.Motive, CaseFile.MurderWeapon, CaseFile.Context);
+}
+
 
 void UCaseSystem::RandomiseInitialParams()
 {
@@ -111,33 +96,6 @@ void UCaseSystem::GenerateConnections()
 }
 #pragma endregion 
 
-#pragma region Requests
-
-// void UCaseSystem::SendCustomInstructions(const FString& Prompt)
-// {
-// 	if(LLMService)
-// 	{
-// 		LLMService->SendCustomInstructions(this, Prompt);
-// 	}
-// }
-//
-// void UCaseSystem::SendMessage(const FString& Prompt)
-// {
-// 	if(LLMService)
-// 	{
-// 		LLMService->SendMessage(this, Prompt, MessageDelegate);
-// 	}
-// }
-//
-// void UCaseSystem::SendStructuredMessage(const FString& Prompt, UScriptStruct* Schema)
-// {
-// 	if(LLMService)
-// 	{
-// 		LLMService->SendStructuredMessage(this, Prompt, Schema, StructuredMessageDelegate);
-// 	}
-// }
-//
-// #pragma endregion 
 
 #pragma region Callbacks
 void UCaseSystem::MessageReceived(FString& Message)
@@ -175,10 +133,12 @@ void UCaseSystem::StructuredMessageReceived(FString& Message, UScriptStruct* Str
 			{
 				if(i < CaseFile.Actors.Num())
 				{
-					CaseFile.Actors[i].Context = ContextCollection.KnowledgeBases[i].KnowledgeBase;
+					CaseFile.Actors[i].Context += "\n[UPDATED]\n" + ContextCollection.KnowledgeBases[i].KnowledgeBase;
 				}	
 			}
 		}
+
+		FinishGeneration();
 	}
 	else
 	{

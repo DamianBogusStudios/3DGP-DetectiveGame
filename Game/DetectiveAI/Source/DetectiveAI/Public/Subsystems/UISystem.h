@@ -8,7 +8,30 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FUIActionDelegate, AActor*, Caller, UUserWidget*, Widget);
 
+
 class UInteractionSettings;
+
+UENUM(BlueprintType)
+enum class EUIElementType : uint8
+{
+	NPCDialogue,
+	LockpickMiniGame,
+	PauseMenu,
+	HUD,
+	Loading
+};
+
+USTRUCT(BlueprintType)
+struct FWidgetInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> WidgetClass;
+
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<UUserWidget> WidgetInstance;
+};
 
 /**
  * 
@@ -30,12 +53,14 @@ public:
 
 	
 	UFUNCTION(BlueprintCallable, meta = (Tooltip = "returns whether widget was successfully added"))
-	bool RequestStartWidget(AActor* InCaller, EWidgetType WidgetType);
+	bool RequestStartWidget(AActor* InCaller, EUIElementType WidgetType);
 
 	UFUNCTION(BlueprintCallable, meta = (Tooltip = "returns whether widget was successfully removed"))
-	bool RequestFinishWidget(AActor* InCaller, EWidgetType WidgetType);
-
-
+	bool RequestFinishWidget(AActor* InCaller, EUIElementType WidgetType);
+	
+	UFUNCTION()
+	void OnFinishedLoading();
+	
 protected:
 	
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
@@ -44,10 +69,18 @@ protected:
 	
 private:
 
-	UUserWidget* GetWidget(EWidgetType WidgetType);
-	
+	UPROPERTY()
 	TObjectPtr<AActor> ActiveActor;
-	TMap<EWidgetType, TObjectPtr<UUserWidget>> WidgetMap;
+
+	UPROPERTY()
+	TMap<EUIElementType, FWidgetInfo> WidgetMap;
+
+
+	UFUNCTION()
+	void LoadWidgetClasses();
+	
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	UUserWidget* GetWidget(EUIElementType WidgetType);
 	
 	
 	

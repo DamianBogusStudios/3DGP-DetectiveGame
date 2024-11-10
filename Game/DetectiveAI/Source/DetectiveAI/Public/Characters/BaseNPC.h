@@ -7,6 +7,7 @@
 #include "Interfaces/InteractInterface.h"
 #include "BaseNPC.generated.h"
 
+struct FActorDescription;
 class UDialogueComponent;
 
 UCLASS()
@@ -34,7 +35,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 
-
+	UFUNCTION()
+	void InitialiseActor(const FActorDescription& ActorDescription, USkeletalMesh* SkeletalMesh);
 
 	void Interact_Implementation(AActor* Caller) override;
 	void OnFocus_Implementation() override;

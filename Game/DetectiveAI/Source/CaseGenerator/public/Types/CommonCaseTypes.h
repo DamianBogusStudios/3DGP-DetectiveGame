@@ -64,11 +64,30 @@ enum class EClueType : uint8
 };
 
 UENUM(BlueprintType)
-enum class EGender : uint8
+enum class EActorGender : uint8
 {
 	Male,
 	Female,
 	Unknown
+};
+
+UENUM(BlueprintType)
+enum class EEyeColour : uint8
+{
+	Brown,
+	Blue,
+	Green,
+	Grey
+};
+
+UENUM(BlueprintType)
+enum class EHairColour : uint8
+{
+	Black,
+	Brown,
+	Blonde,
+	Red,
+	Grey
 };
 
 UENUM(BlueprintType)
@@ -137,7 +156,13 @@ struct CASEGENERATOR_API FActorDescription
 	FString Name;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EGender Gender;
+	EActorGender Gender;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EEyeColour EyeColour;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EHairColour HairColour;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 Age;

@@ -6,6 +6,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "GameClasses/MGameInstance.h"
 #include "UI/DialogueWidget.h"
 #include "Interfaces/DialogueProvider.h"
 #include "Settings/InteractionSettings.h"
@@ -68,7 +69,7 @@ void UDialogueComponent::StartDialogue() const
 {
     if (auto UI = GetWorld()->GetGameInstance()->GetSubsystem<UUISystem>())
     {
-        UI->RequestStartWidget(GetOwner(), EWidgetType::NPCDialogue);
+        UI->RequestStartWidget(GetOwner(), EUIElementType::NPCDialogue);
         // InteractionSubsystem->RequestDialogueAction(GetOwner());
     }
 	else
@@ -87,7 +88,7 @@ void UDialogueComponent::FinishDialogue() const
     {
         if (auto UI = GetWorld()->GetGameInstance()->GetSubsystem<UUISystem>())
         {
-            UI->RequestFinishWidget(GetOwner(), EWidgetType::NPCDialogue);
+            UI->RequestFinishWidget(GetOwner(), EUIElementType::NPCDialogue);
         }
     }
 }

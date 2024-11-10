@@ -35,6 +35,14 @@ void ABaseNPC::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
+void ABaseNPC::InitialiseActor(const FActorDescription& ActorDescription, USkeletalMesh* SkeletalMesh)
+{
+	if(GetMesh())
+	{
+		GetMesh()->SetSkeletalMesh(SkeletalMesh);
+	}
+}
+
 void ABaseNPC::Interact_Implementation(AActor* Caller)
 {
 	if(DialogueComponent)

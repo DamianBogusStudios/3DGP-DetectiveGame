@@ -14,12 +14,15 @@ bool UUISystem::ShouldCreateSubsystem(UObject* Outer) const
 void UUISystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+
+	LoadWidgetClasses();
+	
+	RequestStartWidget(GetWorld()->GetFirstPlayerController(), EUIElementType::Loading);
 	
 #if WITH_EDITOR
 	FString Message = FString::Printf(TEXT("UI Sysytem Initialised"));
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, Message);
 #endif
-
 }
 
 void UUISystem::Deinitialize()
@@ -28,7 +31,7 @@ void UUISystem::Deinitialize()
 }
 #pragma endregion
 
-bool UUISystem::RequestStartWidget(AActor* InCaller, EWidgetType WidgetType)
+bool UUISystem::RequestStartWidget(AActor* InCaller, EUIElementType WidgetType)
 {
 	if (UUserWidget* Widget = GetWidget(WidgetType))
 	{
@@ -43,11 +46,11 @@ bool UUISystem::RequestStartWidget(AActor* InCaller, EWidgetType WidgetType)
 	return false;
 }
 
-bool UUISystem::RequestFinishWidget(AActor* InCaller, EWidgetType WidgetType)
+bool UUISystem::RequestFinishWidget(AActor* InCaller, EUIElementType WidgetType)
 {
-	if(InCaller == ActiveActor && WidgetMap.Contains(WidgetType))
+	if(/*InCaller == ActiveActor &&*/WidgetMap.Contains(WidgetType))
 	{
-		UUserWidget* Widget = WidgetMap[WidgetType];
+		UUserWidget* Widget = WidgetMap[WidgetType].WidgetInstance;
 
 		if (Widget && Widget->IsInViewport())
 		{
@@ -65,17 +68,24 @@ bool UUISystem::RequestFinishWidget(AActor* InCaller, EWidgetType WidgetType)
 	return false;
 }
 
-UUserWidget* UUISystem::GetWidget(EWidgetType WidgetType)
+void UUISystem::OnFinishedLoading()
+{
+	RequestFinishWidget(GetWorld()->GetFirstPlayerController(), EUIElementType::Loading);
+}
+
+UUserWidget* UUISystem::GetWidget(EUIElementType WidgetType)
 {
 	if(WidgetMap.Contains(WidgetType))
 	{
-		return WidgetMap[WidgetType];
-	}
-	else if (auto WidgetClass = GetDefault<UInteractionSettings>()->GetWidgetClass(WidgetType))
-	{
-		auto WidgetInstance = CreateWidget(GetWorld()->GetFirstPlayerController(), WidgetClass);
-		WidgetMap.Add(WidgetType, WidgetInstance);
-		return WidgetInstance;
+		if(WidgetMap[WidgetType].WidgetInstance)
+		{
+			return WidgetMap[WidgetType].WidgetInstance;
+		}
+		else
+		{
+			WidgetMap[WidgetType].WidgetInstance 
+						= CreateWidget(GetWorld()->GetFirstPlayerController(), WidgetMap[WidgetType].WidgetClass);
+		}
 	}
 	else
 	{
@@ -87,5 +97,16 @@ UUserWidget* UUISystem::GetWidget(EWidgetType WidgetType)
 
 	return nullptr;
 }
+
+void UUISystem::LoadWidgetClasses()
+{
+	if (auto Settings = GetDefault<UInteractionSettings>())
+	{
+		WidgetMap.Add(EUIElementType::NPCDialogue, {Settings->DialogueWidgetClass});
+		WidgetMap.Add(EUIElementType::LockpickMiniGame, {Settings->LockpickMiniGameClass});
+		WidgetMap.Add(EUIElementType::Loading, {Settings->LoadingWidgetClass});
+	}
+}
+	
 
 

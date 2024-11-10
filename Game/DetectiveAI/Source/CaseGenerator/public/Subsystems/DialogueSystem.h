@@ -35,4 +35,6 @@ protected:
 private:
 	
 	FDialogueOptionsDelegate OnDialogueOptionsReceived;
+
+	
 };

@@ -7,15 +7,6 @@
 #include "Engine/DeveloperSettings.h"
 #include "InteractionSettings.generated.h"
 
-UENUM(BlueprintType)
-enum class EWidgetType : uint8
-{
-	NPCDialogue,
-	LockpickMiniGame,
-	PauseMenu,
-	HUD
-};
-
 /**
  * 
  */
@@ -24,31 +15,22 @@ class DETECTIVEAI_API UInteractionSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
-protected:
+public:
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "UI",
+	UPROPERTY(Config, EditDefaultsOnly, BlueprintReadOnly, Category = "UI",
 		AdvancedDisplay, meta = (AllowedClasses = "DialogueWidget"))
 	TSubclassOf<UUserWidget> DialogueWidgetClass;
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "UI", 
+	UPROPERTY(Config, EditDefaultsOnly, BlueprintReadOnly, Category = "UI", 
 		AdvancedDisplay)
 	TSubclassOf<UUserWidget> LockpickMiniGameClass;
+
+	UPROPERTY(Config, EditDefaultsOnly, BlueprintReadOnly, Category = "UI", 
+		AdvancedDisplay)
+	TSubclassOf<UUserWidget> LoadingWidgetClass;
 	
 public:
 
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	TSubclassOf<UUserWidget> GetWidgetClass(EWidgetType WidgetType) const
-	{
-		switch (WidgetType)
-		{
-		case EWidgetType::NPCDialogue:
-			return DialogueWidgetClass;
-		case EWidgetType::LockpickMiniGame:
-			return LockpickMiniGameClass;
-		default:
-			return nullptr;
-		}		
-	}
 	
 	// /*obselete*/
 	// UFUNCTION(BlueprintCallable, Category = "UI")

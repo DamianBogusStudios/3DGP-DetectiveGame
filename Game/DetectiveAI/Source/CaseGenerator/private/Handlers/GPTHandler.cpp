@@ -304,7 +304,7 @@ void UGPTHandler::AddNewRequest(FMessageRequest& Request)
 
 void UGPTHandler::ProcessNextRequest()
 {
-	const auto& Request = RequestQueue.Top();
+	auto& Request = RequestQueue.Top();
 
 	UObject* Caller = Request.Caller.Get();
 
@@ -322,10 +322,10 @@ void UGPTHandler::ProcessNextRequest()
 	{
 		auto StructuredResponse = UStructToStructuredResponse(Request.StructSchema);
 		auto ResponseSchema = StructuredResponseToJson(StructuredResponse);
-			
 		SendMessageStructured(Caller, *GetChatHistory(Caller), ResponseSchema);
 	}
-
+	
+	Request.StartTime = FPlatformTime::Seconds();
 }
 
 #pragma endregion
@@ -334,6 +334,7 @@ void UGPTHandler::ProcessNextRequest()
 void UGPTHandler::SendMessageStructured(UObject* const WorldObject, const TArray<FHttpGPTChatMessage>& Messages,
 	TSharedPtr<FJsonObject> ResponseSchema)
 {
+	
 	bStructuredMessageRequested = true;
 	auto Request = UHttpGPTChatRequest::SendMessagesStructured(WorldObject, Messages, GetFunctions(), ResponseSchema);
 	BindCallbacks(Request);
@@ -409,7 +410,7 @@ TArray<FHttpGPTChatMessage>* UGPTHandler::GetChatHistory(TWeakObjectPtr<UObject>
 	{		
 		if(Choice.FinishReason.IsEqual("stop", ENameCase::IgnoreCase))
 		{
-			const auto& Request = RequestQueue.Pop();
+			auto Request = RequestQueue.Pop();
 			
 			FString Message = Choice.Message.Content;
 			AddMessageToHistory(Request.Caller, EHttpGPTChatRole::Assistant, Message);

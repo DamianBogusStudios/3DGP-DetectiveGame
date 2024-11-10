@@ -29,6 +29,9 @@ struct FMessageRequest
 	FMessageDelegate OnMessageReceived;
 	FStructuredMessageDelegate OnStructuredMessageReceived;
 	FFunctionCallDelegate OnFunctionCalled;
+
+	double StartTime;
+	double EndTime;
 	
 	FMessageRequest(UObject* InCaller, const FString& InMessage, UScriptStruct* InSchemaStruct)
 		: Caller(InCaller), Message(InMessage), StructSchema(InSchemaStruct)
@@ -42,8 +45,10 @@ struct FMessageRequest
 		StructSchema = nullptr;
 	}
 
-	void ExecuteCallbacks(FString& Response) const
+	void ExecuteCallbacks(FString& Response)
 	{
+		EndTime = FPlatformTime::Seconds();
+		
 		if(StructSchema)
 			OnStructuredMessageReceived.ExecuteIfBound(Response, StructSchema);
 		else

@@ -7,6 +7,7 @@
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"
+#include "GameClasses/MGameInstance.h"
 #include "PlayStation/DualSenseController.h"
 #include "Subsystems/InteractionSystem.h"
 
@@ -27,6 +28,14 @@ void AMPlayerController::BeginPlay()
 		}
 	}
 
+	if(auto GameInstance = GetWorld()->GetGameInstance())
+	{
+		if(auto CustomGameInstance = Cast<UMGameInstance>(GameInstance))
+		{
+			CustomGameInstance->OnGameFinishedLoading.AddDynamic(this, &AMPlayerController::OnGameLoaded);
+		}
+	}
+	
 	if (auto InteractionSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UInteractionSystem>())
 	{
 	 	InteractionSubsystem->OnStartDialogueAction.AddDynamic(this, &AMPlayerController::OnDialogueStarted);
@@ -49,7 +58,12 @@ void AMPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AMPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
+	BindDefaultContextActions();
+	BindDialogueContextActions();
+}
 
+void AMPlayerController::OnGameLoaded()
+{
 	if (auto SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		if (InputContextMap.Contains(EInputContext::Default) && InputContextMap[EInputContext::Default])
@@ -58,8 +72,6 @@ void AMPlayerController::SetupInputComponent()
 		}
 	}
 
-	BindDefaultContextActions();
-	BindDialogueContextActions();
 }
 
 void AMPlayerController::BindDefaultContextActions()

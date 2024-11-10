@@ -50,11 +50,13 @@ public:
 	TObjectPtr<ABaseCharacter> BaseCharacter;
 
 	UFUNCTION()
+	void OnGameLoaded();
+	
+	UFUNCTION()
 	void OnDialogueStarted(AActor* Caller, UDialogueWidget* WidgetClass);
 
 	UFUNCTION()
 	void OnDialogueFinished(AActor* Caller, UDialogueWidget* WidgetClass);
-
 
 protected:
 
