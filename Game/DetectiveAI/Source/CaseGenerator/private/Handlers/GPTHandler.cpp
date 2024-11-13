@@ -25,7 +25,7 @@ UGPTHandler::UGPTHandler()
 }
 
 #pragma region Helper Functions
-FString UGPTHandler::GetDescription(const UScriptStruct* InStruct)
+FString UGPTHandler::GetDescription(const UScriptStruct* InStruct) const
 {
 	if(!MetaDataTable)
 		return "";
@@ -43,7 +43,7 @@ FString UGPTHandler::GetDescription(const UScriptStruct* InStruct)
 	UE_LOG(LogTemp, Warning, TEXT("Row '%s' does not exist in the DataTable."), *RowName);
 	return "";
 }
-FString UGPTHandler::GetDescription(const FProperty& InProperty)
+FString UGPTHandler::GetDescription(const FProperty& InProperty) const
 {
 	if(!MetaDataTable)
 		return "";
@@ -440,7 +440,7 @@ TArray<FHttpGPTChatMessage>* UGPTHandler::GetChatHistory(TWeakObjectPtr<UObject>
 		// 	}
 		//
 		// 	OnFunctionCalled.Broadcast(RequestCaller, Message, FuncCall.Name,ArgNames, ArgValues);
-		// }
+		// }//
 	}
 }
 
@@ -459,7 +459,7 @@ TArray<FHttpGPTChatMessage>* UGPTHandler::GetChatHistory(TWeakObjectPtr<UObject>
 
  void UGPTHandler::OnErrorReceived(const FHttpGPTChatResponse& Response)
  {
-     UE_LOG(LogTemp, Error, TEXT("Error Received: %s"), *Response.Object.ToString());
+     UE_LOG(LogTemp, Error, TEXT("Error Received: %s"), *Response.Error.Code.ToString());
  }
 
  void UGPTHandler::BindCallbacks(UHttpGPTChatRequest* Request)

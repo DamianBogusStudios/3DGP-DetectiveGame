@@ -8,24 +8,32 @@
 #include "Types/CommonCaseTypes.h"
 #include "Data/PromptConfigData.h"
 #include "Utilities/GenAIUtilities.h"
-
+//todo error checking.
 #pragma region Initalisation
 void UCaseSystem::PostInit()
 {
 #if UE_EDITOR
 	UE_LOG(LogTemp, Display, TEXT("CaseSystem Initialised"));
 #endif
-	
-	GenerateCase();
 }
 #pragma endregion
 
 #pragma region Generation
+void UCaseSystem::StartCaseGeneration()
+{
+	// FinishGeneration();
+	GenerateCase();
+}
 void UCaseSystem::GenerateCase()
 {
+	OnProgressUpdated.Broadcast("Started", 0);
 	GenStartTime = FPlatformTime::Seconds();	
 	RandomiseInitialParams();
-			
+
+	TotalTasks = NumOfActors + 2;
+	ProgressIncr = 1.0f / TotalTasks;
+	ProgressPerc = 0.0f;
+	
 	FString CustomInstructions = PromptConfig->CustomInstructions;
 	CustomInstructions.ReplaceInline(TEXT("{Motive}"), *UEnum::GetValueAsString(CaseFile.Motive));
 	CustomInstructions.ReplaceInline(TEXT("{MurderWeapon}"), *UEnum::GetValueAsString(CaseFile.MurderWeapon));
@@ -38,6 +46,7 @@ void UCaseSystem::FinishGeneration()
 {
 	//TODO add some checks for the casefile to see if its valid.
 
+	OnProgressUpdated.Broadcast("Generation Finished", 1);
 	OnCaseGenerationFinished.Broadcast(FPlatformTime::Seconds() - GenStartTime);
 
 #if UE_EDITOR
@@ -110,6 +119,10 @@ void UCaseSystem::StructuredMessageReceived(FString& Message, UScriptStruct* Str
 		FActorDescription ActorDescription;
 		if ( UGenAIUtilities::JsonToUStruct(Message, Struct, &ActorDescription))
 		{
+			ProgressPerc += ProgressIncr;
+			OnProgressUpdated.Broadcast(FString::Printf(TEXT("Actor %d Generated"), CaseFile.Actors.Num()), ProgressPerc);
+
+			
 			CaseFile.Actors.Add(ActorDescription);
 			GeneratedActorSchemas.Add(Message);
 			GenerateActor();
@@ -120,6 +133,9 @@ void UCaseSystem::StructuredMessageReceived(FString& Message, UScriptStruct* Str
 		FClueCollection ClueCollection;
 		if (UGenAIUtilities::JsonToUStruct(Message, Struct, &ClueCollection))
 		{
+			ProgressPerc += ProgressIncr;
+			OnProgressUpdated.Broadcast(FString::Printf(TEXT("Clues Generated")), ProgressPerc);
+
 			CaseFile.Clues = ClueCollection.Clues;
 			GenerateConnections();
 		}
@@ -129,6 +145,9 @@ void UCaseSystem::StructuredMessageReceived(FString& Message, UScriptStruct* Str
 		FContextCollection ContextCollection;
 		if (UGenAIUtilities::JsonToUStruct(Message, Struct, &ContextCollection))
 		{
+			ProgressPerc += ProgressIncr;
+			OnProgressUpdated.Broadcast(FString::Printf(TEXT("Connections Generated")), ProgressPerc);
+
 			for(int i = 0; i < ContextCollection.KnowledgeBases.Num(); i++)
 			{
 				if(i < CaseFile.Actors.Num())

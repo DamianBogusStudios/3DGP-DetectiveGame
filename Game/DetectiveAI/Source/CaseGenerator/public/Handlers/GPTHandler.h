@@ -29,6 +29,7 @@ struct FMessageRequest
 	FMessageDelegate OnMessageReceived;
 	FStructuredMessageDelegate OnStructuredMessageReceived;
 	FFunctionCallDelegate OnFunctionCalled;
+	FErrorReceivedDelegate OnErrorReceived;
 
 	double StartTime;
 	double EndTime;
@@ -53,6 +54,11 @@ struct FMessageRequest
 			OnStructuredMessageReceived.ExecuteIfBound(Response, StructSchema);
 		else
 			OnMessageReceived.ExecuteIfBound(Response);
+	}
+
+	void ExecuteError()
+	{
+		OnErrorReceived.ExecuteIfBound(Message, StructSchema);
 	}
 };
 
@@ -139,8 +145,8 @@ private:
 	
 	
 
-	FString GetDescription(const FProperty& InProperty);
-	FString GetDescription(const UScriptStruct* InStruct);
+	FString GetDescription(const FProperty& InProperty) const;
+	FString GetDescription(const UScriptStruct* InStruct) const;
 	
 	/* callbacks */
 	UFUNCTION()

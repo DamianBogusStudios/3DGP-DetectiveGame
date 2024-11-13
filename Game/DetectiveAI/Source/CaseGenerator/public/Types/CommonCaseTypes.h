@@ -250,6 +250,11 @@ DECLARE_DELEGATE_TwoParams(FStructuredMessageDelegate,
 	FString& /*Message*/,
 	UScriptStruct* /* StructSchema*/);
 
+
+DECLARE_DELEGATE_TwoParams(FErrorReceivedDelegate,
+	FString& /*Message*/,
+	UScriptStruct* /* StructSchema*/);
+
 DECLARE_DYNAMIC_DELEGATE_FiveParams(FFunctionCallDelegate,
 	UObject*, Caller,
 	FString&, Message,

@@ -2,16 +2,46 @@
 
 
 #include "UI/LoadingWidget.h"
+
+#include "Components/Button.h"
+#include "Components/ProgressBar.h"
+#include "Components/TextBlock.h"
+#include "GameClasses/MGameInstance.h"
+#include "Subsystems/CaseSystem.h"
 #include "Subsystems/UISystem.h"
 
 void ULoadingWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	StartGameBtn->OnClicked.AddDynamic(this, &ULoadingWidget::OnStartGamePressed);
+
+	if(auto GI = Cast<UMGameInstance>(GetWorld()->GetGameInstance()))
+	{
+		GI->OnGameFinishedLoading.AddDynamic(this, &ULoadingWidget::OnGameLoaded);
+		GI->OnGenProgressUpdated.AddDynamic(this, &ULoadingWidget::OnProgressUpdated);
+	}
+}
+
+void ULoadingWidget::OnStartGamePressed()
+{
+	if(auto GameInstance = Cast<UMGameInstance>(GetGameInstance()))
+	{
+		GameInstance->StartGame();
+		StartGameBtn->SetVisibility(ESlateVisibility::Hidden);
+		LoadingBar->SetVisibility(ESlateVisibility::Visible);
+		LoadingText->SetText(FText::FromString("Loading..."));
+	}
 }
 
 void ULoadingWidget::OnGameLoaded()
 {
 	FadeOut();
+}
+
+void ULoadingWidget::OnProgressUpdated(const FString& ProgressMessage, float PercentComplete)
+{
+	LoadingText->SetText(FText::FromString(ProgressMessage));
+	TargetPerc = PercentComplete;
 }
 
 void ULoadingWidget::FadeOut()
@@ -37,5 +67,17 @@ void ULoadingWidget::UpdateFadeOut()
 			UISystem->RequestFinishWidget(GetWorld()->GetFirstPlayerController(), EUIElementType::Loading);
 		else
 			RemoveFromParent();
+	}
+}
+
+void ULoadingWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	
+	if (LoadingBar->GetVisibility() == ESlateVisibility::Visible && !FMath::IsNearlyEqual(CurrentPerc, TargetPerc))
+	{
+		CurrentPerc = FMath::FInterpTo(CurrentPerc, TargetPerc, InDeltaTime, BarSpeed);
+		LoadingBar->SetPercent(CurrentPerc);
 	}
 }

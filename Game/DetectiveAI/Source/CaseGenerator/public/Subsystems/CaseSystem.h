@@ -18,6 +18,10 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCaseDetailsDelegate,
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCaseGenerationFinishedDelegate,
 	double, ElapsedTime);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FCaseGenerationProgressDelegate,
+	const FString&, NextTask,
+	float, Progress);
 /**
 * CaseSystem
 *
@@ -35,8 +39,12 @@ class CASEGENERATOR_API UCaseSystem : public ULLMBaseSubSystem
 	GENERATED_BODY()
 
 public:
+
 	UPROPERTY(BlueprintAssignable)
 	FCaseGenerationFinishedDelegate OnCaseGenerationFinished;
+
+	UPROPERTY(BlueprintAssignable)
+	FCaseGenerationProgressDelegate OnProgressUpdated;
 	
 	UPROPERTY(BlueprintAssignable)
 	FCaseActorsDelegate OnActorsGenerated;
@@ -47,6 +55,10 @@ public:
 
 	UFUNCTION()
 	double GetStartTime() const { return GenStartTime; }
+
+	UFUNCTION(BlueprintCallable)
+	void StartCaseGeneration();
+	
 	
 protected:
 
@@ -62,6 +74,10 @@ private:
 	int NumOfClues;
 
 	double GenStartTime;
+
+	float ProgressPerc = 0.0f;
+	float ProgressIncr = 0.0f;
+	int32 TotalTasks = 0;
 
 	/* generative functions */
 	void RandomiseInitialParams();

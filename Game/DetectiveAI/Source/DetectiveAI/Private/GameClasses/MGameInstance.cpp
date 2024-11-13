@@ -8,14 +8,14 @@
 #include "Data/OverlayMaterials.h"
 #include "Kismet/GameplayStatics.h"
 #include "Subsystems/CaseSystem.h"
+#include "Subsystems/UISystem.h"
+
+//TODO need to move material code to separate class.
 
 void UMGameInstance::Init()
 {
     Super::Init();
     
-    OnPostWorldInitializationHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this,
-        &UMGameInstance::OnPostWorldInit);
-
     if (UAssetManager* AssetManager = UAssetManager::GetIfInitialized())
     {
         TArray<FName> Bundles;
@@ -27,18 +27,33 @@ void UMGameInstance::Init()
 
     if (auto CaseSys = GetSubsystem<UCaseSystem>())
     {
-        CaseSys->OnCaseGenerationFinished.AddDynamic(this, &UMGameInstance::OnCaseGenerationFinished);
+        CaseSys->OnCaseGenerationFinished.AddDynamic(this, &UMGameInstance::CaseGenerationFinishedCallback);
+        CaseSys->OnProgressUpdated.AddDynamic(this, &UMGameInstance::CaseGenerationProgressCallback);
     }
-    
 }
 
-void UMGameInstance::OnPostWorldInit(UWorld* World, const UWorld::InitializationValues IVS)
+void UMGameInstance::BeginInit()
 {
     if (AActorSpawner* ActorSpawner = Cast<AActorSpawner>(UGameplayStatics::GetActorOfClass(GetWorld(), AActorSpawner::StaticClass())))
     {
         ActorSpawner->OnActorsSpawned.AddDynamic(this, &UMGameInstance::OnActorsSpawned);
     }
+
+    if(auto UI = GetSubsystem<UUISystem>())
+    {
+        UI->RequestStartWidget(GetWorld()->GetFirstPlayerController(), EUIElementType::Loading);
+    }
 }
+
+
+void UMGameInstance::StartGame()
+{
+    if (auto CaseSys = GetSubsystem<UCaseSystem>())
+    {
+        CaseSys->StartCaseGeneration();
+    }
+}
+
 
 UMaterial* UMGameInstance::GetOverlayMaterial(bool Interactable)
 {
@@ -54,7 +69,6 @@ UMaterial* UMGameInstance::GetOverlayMaterial(bool Interactable)
     return nullptr;
 }
 
-
 void UMGameInstance::OnMaterialsLoaded(FPrimaryAssetId Id)
 {
     if(Id == OverlayMaterials)
@@ -63,20 +77,26 @@ void UMGameInstance::OnMaterialsLoaded(FPrimaryAssetId Id)
     }
 }
 
-void UMGameInstance::OnCaseGenerationFinished(double ElapsedTime)
+void UMGameInstance::CaseGenerationProgressCallback(const FString& Msg, float Progress)
+{
+    OnGenProgressUpdated.Broadcast(Msg, Progress);
+}
+
+void UMGameInstance::CaseGenerationFinishedCallback(double ElapsedTime)
 {
     bCaseSystemFinished = true;
-    
+    CheckAllLoaded();
 }
 
 void UMGameInstance::OnActorsSpawned()
 {
     bActorSpawnerFinished = true;
+    CheckAllLoaded();
 }
 
-void UMGameInstance::CheckAllLoaded()
+void UMGameInstance::CheckAllLoaded() const
 {
-    if (bCaseSystemFinished && bActorSpawnerFinished)
+    if (bCaseSystemFinished /*&& bActorSpawnerFinished*/)
     {
         OnGameFinishedLoading.Broadcast();
     }

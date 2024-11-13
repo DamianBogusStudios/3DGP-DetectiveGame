@@ -4,6 +4,7 @@
 #include "Actors/ActorSpawner.h"
 
 #include "Characters/BaseNPC.h"
+#include "Kismet/GameplayStatics.h"
 #include "Subsystems/CaseSystem.h"
 
 
@@ -32,19 +33,25 @@ void AActorSpawner::SpawnActors(const TArray<FActorDescription>& Actors)
 	{
 		UsedMeshes.Empty();
 		
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.Instigator = GetInstigator();
+
 		for (int i = 0; i < Actors.Num(); i++)
 		{
 			FVector SpawnLocation = GetActorLocation() + GetActorRightVector() * (i*Spacing);
 			FRotator SpawnRotation = FRotator::ZeroRotator;
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.Owner = this;
-			SpawnParams.Instigator = GetInstigator();
-
-			auto Actor = World->SpawnActor<ABaseNPC>(NPCClass, SpawnLocation, SpawnRotation, SpawnParams);
-
+			FTransform SpawnTransform(SpawnRotation, SpawnLocation);
+			
 			/* don't have enough character models to be selective with eyecolour,haircolour etc. */
 			USkeletalMesh* Mesh = GetRandomMesh(Actors[i].Gender);
-			Actor->InitialiseActor(Actors[i], Mesh);
+			ABaseNPC* Actor = Cast<ABaseNPC>(UGameplayStatics::BeginDeferredActorSpawnFromClass(this, NPCClass, SpawnTransform));
+
+			if (Actor)
+			{
+				Actor->InitialiseActor(Actors[i], Mesh);
+				UGameplayStatics::FinishSpawningActor(Actor, SpawnTransform);
+			}
 		}
 
 		OnActorsSpawned.Broadcast();

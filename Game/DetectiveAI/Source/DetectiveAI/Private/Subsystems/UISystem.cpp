@@ -17,10 +17,8 @@ void UUISystem::Initialize(FSubsystemCollectionBase& Collection)
 
 	LoadWidgetClasses();
 	
-	RequestStartWidget(GetWorld()->GetFirstPlayerController(), EUIElementType::Loading);
-	
 #if WITH_EDITOR
-	FString Message = FString::Printf(TEXT("UI Sysytem Initialised"));
+	FString Message = FString::Printf(TEXT("UI System Initialised"));
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, Message);
 #endif
 }
@@ -83,8 +81,14 @@ UUserWidget* UUISystem::GetWidget(EUIElementType WidgetType)
 		}
 		else
 		{
-			WidgetMap[WidgetType].WidgetInstance 
-						= CreateWidget(GetWorld()->GetFirstPlayerController(), WidgetMap[WidgetType].WidgetClass);
+			if(GetWorld())
+			{
+				if(GetWorld()->GetFirstPlayerController())
+				{
+					WidgetMap[WidgetType].WidgetInstance = CreateWidget(GetWorld()->GetFirstPlayerController(), WidgetMap[WidgetType].WidgetClass);
+					return WidgetMap[WidgetType].WidgetInstance;
+				}
+			}
 		}
 	}
 	else

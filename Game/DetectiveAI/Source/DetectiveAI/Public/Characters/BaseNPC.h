@@ -16,6 +16,10 @@ class DETECTIVEAI_API ABaseNPC : public ACharacter, public IInteractInterface
 	GENERATED_BODY()
 
 public:
+
+	ABaseNPC(const FObjectInitializer& ObjectInitializer, FActorDescription ActorDescription, USkeletalMesh* InitialMesh = nullptr);
+
+	
 	// Sets default values for this character's properties
 	ABaseNPC();
 
@@ -27,6 +31,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	// virtual void OnConstruction(const FTransform& Transform) override;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -36,9 +42,14 @@ public:
 
 
 	UFUNCTION()
-	void InitialiseActor(const FActorDescription& ActorDescription, USkeletalMesh* SkeletalMesh);
+	void InitialiseActor(FActorDescription ActorDescription, USkeletalMesh* SkeletalMesh);
 
 	void Interact_Implementation(AActor* Caller) override;
 	void OnFocus_Implementation() override;
 	void EndFocus_Implementation() override;
+
+private:
+
+	USkeletalMesh* PendingMesh;
+	FActorDescription* PendingActorDescription;
 };

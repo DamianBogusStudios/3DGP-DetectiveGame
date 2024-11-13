@@ -19,8 +19,18 @@ ABaseNPC::ABaseNPC()
 void ABaseNPC::BeginPlay()
 {
 	Super::BeginPlay();
-}
 
+	if(PendingMesh)
+	{
+		if(GetMesh())
+		{
+			{
+				GetMesh()->SetSkeletalMesh(PendingMesh);
+			}
+			//dsd
+		}
+	}
+}
 // Called every frame
 void ABaseNPC::Tick(float DeltaTime)
 {
@@ -35,13 +45,25 @@ void ABaseNPC::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
-void ABaseNPC::InitialiseActor(const FActorDescription& ActorDescription, USkeletalMesh* SkeletalMesh)
+void ABaseNPC::InitialiseActor(FActorDescription ActorDescription, USkeletalMesh* SkeletalMesh)
 {
-	if(GetMesh())
-	{
-		GetMesh()->SetSkeletalMesh(SkeletalMesh);
-	}
+	PendingMesh = SkeletalMesh;
+	PendingActorDescription = &ActorDescription;
 }
+
+// void ABaseNPC::OnConstruction(const FTransform& Transform)
+// {
+// 	Super::OnConstruction(Transform);
+//
+// 	if (GetMesh() && PendingMesh)
+// 	{
+// 		GetMesh()->SetSkeletalMesh(PendingMesh);
+// 	}
+// 	if(DialogueComponent)
+// 	{
+// 		DialogueComponent->ActorDescription = *PendingActorDescription;
+// 	}
+// }
 
 void ABaseNPC::Interact_Implementation(AActor* Caller)
 {
