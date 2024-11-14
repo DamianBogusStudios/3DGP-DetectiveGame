@@ -59,6 +59,11 @@
 				"Mac",
 				"Linux"
 			]
+		},
+		{
+			"Name": "HttpGPTVoiceModule",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
 		}
 	]
 }

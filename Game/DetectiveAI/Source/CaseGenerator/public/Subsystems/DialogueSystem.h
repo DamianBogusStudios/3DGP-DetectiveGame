@@ -26,15 +26,23 @@ public:
 	virtual void RequestSendMessage(UObject* Caller, FString& Message) override;
 	virtual void RequestDialogueOptions(UObject* Caller, FActorDescription& ActorDescription, FDialogueOptionsDelegate& Delegate) override;
 
+
+	void RegisterActor(AActor* Actor, FActorDescription& ActorDescription);
+	void SendMessageToActor(AActor* Actor, FString& Message);
+	
 protected:
 	
 	virtual void PostInit() override;
 	virtual void MessageReceived(FString& Message) override;
 	virtual void StructuredMessageReceived(FString& Message, UScriptStruct* Struct) override;
 
+	TMap<AActor*, FActorDescription> ActorMap;
+
 private:
 	
 	FDialogueOptionsDelegate OnDialogueOptionsReceived;
 
+	
+	
 	
 };

@@ -2,7 +2,7 @@
 
 
 #include "Subsystems/LLMBaseSubSystem.h"
-#include "Handlers/LLMServiceLocator.h"
+#include "Handlers/ServiceLocator.h"
 #include "Interfaces/LLMService.h"
 #include "Settings/LLMSettings.h"
 
@@ -11,7 +11,7 @@ void ULLMBaseSubSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	LLMService = ULLMServiceLocator::GetService();
+	LLMService = UServiceLocator::GetService_LLM();
 
 	GetConfigFiles();
 	BindCallbacks();
@@ -43,7 +43,7 @@ void ULLMBaseSubSystem::Deinitialize()
 {
 	Super::Deinitialize();
 
-	ULLMServiceLocator::Cleanup();
+	UServiceLocator::Cleanup();
 }
 
 void ULLMBaseSubSystem::GetConfigFiles()

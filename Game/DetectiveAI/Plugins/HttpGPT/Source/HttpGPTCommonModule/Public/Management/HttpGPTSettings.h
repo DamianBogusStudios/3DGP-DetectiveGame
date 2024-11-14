@@ -8,6 +8,7 @@
 #include <Engine/DeveloperSettings.h>
 #include "Structures/HttpGPTCommonTypes.h"
 #include "Structures/HttpGPTChatTypes.h"
+#include "Structures/HttpGPTVoiceTypes.h"
 #include "Structures/HttpGPTImageTypes.h"
 #include "HttpGPTSettings.generated.h"
 
@@ -29,6 +30,9 @@ public:
 
 	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Default Options", Meta = (DisplayName = "Chat Options"))
 	FHttpGPTChatOptions ChatOptions;
+
+	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Default Options", Meta = (DisplayName = "Voice Options"))
+	FHttpGPTVoiceOptions VoiceOptions;
 
 	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Default Options", Meta = (DisplayName = "Image Options"))
 	FHttpGPTImageOptions ImageOptions;
@@ -61,6 +65,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "HttpGPT | Settings",
 		meta = (HidePin = "Self", DefaultToSelf = "Self", DisplayName = "Get Chat Options", CompactNodeTitle = "HttpGPT Chat Options"))
 	static FHttpGPTChatOptions GetChatOptions();
+
+	
+	UFUNCTION(BlueprintPure, Category = "HttpGPT | Settings",
+		meta = (HidePin = "Self", DefaultToSelf = "Self", DisplayName = "Get Voice Options", CompactNodeTitle = "HttpGPT Voice Options"))
+	static FHttpGPTVoiceOptions GetVoiceOptions();
+
 
 	UFUNCTION(BlueprintCallable, Category = "HttpGPT | Settings", meta = (HidePin = "Self", DefaultToSelf = "Self", DisplayName = "Set Chat Options"))
 	static void SetChatOptions(const FHttpGPTChatOptions& Value);

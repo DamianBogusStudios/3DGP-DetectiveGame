@@ -2,67 +2,108 @@
 
 
 #include "ActorComponents/DialogueComponent.h"
+#include "Handlers/ServiceLocator.h"
+#include "Interfaces/LLMService.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundWaveProcedural.h"
+#include "Settings/LLMSettings.h"
 #include "Subsystems/UISystem.h"
-#include "BehaviorTree/BehaviorTree.h"
-#include "AIController.h"
-#include "BehaviorTree/BlackboardComponent.h"
-#include "GameClasses/MGameInstance.h"
-#include "UI/DialogueWidget.h"
-#include "Interfaces/DialogueProvider.h"
-#include "Settings/InteractionSettings.h"
-#include "Types/CommonCaseTypes.h"
 
+// Fill out your copyright notice in the Description page of Project Settings.
 
-// Sets default values for this component's properties
 UDialogueComponent::UDialogueComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 }
+
+#pragma region Initalisation
 void UDialogueComponent::BeginPlay()
 {
-    Super::BeginPlay();
-    
-    BindDialogueDelegates();
+	Super::BeginPlay();
+
+	GetConfigFiles();
+	GetServices();
+	BindCallbacks();
 }
 
 void UDialogueComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
- //   UnBindDialogueDelegates();
+	Super::EndPlay(EndPlayReason);
+	UServiceLocator::Cleanup();
 }
 
-
-void UDialogueComponent::BindDialogueDelegates()
+void UDialogueComponent::GetServices()
 {
-    if (auto UI = GetWorld()->GetGameInstance()->GetSubsystem<UUISystem>())
-    {
-        UI->OnStartUIAction.AddDynamic(this, &UDialogueComponent::OnDialogueStarted);
-        UI->OnAdvanceUIAction.AddDynamic(this, &UDialogueComponent::OnAdvanceDialogue);
-        UI->OnFinishUIAction.AddDynamic(this, &UDialogueComponent::OnFinishDialogue);
-    }
-    
-    for(auto Subsystem : GetWorld()->GetGameInstance()->GetSubsystemArray<UGameInstanceSubsystem>())
-    {
-        if(Subsystem->Implements<UDialogueProvider>())
-        {
-            DialogueProvider = TScriptInterface<IDialogueProvider>(Subsystem);
-            DialogueOptionsDelegate.BindDynamic(this, &UDialogueComponent::OnDialogueOptionsReceived);
-            //DialogueProvider->GetDialogueOptionsDelegate().AddDynamic(this, &UDialogueComponent::OnDialogueOptionsReceived);
-            break;
-        }
-    }
-
-
+	LLMService = UServiceLocator::GetService_LLM();
+	TTSService = UServiceLocator::GetService_TTS();
+	
 }
 
-void UDialogueComponent::UnBindDialogueDelegates()
+void UDialogueComponent::GetConfigFiles()
 {
-    if (auto UI = GetWorld()->GetGameInstance()->GetSubsystem<UUISystem>())
-    {
-        UI->OnStartUIAction.RemoveDynamic(this, &UDialogueComponent::OnDialogueStarted);
-        UI->OnAdvanceUIAction.RemoveDynamic(this, &UDialogueComponent::OnAdvanceDialogue);
-        UI->OnFinishUIAction.RemoveDynamic(this, &UDialogueComponent::OnFinishDialogue);
-    }
+	if(const ULLMSettings* Settings = GetDefault<ULLMSettings>())
+	{
+		PromptConfig = Settings->GetPromptConfigData();
+	}
 }
+
+void UDialogueComponent::BindCallbacks()
+{
+	MessageDelegate.BindUObject(this, &UDialogueComponent::OnMessageReceived);
+	VoiceDelegate.BindUObject(this, &UDialogueComponent::OnVoiceReceived);
+}
+
+
+void UDialogueComponent::SetDescription(const FActorDescription& Description)
+{
+	ActorDescription = Description;
+}
+
+void UDialogueComponent::RegisterWitness()
+{
+	if(LLMService)
+	{
+		LLMService->SendCustomInstructions(this, PromptConfig->WitnessCustomInstructions);
+		LLMService->SendCustomInstructions(this, ActorDescription.ToString());
+		bActorRegistered = true;
+	}
+}
+#pragma endregion
+
+#pragma region Requests
+
+void UDialogueComponent::SendMessageToActor(const FString& Prompt)
+{
+	if(!bActorRegistered)
+	{
+		RegisterWitness();
+	}
+	
+	if(LLMService && bActorRegistered)
+	{
+		LLMService->SendMessage(this, Prompt, MessageDelegate);
+	}
+}
+
+#pragma endregion 
+
+#pragma region Callbacks
+void UDialogueComponent::OnMessageReceived(FString& Message)
+{
+	UE_LOG(LogTemp, Display, TEXT("Actor Spoke %s"), *Message);
+
+	if(TTSService)
+	{
+		TTSService->SendTextToVoice(this, Message, VoiceDelegate);
+	}
+}
+
+void UDialogueComponent::OnVoiceReceived(USoundWaveProcedural* SoundWave)
+{
+	ProcessedSoundWave = SoundWave;
+	UGameplayStatics::PlaySound2D(this, ProcessedSoundWave);
+}
+#pragma endregion 
 
 
 void UDialogueComponent::StartDialogue() const
@@ -70,7 +111,6 @@ void UDialogueComponent::StartDialogue() const
     if (auto UI = GetWorld()->GetGameInstance()->GetSubsystem<UUISystem>())
     {
         UI->RequestStartWidget(GetOwner(), EUIElementType::NPCDialogue);
-        // InteractionSubsystem->RequestDialogueAction(GetOwner());
     }
 	else
     {
@@ -93,102 +133,151 @@ void UDialogueComponent::FinishDialogue() const
     }
 }
 
-#pragma region Delegate Callbacks
-
-void UDialogueComponent::OnDialogueStarted(AActor* Caller, UUserWidget* Widget)
-{
-    if(Caller == GetOwner())
-    {
-        bInDialogue = true;
-        
-        auto Pawn = Cast<APawn>(Caller);
-        auto Controller = Pawn->GetController<AAIController>();
-        UBlackboardComponent* BlackboardComponent;
-      
-        if(Controller && Controller->UseBlackboard(DialogueTree->GetBlackboardAsset(), BlackboardComponent))
-        {                
-            BlackboardComponent->SetValueAsObject("DialogueWidget", Widget);
-
-            
-            FString BoolValue = BlackboardComponent->GetValueAsBool("HasMetPlayer") ? "true" : "false";  
-            
-            if(auto BrainComponent =Controller->GetBrainComponent())
-            {
-                if(auto BTComp =  Cast<UBehaviorTreeComponent>(BrainComponent))
-                {
-                    if(BTComp->GetCurrentTree() == DialogueTree)
-                    {
-                        Controller->BrainComponent->RestartLogic();
-                    }
-                }
-            }
-            Controller->RunBehaviorTree(DialogueTree);
-
-            if(DialogueOptions.OptionOne.IsEmpty() && DialogueProvider)
-            {
-                DialogueProvider->RequestDialogueOptions(this, ActorDescription, DialogueOptionsDelegate);
-            }
-        }
-    }
-}
-
-void UDialogueComponent::OnAdvanceDialogue(AActor* Caller, UUserWidget* Widget)
-{
-    if(Caller == GetOwner())
-    {
-       
-    }
-}
-
-
-void UDialogueComponent::OnFinishDialogue(AActor* Caller, UUserWidget* Widget)
-{
-    if(Caller == GetOwner())
-    {
-        bInDialogue = false;
-        
-        auto Pawn = Cast<APawn>(Caller);
-        auto Controller = Pawn->GetController<AAIController>();
-
-        if(auto BlackboardComponent = Controller->GetBlackboardComponent())
-        {
-            BlackboardComponent->SetValueAsBool("HasMetPlayer", true);
-
-            FString BoolValue = BlackboardComponent->GetValueAsBool("HasMetPlayer") ? "true" : "false";   
-            FString Message = FString::Printf(TEXT("HasMetPlayer %s"), *BoolValue);
-            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, Message);
-        }
-    }
-}
-
-FString UDialogueComponent::GetGreeting()
-{
-    auto Pawn = Cast<APawn>(GetOwner());
-    auto Controller = Pawn->GetController<AAIController>();
-
-    if(auto BlackboardComponent = Controller->GetBlackboardComponent())
-    {
-        auto bHasMet = BlackboardComponent->GetValueAsBool("HasMetPlayer");
-
-        if(bHasMet)
-            return FString("Hi Again");
-    }
-
-
-    return FString("Hi Detective");
-}
-FDialogueOptions UDialogueComponent::GetDialogueOptions()
-{
-    return DialogueOptions;
-}
-
-void UDialogueComponent::OnDialogueOptionsReceived(FDialogueOptions& InDialogueOptions)
-{
-    UE_LOG(LogTemp, Log, TEXT("DialogueComponent: DialogueOptions Received"));
-     
-    DialogueOptions = InDialogueOptions;
-}
-
-
-
-#pragma endregion
+// void UDialogueComponent::BeginPlay()
+// {
+//     Super::BeginPlay();
+//     
+//     BindDialogueDelegates();
+// }
+//
+// void UDialogueComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+// {
+//  //   UnBindDialogueDelegates();
+// }
+//
+//
+// void UDialogueComponent::BindDialogueDelegates()
+// {
+//     if (auto UI = GetWorld()->GetGameInstance()->GetSubsystem<UUISystem>())
+//     {
+//         UI->OnStartUIAction.AddDynamic(this, &UDialogueComponent::OnDialogueStarted);
+//         UI->OnAdvanceUIAction.AddDynamic(this, &UDialogueComponent::OnAdvanceDialogue);
+//         UI->OnFinishUIAction.AddDynamic(this, &UDialogueComponent::OnFinishDialogue);
+//     }
+//     
+//     for(auto Subsystem : GetWorld()->GetGameInstance()->GetSubsystemArray<UGameInstanceSubsystem>())
+//     {
+//         if(Subsystem->Implements<UDialogueProvider>())
+//         {
+//             DialogueProvider = TScriptInterface<IDialogueProvider>(Subsystem);
+//             DialogueOptionsDelegate.BindDynamic(this, &UDialogueComponent::OnDialogueOptionsReceived);
+//             //DialogueProvider->GetDialogueOptionsDelegate().AddDynamic(this, &UDialogueComponent::OnDialogueOptionsReceived);
+//             break;
+//         }
+//     }
+//
+//
+// }
+//
+// void UDialogueComponent::UnBindDialogueDelegates()
+// {
+//     if (auto UI = GetWorld()->GetGameInstance()->GetSubsystem<UUISystem>())
+//     {
+//         UI->OnStartUIAction.RemoveDynamic(this, &UDialogueComponent::OnDialogueStarted);
+//         UI->OnAdvanceUIAction.RemoveDynamic(this, &UDialogueComponent::OnAdvanceDialogue);
+//         UI->OnFinishUIAction.RemoveDynamic(this, &UDialogueComponent::OnFinishDialogue);
+//     }
+// }
+//
+//
+// 
+//
+// #pragma region Delegate Callbacks
+//
+// void UDialogueComponent::OnDialogueStarted(AActor* Caller, UUserWidget* Widget)
+// {
+//     if(Caller == GetOwner())
+//     {
+//         bInDialogue = true;
+//         
+//         auto Pawn = Cast<APawn>(Caller);
+//         auto Controller = Pawn->GetController<AAIController>();
+//         UBlackboardComponent* BlackboardComponent;
+//       
+//         if(Controller && Controller->UseBlackboard(DialogueTree->GetBlackboardAsset(), BlackboardComponent))
+//         {                
+//             BlackboardComponent->SetValueAsObject("DialogueWidget", Widget);
+//
+//             
+//             FString BoolValue = BlackboardComponent->GetValueAsBool("HasMetPlayer") ? "true" : "false";  
+//             
+//             if(auto BrainComponent =Controller->GetBrainComponent())
+//             {
+//                 if(auto BTComp =  Cast<UBehaviorTreeComponent>(BrainComponent))
+//                 {
+//                     if(BTComp->GetCurrentTree() == DialogueTree)
+//                     {
+//                         Controller->BrainComponent->RestartLogic();
+//                     }
+//                 }
+//             }
+//             Controller->RunBehaviorTree(DialogueTree);
+//
+//             if(DialogueOptions.OptionOne.IsEmpty() && DialogueProvider)
+//             {
+//                 DialogueProvider->RequestDialogueOptions(this, ActorDescription, DialogueOptionsDelegate);
+//             }
+//         }
+//     }
+// }
+//
+// void UDialogueComponent::OnAdvanceDialogue(AActor* Caller, UUserWidget* Widget)
+// {
+//     if(Caller == GetOwner())
+//     {
+//        
+//     }
+// }
+//
+//
+// void UDialogueComponent::OnFinishDialogue(AActor* Caller, UUserWidget* Widget)
+// {
+//     if(Caller == GetOwner())
+//     {
+//         bInDialogue = false;
+//         
+//         auto Pawn = Cast<APawn>(Caller);
+//         auto Controller = Pawn->GetController<AAIController>();
+//
+//         if(auto BlackboardComponent = Controller->GetBlackboardComponent())
+//         {
+//             BlackboardComponent->SetValueAsBool("HasMetPlayer", true);
+//
+//             FString BoolValue = BlackboardComponent->GetValueAsBool("HasMetPlayer") ? "true" : "false";   
+//             FString Message = FString::Printf(TEXT("HasMetPlayer %s"), *BoolValue);
+//             GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, Message);
+//         }
+//     }
+// }
+//
+// FString UDialogueComponent::GetGreeting()
+// {
+//     auto Pawn = Cast<APawn>(GetOwner());
+//     auto Controller = Pawn->GetController<AAIController>();
+//
+//     if(auto BlackboardComponent = Controller->GetBlackboardComponent())
+//     {
+//         auto bHasMet = BlackboardComponent->GetValueAsBool("HasMetPlayer");
+//
+//         if(bHasMet)
+//             return FString("Hi Again");
+//     }
+//
+//
+//     return FString("Hi Detective");
+// }
+// FDialogueOptions UDialogueComponent::GetDialogueOptions()
+// {
+//     return DialogueOptions;
+// }
+//
+// void UDialogueComponent::OnDialogueOptionsReceived(FDialogueOptions& InDialogueOptions)
+// {
+//     UE_LOG(LogTemp, Log, TEXT("DialogueComponent: DialogueOptions Received"));
+//      
+//     DialogueOptions = InDialogueOptions;
+// }
+//
+//
+//
+// #pragma endregion

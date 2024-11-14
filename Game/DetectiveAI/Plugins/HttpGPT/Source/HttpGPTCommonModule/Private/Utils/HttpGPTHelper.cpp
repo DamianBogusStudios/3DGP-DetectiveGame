@@ -46,6 +46,60 @@ const FName UHttpGPTHelper::ModelToName(const EHttpGPTChatModel Model)
 	return NAME_None;
 }
 
+const FString UHttpGPTHelper::ModelToString(const EHttpGPTVoiceModel Model)
+{
+	switch (Model)
+	{
+	case EHttpGPTVoiceModel::tts1:
+		return "tts-1";
+
+	case EHttpGPTVoiceModel::tts1_hd:
+		return "tts-1-hd";
+	}
+	return "";
+}
+
+const FString UHttpGPTHelper::VoiceToString(const EHttpGPTSynthVoice Voice)
+{
+	switch (Voice)
+	{
+	case EHttpGPTSynthVoice::alloy:
+		return "alloy";
+	case EHttpGPTSynthVoice::echo:
+		return "echo";
+	case EHttpGPTSynthVoice::fable:
+		return "fable";
+	case EHttpGPTSynthVoice::nova:
+		return "nova";
+	case EHttpGPTSynthVoice::onyx:
+		return "onyx";
+	case EHttpGPTSynthVoice::shimmer:
+		return "shimmer";
+	}
+	return "";
+}
+const FString UHttpGPTHelper::OutputFormatToString(const EHttpGPTVoiceOutputFormat OutputFormat)
+{
+	switch (OutputFormat)
+	{
+	case EHttpGPTVoiceOutputFormat::Mp3:
+		return "mp3";
+	case EHttpGPTVoiceOutputFormat::Pcm:
+		return  "pcm";
+	case EHttpGPTVoiceOutputFormat::Opus:
+		return  "opus";
+	case EHttpGPTVoiceOutputFormat::Aac:
+		return  "aac";
+	case EHttpGPTVoiceOutputFormat::Flac:
+		return  "flac";
+	case EHttpGPTVoiceOutputFormat::Wav:
+		return  "wav";
+	default:
+		return "mp3";
+	}
+}
+
+
 const EHttpGPTChatModel UHttpGPTHelper::NameToModel(const FName Model)
 {
 	if (Model.IsEqual("gpt-4o", ENameCase::IgnoreCase))

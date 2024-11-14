@@ -14,7 +14,8 @@ public class CaseGenerator: ModuleRules
             "Json",
             "JsonUtilities",
             "HttpGPTChatModule",
-            "HttpGPTCommonModule"
+            "HttpGPTCommonModule", 
+            "HttpGPTVoiceModule"
         });
     }
 }

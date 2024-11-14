@@ -43,6 +43,11 @@ FHttpGPTChatOptions UHttpGPTSettings::GetChatOptions()
 	return GetDefault<UHttpGPTSettings>()->ChatOptions;
 }
 
+FHttpGPTVoiceOptions UHttpGPTSettings::GetVoiceOptions()
+{
+	return GetDefault<UHttpGPTSettings>()->VoiceOptions;
+}
+
 void UHttpGPTSettings::SetChatOptions(const FHttpGPTChatOptions& Value)
 {
 	UHttpGPTSettings* const Settings = GetMutableDefault<UHttpGPTSettings>();

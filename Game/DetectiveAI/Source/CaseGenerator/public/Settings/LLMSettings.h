@@ -16,6 +16,12 @@ enum EActiveLLM
 	Llama,
 	Claude	
 };
+
+UENUM(BlueprintType)
+enum EActiveTTS
+{
+	OpenAI
+};
 // /**
 //  * 
 //  */
@@ -30,6 +36,9 @@ private:
 	TEnumAsByte<EActiveLLM> ActiveLLM;
 
 	UPROPERTY(Config, EditDefaultsOnly, Category = "LLM")
+	TEnumAsByte<EActiveTTS> ActiveTTS;
+	
+	UPROPERTY(Config, EditDefaultsOnly, Category = "LLM")
 	TSoftObjectPtr<UPromptConfigData> PromptConfigData;
 
 public:
@@ -37,6 +46,11 @@ public:
 	TEnumAsByte<EActiveLLM> GetActiveLLM() const
 	{
 		return ActiveLLM;
+	}
+
+	TEnumAsByte<EActiveTTS> GetActiveTTS() const
+	{
+		return ActiveTTS;
 	}
 	
 	UPromptConfigData* GetPromptConfigData() const

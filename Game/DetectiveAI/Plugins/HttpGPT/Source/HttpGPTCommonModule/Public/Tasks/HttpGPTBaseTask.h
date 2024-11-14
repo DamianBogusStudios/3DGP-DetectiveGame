@@ -55,7 +55,7 @@ protected:
 	/* Return true if contains error */
 	const bool CheckError(const TSharedPtr<class FJsonObject>& JsonObject, FHttpGPTCommonError& OutputError) const;
 
-	void InitializeRequest();
+	virtual void InitializeRequest();
 	void BindRequestCallbacks();
 
 	virtual FString SetRequestContent() { return FString(); };

@@ -7,6 +7,7 @@
 #include <CoreMinimal.h>
 #include <Kismet/BlueprintFunctionLibrary.h>
 #include "Structures/HttpGPTChatTypes.h"
+#include "Structures/HttpGPTVoiceTypes.h"
 #include "Structures/HttpGPTImageTypes.h"
 #include "HttpGPTHelper.generated.h"
 
@@ -22,6 +23,15 @@ public:
 	
 	UFUNCTION(BlueprintPure, Category = "HttpGPT | Chat", meta = (DisplayName = "Convert HttpGPT Model to Name"))
 	static const FName ModelToName(const EHttpGPTChatModel Model);
+	
+	UFUNCTION(BlueprintPure, Category = "HttpGPT | Voice", meta = (DisplayName = "Convert HttpGPT Model to Name"))
+	static const FString ModelToString(const EHttpGPTVoiceModel Model);
+
+	UFUNCTION(BlueprintPure, Category = "HttpGPT | Voice", meta = (DisplayName = "Convert HttpGPT Model to Name"))
+	static const FString VoiceToString(const EHttpGPTSynthVoice Voice);
+
+	UFUNCTION(BlueprintPure, Category = "HttpGPT | Voice", meta = (DisplayName = "Convert HttpGPT Model to Name"))
+	static const FString OutputFormatToString(const EHttpGPTVoiceOutputFormat OutputFormat);
 
 	UFUNCTION(BlueprintPure, Category = "HttpGPT | Chat", meta = (DisplayName = "Convert Name to HttpGPT Model"))
 	static const EHttpGPTChatModel NameToModel(const FName Model);

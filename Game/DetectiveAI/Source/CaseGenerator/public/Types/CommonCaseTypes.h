@@ -177,7 +177,29 @@ struct CASEGENERATOR_API FActorDescription
 	EVictimFamiliarity VictimFamiliarity;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (LLMDescription = "Description of the current world and knowledge from the perspective of this character. Some characters may know more than others. can be later used in dialogue to acquire information"))
-	FString Context; 
+	FString Context;
+
+	FString ToString()
+	{
+		FString Result = FString::Printf(TEXT("Name: %s\nGender: %s\nEye Colour: %s\nHair Colour: %s\nAge: %d\nMyers-Briggs Type: %s\nRoles: "),
+									 *Name,
+									 *UEnum::GetValueAsString(Gender),
+									 *UEnum::GetValueAsString(EyeColour),
+									 *UEnum::GetValueAsString(HairColour),
+									 Age,
+									 *UEnum::GetValueAsString(MyersBriggsType));
+    
+		for (const EActorRole& Role : Roles)
+		{
+			Result += UEnum::GetValueAsString(Role) + TEXT(", ");
+		}
+		Result.RemoveFromEnd(TEXT(", ")); 
+
+		Result += FString::Printf(TEXT("\nVictim Familiarity: %s\nContext: %s"),
+								  *UEnum::GetValueAsString(VictimFamiliarity),
+								  *Context);
+		return Result;
+	}
 };
 
 USTRUCT(BlueprintType)

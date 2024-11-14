@@ -2,9 +2,8 @@
 
 
 #include "Subsystems/CaseSystem.h"
-#include "Handlers/LLMServiceLocator.h"
-#include "Interfaces/LLMService.h"
-#include "Settings/LLMSettings.h"
+#include "Handlers/ServiceLocator.h"
+#include "Interfaces/TTSService.h"
 #include "Types/CommonCaseTypes.h"
 #include "Data/PromptConfigData.h"
 #include "Utilities/GenAIUtilities.h"
@@ -21,8 +20,9 @@ void UCaseSystem::PostInit()
 #pragma region Generation
 void UCaseSystem::StartCaseGeneration()
 {
-	// FinishGeneration();
-	GenerateCase();
+	//GenerateCase();
+
+	
 }
 void UCaseSystem::GenerateCase()
 {
@@ -109,7 +109,7 @@ void UCaseSystem::GenerateConnections()
 #pragma region Callbacks
 void UCaseSystem::MessageReceived(FString& Message)
 {
-
+	
 }
 
 void UCaseSystem::StructuredMessageReceived(FString& Message, UScriptStruct* Struct)

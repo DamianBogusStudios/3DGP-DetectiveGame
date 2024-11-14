@@ -30,6 +30,11 @@ void ABaseNPC::BeginPlay()
 			//dsd
 		}
 	}
+
+	if(PendingActorDescription)
+	{
+		DialogueComponent->SetDescription(*PendingActorDescription);
+	}
 }
 // Called every frame
 void ABaseNPC::Tick(float DeltaTime)

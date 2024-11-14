@@ -20,6 +20,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prompts | Config", meta = (MultiLine = true, ToolTip = ""))
 	FString CustomInstructions;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prompts | Config", meta = (MultiLine = true, ToolTip = ""))
+	FString WitnessCustomInstructions;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prompts | Actors")
 	FString Victim =  "Based on the provided murder weapon and motive, generate the victim of the murder with the provided schema.";
