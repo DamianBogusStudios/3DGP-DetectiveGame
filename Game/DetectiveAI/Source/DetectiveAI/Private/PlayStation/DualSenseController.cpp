@@ -32,6 +32,18 @@ void UDualSenseController::SetLightBarColour(const FColor& LightColour)
 #endif
 }
 
+
+void UDualSenseController::SetTriggerEffectProperty(int StartPos, int EndPos, int Strength, int Trigger)
+{
+	FPS5TriggeEffectProperty TriggerProperty(SetTrigger(Trigger));
+	TriggerProperty.SetWeapon(StartPos, EndPos, Strength);
+	TriggerProperty.SetUseEffectForThreshold(true);
+
+	SendTriggerEffectProperty(TriggerProperty);
+}
+
+
+
 #endif
 */
 
@@ -40,3 +52,44 @@ void UDualSenseController::SetLightBarColour(const FColor& LightColour)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("%s SetLightBarColour()", *PlatformWarningPrefix));
 }
+void UDualSenseController::SetTriggerEffectProperty(int StartPos, int EndPos, int Strength, int Trigger)
+{
+	//do nothing
+}
+
+// FPS5TriggerEffectProperty::TriggerMask SetTrigger(int trigger)
+// {
+// 	FPS5TriggerEffectProperty Property;
+//
+// 	switch (trigger)
+// 	{
+// 	case 0:
+// 		Property.Triggers = FPS5TriggerEffectProperty::TriggerMask::None;
+// 		break;
+// 	case 1:
+// 		Property.Triggers = FPS5TriggerEffectProperty::TriggerMask::Left;
+// 		break;
+// 	case 2:
+// 		Property.Triggers = FPS5TriggerEffectProperty::TriggerMask::Right;
+// 		break;
+// 	case 3:
+// 		Property.Triggers = FPS5TriggerEffectProperty::TriggerMask::Both;
+// 		break;
+// 	}
+//
+// 	return Property.Triggers;
+// }
+//
+// bool SendTriggerEffectProperty(const FPS5TriggerEffectProperty& DeviceProperty)
+// {
+// 	FSonyInputInterface* SonyInputInterface = TryGetPlayformInputInterface();
+//
+// 	if(SonyInputInterface == nullptr)
+// 	{
+// 		UE_LOG(LogTemp, Warning, TEXT("no interface found"));
+// 		return false;
+// 	}
+//
+// 	SonyInputInterface->SetDeviceProperty(0, &DeviceProperty);
+// 	return true;
+// }

@@ -4,10 +4,8 @@
 #include "Actors/SoundCaptureActor.h"
 #include "AudioCaptureComponent.h"
 #include "AudioDevice.h"
-#include "Sound/SoundSubmix.h"
 #include "AudioMixerDevice.h"
-#include "AudioDeviceManager.h"
-#include "Components/EditableTextBox.h"
+#include "Sound/SoundSubmix.h"
 #include "Handlers/ServiceLocator.h"
 #include "Interfaces/STTService.h"
 #include "RawObjects/FSubmixBufferListener.h"
@@ -39,25 +37,19 @@ void ASoundCaptureActor::BeginPlay()
 	
 	if (AudioCaptureComponent)
 	{
-		FAudioDevice* AudioDevice = GetWorld()->GetAudioDeviceRaw();
-		AudioDevice->GetMainSubmixObject().SetSubmixOutputVolume(GetWorld(), 0.0f); 
-		BufferListener = MakeShared<FSubmixBufferListener>(TWeakObjectPtr<ASoundCaptureActor>(this));
+		// FAudioDevice* AudioDevice = GetWorld()->GetAudioDeviceRaw();
+		//
+		// BufferListener = MakeShared<FSubmixBufferListener>(TWeakObjectPtr<ASoundCaptureActor>(this));
+		// // ISubmixBufferListener* BufferListenerPtr = BufferListener.Get();
+		//
+		// AudioCaptureComponent->SoundSubmix = AudioSubmix;
+		// AudioCaptureComponent->SetOutputToBusOnly(true);
+		// AudioCaptureComponent->Start();
 		
-		AudioCaptureComponent->SoundSubmix = AudioSubmix;
-		AudioCaptureComponent->Start();
-		//AudioCaptureComponent->SetOutputToBusOnly(true);
-
-		
-		Audio::FMixerDevice* MixerDevice = FAudioDeviceManager::GetAudioMixerDeviceFromWorldContext(GetWorld());
-		MixerDevice->RegisterSoundSubmix(AudioSubmix);
-		MixerDevice->StartRecording(AudioSubmix, 0);
-		
-		// Mute the submix output to prevent echo
-		
-		if (AudioDevice && AudioSubmix)
-		{
-			AudioDevice->RegisterSubmixBufferListener(BufferListener.ToSharedRef(), *AudioSubmix);
-		}
+		// if (AudioDevice && AudioSubmix)
+		// {
+		// 	AudioDevice->RegisterSubmixBufferListener(BufferListener.ToSharedRef(), *AudioSubmix);
+		// }
 	}
 }
 
@@ -85,9 +77,19 @@ void ASoundCaptureActor::Tick(float DeltaTime)
 
 void ASoundCaptureActor::OnNewSubmixBuffer(const USoundSubmix* OwningSubmix, float* AudioData, int32 NumSamples, int32 NumChannels, const int32 InSampleRate, double AudioClock)
 {
+	OnMicInputReceived(AudioData, NumSamples, NumChannels);
+}
+
+void ASoundCaptureActor::OnGeneratedBuffer(const float* AudioData, const int32 NumSamples, const int32 NumChannels)
+{
+	OnMicInputReceived(AudioData, NumSamples, NumChannels);
+}
+
+void ASoundCaptureActor::OnMicInputReceived(const float* AudioData, const int32 NumSamples, const int32 NumChannels)
+{
 	MaxAmplitude = 0.0f;
 	Channels = NumChannels;
-	SampleRate = InSampleRate;
+	SampleRate = 16000;
 
 	for (int32 i = 0; i < NumSamples; i++)
 	{

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ISubmixBufferListener.h"
+#include "Components/SynthComponent.h"
 #include "GameFramework/Actor.h"
 #include "SoundCaptureActor.generated.h"
 
@@ -34,7 +35,7 @@ struct FWavHeader
 };
 
 UCLASS()
-class DETECTIVEAI_API ASoundCaptureActor : public AActor
+class DETECTIVEAI_API ASoundCaptureActor : public AActor, public IAudioBufferListener
 {
 	GENERATED_BODY()
 
@@ -59,6 +60,11 @@ public:
 	void OnNewSubmixBuffer(const USoundSubmix* OwningSubmix, float* AudioData, int32 NumSamples, int32 NumChannels,
 		const int32 InSampleRate, double AudioClock);
 
+	virtual void OnGeneratedBuffer(const float* AudioBuffer, const int32 NumSamples, const int32 NumChannels) override;
+
+	void OnMicInputReceived(const float* AudioBuffer, const int32 NumSamples, const int32 NumChannels);
+
+	
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Voice Detection Settings")

@@ -19,6 +19,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "DualSense")
 	static void SetLightBarColour(const FColor& LightColour);
 
+
+	UFUNCTION(Blueprintable, Category = "DualSense")
+	static void SetTriggerEffectProperty(int StartPos, int EndPos, int Strength, int Trigger);
 private:
 
 	UPROPERTY(EditAnywhere, Category = "Logging")
