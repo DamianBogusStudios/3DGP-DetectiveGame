@@ -7,7 +7,7 @@
 #include "HttpGPTVoiceRequest.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHttpGPTTextToSpeechResponseDelegate, USoundWaveProcedural*, AudioData);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHttpGPTErrorResponseDelegate, const FString&, ErrorMessage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FVoiceRequestErrorDelegate, const FString&, ErrorMessage);
 
 /**
  * Class to handle Text-to-Speech requests using OpenAI's TTS models
@@ -24,7 +24,7 @@ public:
 
     // Delegate called when an error occurs
     UPROPERTY(BlueprintAssignable, Category = "HttpGPT | Voice")
-    FHttpGPTErrorResponseDelegate OnError;
+    FVoiceRequestErrorDelegate OnError;
 
     static UHttpGPTVoiceRequest* StartTextToSpeech(UObject* const WorldObject, const FString& Text);
     

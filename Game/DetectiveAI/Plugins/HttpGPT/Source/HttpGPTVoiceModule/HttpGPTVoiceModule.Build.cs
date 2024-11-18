@@ -12,7 +12,8 @@ public class HttpGPTVoiceModule : ModuleRules
                 "Core",
                 "HTTP",
                 "Json",
-                "HttpGPTCommonModule"
+                "HttpGPTCommonModule",
+                "WebSockets"
             }
         );
 

@@ -20,9 +20,8 @@ void UCaseSystem::PostInit()
 #pragma region Generation
 void UCaseSystem::StartCaseGeneration()
 {
-	//GenerateCase();
-
-	
+	OnCaseGenerationFinished.Broadcast(FPlatformTime::Seconds());
+	// GenerateCase();
 }
 void UCaseSystem::GenerateCase()
 {

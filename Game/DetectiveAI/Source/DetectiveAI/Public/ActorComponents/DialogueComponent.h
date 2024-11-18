@@ -9,12 +9,11 @@
 #include "DialogueComponent.generated.h"
 
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FMessageRelayDelegate, const FString&, MessageRelay);
+
 class ITTSService;
 class ILLMService;
-class UPromptConfigData;
-class IDialogueProvider;
 class UDialogueWidget;
-class UBehaviorTree;
 class USoundWaveProcedural;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -26,33 +25,33 @@ public:
 	// Sets default values for this component's properties
 	UDialogueComponent();
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AI)
-	TObjectPtr<UBehaviorTree> DialogueTree;
-	
+	// UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AI)
+	// TObjectPtr<UBehaviorTree> DialogueTree;
+	//
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NPC")
 	FActorDescription ActorDescription;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NPC")
-	FDialogueOptions DialogueOptions;
-
 	FMessageDelegate MessageDelegate;
 	FVoiceDelegate VoiceDelegate;
+	
+	FMessageRelayDelegate MessageRelayDelegate;
 
 	UFUNCTION()
 	void SetDescription(const FActorDescription& Description);
 	UFUNCTION()
-	void StartDialogue() const;
+	void StartDialogue();
 	UFUNCTION()
-	void FinishDialogue() const;
+	void FinishDialogue();
+	UFUNCTION()
+	void SendMessageToActor(const FString& Message);
 	
 protected:
 
 	UPROPERTY()
-	TObjectPtr<UPromptConfigData> PromptConfig;
-	UPROPERTY()
 	TScriptInterface<ILLMService> LLMService;
 	UPROPERTY()
 	TScriptInterface<ITTSService> TTSService;
+
 	UPROPERTY()
 	TObjectPtr<USoundWaveProcedural> ProcessedSoundWave;
 	
@@ -62,12 +61,15 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+
+	
+	UFUNCTION()
+	void OnTranscriptReceived(const FString& Message);
+	
 	void GetServices();
-	void GetConfigFiles();
+	// void GetConfigFiles();
 	void BindCallbacks();
 	void RegisterWitness();
-
-	void SendMessageToActor(const FString& Message);
 	void OnMessageReceived(FString& Message);
 	void OnVoiceReceived(USoundWaveProcedural* SoundWave);
 	

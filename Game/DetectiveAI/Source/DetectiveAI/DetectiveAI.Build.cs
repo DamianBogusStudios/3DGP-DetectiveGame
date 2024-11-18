@@ -21,7 +21,10 @@ public class DetectiveAI : ModuleRules
 			"EnhancedInput",
 			"InventorySystem",
 			"CaseGenerator",
-			"JsonUtilities"
+			"JsonUtilities",
+			"AudioCapture",
+			"SignalProcessing",
+			"AudioMixer"
 		});
 	}
 }

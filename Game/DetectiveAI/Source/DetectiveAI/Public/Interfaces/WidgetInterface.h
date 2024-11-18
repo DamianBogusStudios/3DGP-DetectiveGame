@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "WidgetCleanupInterface.generated.h"
+#include "WidgetInterface.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE()
-class UWidgetCleanupInterface : public UInterface
+class UWidgetInterface : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -16,7 +16,7 @@ class UWidgetCleanupInterface : public UInterface
 /**
  * 
  */
-class DETECTIVEAI_API IWidgetCleanupInterface
+class DETECTIVEAI_API IWidgetInterface
 {
 	GENERATED_BODY()
 
@@ -25,4 +25,12 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "UI")
 	void Cleanup();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "UI")
+	void Setup(UObject* Caller);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "UI")
+	void Advance();
+
+
 };

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Interfaces/WidgetCleanupInterface.h"
+#include "Interfaces/WidgetInterface.h"
 #include "LockpickMiniGame.generated.h"
 
 
@@ -53,7 +53,7 @@ struct FLockPin
  * 
  */
 UCLASS()
-class DETECTIVEAI_API ULockpickMiniGame : public UUserWidget, public IWidgetCleanupInterface
+class DETECTIVEAI_API ULockpickMiniGame : public UUserWidget, public IWidgetInterface
 {
 	GENERATED_BODY()
 

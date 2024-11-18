@@ -46,9 +46,9 @@ void UDialogueSystem::RegisterActor(AActor* Actor, FActorDescription& ActorDescr
     if(ActorMap.Contains(Actor))
         return;
     
-    SendCustomInstructions(Actor, PromptConfig->WitnessCustomInstructions);
-    SendCustomInstructions(Actor, ActorDescription.ToString());
-    ActorMap.Add(Actor, ActorDescription);
+    // SendCustomInstructions(Actor, PromptConfig->WitnessCustomInstructions);
+    // SendCustomInstructions(Actor, ActorDescription.ToString());
+    // ActorMap.Add(Actor, ActorDescription);
 }
 
 void UDialogueSystem::SendMessageToActor(AActor* Actor, FString& Message)
@@ -58,7 +58,7 @@ void UDialogueSystem::SendMessageToActor(AActor* Actor, FString& Message)
         UE_LOG(LogTemp, Error, TEXT("Actor Not Registered"));
         return;
     }
-    SendMessage(Actor, Message);
+    // SendMessage(Actor, Message);
 }
 #pragma endregion
 

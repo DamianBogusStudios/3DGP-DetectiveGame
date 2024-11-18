@@ -1,5 +1,6 @@
 
 
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -44,8 +45,11 @@ public:
 	UInputAction* InteractAction;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Dialogue")
-	UInputAction* AdvanceAction;
+	UInputAction* UIAdvanceAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Dialogue")
+	UInputAction* UIExitAction;
+	
 	UPROPERTY()
 	TObjectPtr<ABaseCharacter> BaseCharacter;
 
@@ -53,10 +57,7 @@ public:
 	void OnGameLoaded();
 	
 	UFUNCTION()
-	void OnDialogueStarted(AActor* Caller, UDialogueWidget* WidgetClass);
-
-	UFUNCTION()
-	void OnDialogueFinished(AActor* Caller, UDialogueWidget* WidgetClass);
+	void UIInputRequested(bool InputNeeded);
 
 protected:
 
@@ -69,7 +70,9 @@ protected:
 
 	void OnInteractInput(const FInputActionValue& Value);
 
-	void OnAdvanceInput(const FInputActionValue& Value);
+	void OnAdvanceInput_UI(const FInputActionValue& Value);
+	
+	void OnExitInput_UI(const FInputActionValue& Value);
 
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
@@ -82,7 +85,7 @@ private:
 
 	void BindDefaultContextActions();
 
-	void BindDialogueContextActions();
+	void BindUIContextActions();
 
 
 };

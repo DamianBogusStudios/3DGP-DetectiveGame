@@ -214,8 +214,9 @@ void UHttpGPTBaseTask::BindRequestCallbacks()
 		{
 			return;
 		}
+		if(RequestResponse)
+			OnProgressCompleted(RequestResponse->GetContentAsString(), bWasSuccessful);
 
-		OnProgressCompleted(RequestResponse->GetContentAsString(), bWasSuccessful);
 		SetReadyToDestroy();
 	});
 }

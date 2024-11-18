@@ -7,6 +7,7 @@
 #include "ServiceLocator.generated.h"
 
 class ITTSService;
+class ISTTService;
 class ILLMService;
 /**
  * 
@@ -20,6 +21,7 @@ public:
 
 	static TScriptInterface<ILLMService> GetService_LLM();
 	static TScriptInterface<ITTSService> GetService_TTS();
+	static TScriptInterface<ISTTService> GetService_STT();
 
 	static void Cleanup();
 
@@ -27,9 +29,11 @@ private:
 
 	static TScriptInterface<ILLMService> LLMService;
 	static TScriptInterface<ITTSService> TTSService;
+	static TScriptInterface<ISTTService> STTService;
 
 	static void InitializeLLMService();
 	static void InitializeTTSService();
+	static void InitializeSTTService();
 
 	virtual void BeginDestroy() override;
 };

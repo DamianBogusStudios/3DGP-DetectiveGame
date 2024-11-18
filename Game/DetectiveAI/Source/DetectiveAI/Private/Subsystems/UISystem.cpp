@@ -3,7 +3,7 @@
 #include "Subsystems/UISystem.h"
 #include "Blueprint/UserWidget.h"
 #include "Settings/InteractionSettings.h"
-#include "Interfaces/WidgetCleanupInterface.h"
+#include "Interfaces/WidgetInterface.h"
 
 #pragma region  Init
 bool UUISystem::ShouldCreateSubsystem(UObject* Outer) const
@@ -29,22 +29,30 @@ void UUISystem::Deinitialize()
 }
 #pragma endregion
 
-bool UUISystem::RequestStartWidget(AActor* InCaller, EUIElementType WidgetType)
+UUserWidget* UUISystem::RequestStartWidget(UObject* InCaller, EUIElementType WidgetType)
 {
 	if (UUserWidget* Widget = GetWidget(WidgetType))
 	{
 		if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
 		{
 			Widget->AddToViewport();
-			ActiveActor = InCaller;
-			OnStartUIAction.Broadcast(ActiveActor, Widget);
-			return true;
+			ActiveUObject = InCaller;
+			//OnStartUIAction.Broadcast(ActiveComponent, Widget);
+
+			if(Widget->Implements<UWidgetInterface>())
+			{
+				IWidgetInterface::Execute_Setup(Widget, ActiveUObject);
+			}
+
+			WidgetQueue.Add(WidgetType);
+			CheckInputNeeded();
+			return Widget;
 		}
 	}
-	return false;
+	return nullptr;
 }
 
-bool UUISystem::RequestFinishWidget(AActor* InCaller, EUIElementType WidgetType)
+bool UUISystem::RequestFinishWidget(UObject* InCaller, EUIElementType WidgetType)
 {
 	if(/*InCaller == ActiveActor &&*/WidgetMap.Contains(WidgetType))
 	{
@@ -52,18 +60,52 @@ bool UUISystem::RequestFinishWidget(AActor* InCaller, EUIElementType WidgetType)
 
 		if (Widget && Widget->IsInViewport())
 		{
-			if(Widget->Implements<UWidgetCleanupInterface>())
+			if(Widget->Implements<UWidgetInterface>())
 			{
-				IWidgetCleanupInterface::Execute_Cleanup(Widget);
+				IWidgetInterface::Execute_Cleanup(Widget);
 			}
 			
 			Widget->RemoveFromParent();
-			ActiveActor = nullptr;
-			OnFinishUIAction.Broadcast(ActiveActor, Widget);
+			ActiveUObject = nullptr;
+			//OnFinishUIAction.Broadcast(ActiveComponent, Widget);
+
+			WidgetQueue.Remove(WidgetType);
+			CheckInputNeeded();
 			return true;
 		}
 	}
 	return false;
+}
+
+void UUISystem::Advance()
+{
+	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+	{
+		if(WidgetQueue.Num() > 0)
+		{
+			if(WidgetMap.Contains(WidgetQueue.Last()))
+			{
+				auto Widget = WidgetMap[WidgetQueue.Last()].WidgetInstance;
+
+				if(Widget && Widget->Implements<UWidgetInterface>())
+				{
+					IWidgetInterface::Execute_Advance(Widget);
+				}
+			}
+		}
+		
+	}
+}
+
+void UUISystem::Exit()
+{
+	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+	{
+		if(WidgetQueue.Num() > 0)
+		{
+			RequestFinishWidget(PlayerController,WidgetQueue.Last());
+		}
+	}
 }
 
 void UUISystem::OnFinishedLoading()
@@ -100,6 +142,12 @@ UUserWidget* UUISystem::GetWidget(EUIElementType WidgetType)
 	}
 
 	return nullptr;
+}
+
+void UUISystem::CheckInputNeeded() const
+{
+	bool bInputNeeded = (WidgetQueue.Contains(EUIElementType::LockpickMiniGame) || WidgetQueue.Contains(EUIElementType::NPCDialogue));
+	RequestInput.Broadcast(bInputNeeded);
 }
 
 void UUISystem::LoadWidgetClasses()

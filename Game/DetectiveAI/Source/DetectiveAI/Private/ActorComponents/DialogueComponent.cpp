@@ -21,7 +21,6 @@ void UDialogueComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GetConfigFiles();
 	GetServices();
 	BindCallbacks();
 }
@@ -36,15 +35,6 @@ void UDialogueComponent::GetServices()
 {
 	LLMService = UServiceLocator::GetService_LLM();
 	TTSService = UServiceLocator::GetService_TTS();
-	
-}
-
-void UDialogueComponent::GetConfigFiles()
-{
-	if(const ULLMSettings* Settings = GetDefault<ULLMSettings>())
-	{
-		PromptConfig = Settings->GetPromptConfigData();
-	}
 }
 
 void UDialogueComponent::BindCallbacks()
@@ -63,11 +53,17 @@ void UDialogueComponent::RegisterWitness()
 {
 	if(LLMService)
 	{
-		LLMService->SendCustomInstructions(this, PromptConfig->WitnessCustomInstructions);
-		LLMService->SendCustomInstructions(this, ActorDescription.ToString());
-		bActorRegistered = true;
+		if(const ULLMSettings* Settings = GetDefault<ULLMSettings>())
+		{
+			auto PromptConfig = Settings->GetPromptConfigData();
+	
+			LLMService->SendCustomInstructions(this, PromptConfig->WitnessCustomInstructions);
+			LLMService->SendCustomInstructions(this, ActorDescription.ToString());
+			bActorRegistered = true;
+		}
 	}
 }
+
 #pragma endregion
 
 #pragma region Requests
@@ -92,10 +88,17 @@ void UDialogueComponent::OnMessageReceived(FString& Message)
 {
 	UE_LOG(LogTemp, Display, TEXT("Actor Spoke %s"), *Message);
 
+	MessageRelayDelegate.ExecuteIfBound(Message);
+	
 	if(TTSService)
 	{
 		TTSService->SendTextToVoice(this, Message, VoiceDelegate);
 	}
+}
+
+void UDialogueComponent::OnTranscriptReceived(const FString& Message)
+{
+//	TranscriptRelayDelegate.ExecuteIfBound(Message);
 }
 
 void UDialogueComponent::OnVoiceReceived(USoundWaveProcedural* SoundWave)
@@ -106,11 +109,12 @@ void UDialogueComponent::OnVoiceReceived(USoundWaveProcedural* SoundWave)
 #pragma endregion 
 
 
-void UDialogueComponent::StartDialogue() const
+void UDialogueComponent::StartDialogue() 
 {
     if (auto UI = GetWorld()->GetGameInstance()->GetSubsystem<UUISystem>())
     {
-        UI->RequestStartWidget(GetOwner(), EUIElementType::NPCDialogue);
+    	UI->RequestStartWidget(this, EUIElementType::NPCDialogue);
+    	bInDialogue = true;
     }
 	else
     {
@@ -122,7 +126,7 @@ void UDialogueComponent::StartDialogue() const
     }
 }
 
-void UDialogueComponent::FinishDialogue() const
+void UDialogueComponent::FinishDialogue()
 {
     if(bInDialogue)
     {

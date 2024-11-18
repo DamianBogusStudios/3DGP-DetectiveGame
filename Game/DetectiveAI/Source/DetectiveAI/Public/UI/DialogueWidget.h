@@ -4,13 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Interfaces/WidgetCleanupInterface.h"
+#include "Interfaces/WidgetInterface.h"
 #include "DialogueWidget.generated.h"
 
 
+class UDialogueComponent;
+class UButton;
+class UEditableTextBox;
 class USizeBox;
 class UTextBlock;
 class UListView;
+class UActorComponent;
 
 UENUM(BlueprintType)
 enum class EDialogueVisibility : uint8
@@ -24,7 +28,7 @@ enum class EDialogueVisibility : uint8
  * 
  */
 UCLASS()
-class DETECTIVEAI_API UDialogueWidget : public UUserWidget, public IWidgetCleanupInterface
+class DETECTIVEAI_API UDialogueWidget : public UUserWidget, public IWidgetInterface
 {
 	GENERATED_BODY()
 
@@ -33,36 +37,48 @@ public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<USizeBox> SpeechBox;
 
-
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<USizeBox> ReplyBox;
-
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<UTextBlock> SpeechText;
 
-	
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	TObjectPtr<UListView> ReplyListView;
+	TObjectPtr<UEditableTextBox> InputTextBox;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	TObjectPtr<UButton> SendMessageBtn;
 
 	UFUNCTION(BlueprintCallable)
 	void ResetDialogueWidget();
 
+	UFUNCTION()
+	void TranscriptReceived(const FString& Message);
 
+	virtual void Advance_Implementation() override;
+	virtual void Setup_Implementation(UObject* Caller) override;
 	virtual void Cleanup_Implementation() override;
 	
 protected:
+
+	UPROPERTY()
+	TObjectPtr<UDialogueComponent> DialogueComponent;
+	
+	EDialogueVisibility WidgetVisibility;
+
+	virtual void NativeConstruct() override;
+	
 	UFUNCTION(BlueprintCallable)
 	void Speak(FString Text);
 	
 	UFUNCTION(BlueprintCallable)
-	void Reply(TArray<FString> TextReplies);
+	void Reply();
 
-	
 	UFUNCTION()
 	void ToggleBoxes(EDialogueVisibility DialogueVisibility);
 
 	UFUNCTION()
-	void OptionSelected();
+	void SpeechReceived(const FString& Message);
+
 	
 };

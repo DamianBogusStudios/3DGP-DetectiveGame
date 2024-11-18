@@ -15,6 +15,12 @@ ABaseNPC::ABaseNPC()
 	DialogueComponent = CreateDefaultSubobject<UDialogueComponent>(TEXT("Dialog Component"));
 }
 
+void ABaseNPC::InitialiseActor(FActorDescription ActorDescription, USkeletalMesh* SkeletalMesh)
+{
+	PendingMesh = SkeletalMesh;
+	PendingActorDescription = &ActorDescription;
+}
+
 // Called when the game starts or when spawned
 void ABaseNPC::BeginPlay()
 {
@@ -49,26 +55,6 @@ void ABaseNPC::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
-
-void ABaseNPC::InitialiseActor(FActorDescription ActorDescription, USkeletalMesh* SkeletalMesh)
-{
-	PendingMesh = SkeletalMesh;
-	PendingActorDescription = &ActorDescription;
-}
-
-// void ABaseNPC::OnConstruction(const FTransform& Transform)
-// {
-// 	Super::OnConstruction(Transform);
-//
-// 	if (GetMesh() && PendingMesh)
-// 	{
-// 		GetMesh()->SetSkeletalMesh(PendingMesh);
-// 	}
-// 	if(DialogueComponent)
-// 	{
-// 		DialogueComponent->ActorDescription = *PendingActorDescription;
-// 	}
-// }
 
 void ABaseNPC::Interact_Implementation(AActor* Caller)
 {

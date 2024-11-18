@@ -3,15 +3,18 @@
 
 #include "Handlers/ServiceLocator.h"
 #include "Handlers/GPTHandler.h"
+#include "Handlers/GPTSpeechHandler.h"
 #include "Handlers/GPTVoiceHandler.h"
 #include "Handlers/NullLLMService.h"
 #include "Handlers/NullVoiceHandler.h"
-#include "Interfaces/LLMService.h"
 #include "Settings/LLMSettings.h"
 #include "Interfaces/TTSService.h"
+#include "Interfaces/LLMService.h"
+#include "Interfaces/STTService.h"
 
 TScriptInterface<ILLMService> UServiceLocator::LLMService;
 TScriptInterface<ITTSService> UServiceLocator::TTSService;
+TScriptInterface<ISTTService> UServiceLocator::STTService;
 
 void UServiceLocator::BeginDestroy()
 {
@@ -33,6 +36,12 @@ void UServiceLocator::Cleanup()
 	    TTSService.SetObject(nullptr);
 	    TTSService.SetInterface(nullptr);
 	}
+	if(STTService)
+	{
+		STTService.GetObject()->RemoveFromRoot();
+		STTService.SetObject(nullptr);
+		STTService.SetInterface(nullptr);
+	}
 }
 
 TScriptInterface<ILLMService> UServiceLocator::GetService_LLM()
@@ -52,6 +61,16 @@ TScriptInterface<ITTSService> UServiceLocator::GetService_TTS()
 	}
 
 	return TTSService;
+}
+
+TScriptInterface<ISTTService> UServiceLocator::GetService_STT()
+{
+	if(!STTService)
+	{
+		InitializeSTTService();
+	}
+
+	return STTService;
 }
 
 void UServiceLocator::InitializeLLMService()
@@ -102,5 +121,32 @@ void UServiceLocator::InitializeTTSService()
 		Handler->AddToRoot();
 		TTSService.SetObject(Handler);
 		TTSService.SetInterface(Cast<ITTSService>(Handler));
+	}
+}
+
+
+
+void UServiceLocator::InitializeSTTService()
+{
+	UObject* Handler = nullptr;
+
+	if (const ULLMSettings* Settings = GetDefault<ULLMSettings>())
+	{
+		switch (Settings->GetActiveTTS())
+		{
+		case EActiveTTS::OpenAI:
+			Handler = NewObject<UGPTSpeechHandler>();
+			break;
+		default:
+			//Handler = NewObject<UNullVoiceHandler>();
+			break;
+		}
+	}
+    
+	if (Handler)
+	{
+		Handler->AddToRoot();
+		STTService.SetObject(Handler);
+		STTService.SetInterface(Cast<ISTTService>(Handler));
 	}
 }

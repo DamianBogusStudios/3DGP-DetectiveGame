@@ -42,10 +42,8 @@ protected:
 	void BindCallbacks();
 	
 	/* requests */
-	void SendCustomInstructions(UObject* Caller, const FString& Prompt);
 	void SendCustomInstructions(const FString& Prompt);
 	void SendMessage(const FString& Prompt);
-	void SendMessage(UObject* Caller, const FString& Prompt);
 	void SendStructuredMessage(const FString& Prompt, UScriptStruct* Schema);
 
 	

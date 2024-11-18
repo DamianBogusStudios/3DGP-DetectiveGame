@@ -7,9 +7,10 @@
 #include "UISystem.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FUIActionDelegate, AActor*, Caller, UUserWidget*, Widget);
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRequestInputDelegate, bool, bInputNeeded);
 
 class UInteractionSettings;
+class UActorComponent;
 
 UENUM(BlueprintType)
 enum class EUIElementType : uint8
@@ -51,15 +52,26 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FUIActionDelegate OnFinishUIAction;
 
+	UPROPERTY(BlueprintAssignable)
+	FRequestInputDelegate RequestInput;
+
 	
 	UFUNCTION(BlueprintCallable, meta = (Tooltip = "returns whether widget was successfully added"))
-	bool RequestStartWidget(AActor* InCaller, EUIElementType WidgetType);
+	UUserWidget* RequestStartWidget(UObject* InCaller, EUIElementType WidgetType);
 
 	UFUNCTION(BlueprintCallable, meta = (Tooltip = "returns whether widget was successfully removed"))
-	bool RequestFinishWidget(AActor* InCaller, EUIElementType WidgetType);
-	
+	bool RequestFinishWidget(UObject* InCaller, EUIElementType WidgetType);
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	UUserWidget* GetWidget(EUIElementType WidgetType);
+
+	UFUNCTION(BlueprintCallable)
+	void Advance();
+	UFUNCTION(BlueprintCallable)
+	void Exit();
 	UFUNCTION()
 	void OnFinishedLoading();
+
 	
 protected:
 	
@@ -70,18 +82,18 @@ protected:
 private:
 
 	UPROPERTY()
-	TObjectPtr<AActor> ActiveActor;
+	TObjectPtr<UObject> ActiveUObject;
 
 	UPROPERTY()
 	TMap<EUIElementType, FWidgetInfo> WidgetMap;
 
+	TArray<EUIElementType> WidgetQueue;
 
 	UFUNCTION()
+	void CheckInputNeeded() const;
+	
+	UFUNCTION()
 	void LoadWidgetClasses();
-	
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	UUserWidget* GetWidget(EUIElementType WidgetType);
-	
 	
 	
 	

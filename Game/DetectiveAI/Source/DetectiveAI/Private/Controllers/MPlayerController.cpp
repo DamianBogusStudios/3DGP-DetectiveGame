@@ -9,7 +9,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "GameClasses/MGameInstance.h"
 #include "PlayStation/DualSenseController.h"
-#include "Subsystems/InteractionSystem.h"
+// #include "Subsystems/InteractionSystem.h"
+#include "Subsystems/UISystem.h"
 
 
 void AMPlayerController::BeginPlay()
@@ -36,10 +37,9 @@ void AMPlayerController::BeginPlay()
 		}
 	}
 	
-	if (auto InteractionSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UInteractionSystem>())
+	if (auto InteractionSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UUISystem>())
 	{
-	 	InteractionSubsystem->OnStartDialogueAction.AddDynamic(this, &AMPlayerController::OnDialogueStarted);
-	 	InteractionSubsystem->OnFinishDialogueAction.AddDynamic(this, &AMPlayerController::OnDialogueFinished);
+	 	InteractionSubsystem->RequestInput.AddDynamic(this, &AMPlayerController::UIInputRequested);
 	}
 
 }
@@ -48,10 +48,9 @@ void AMPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 
 
-	if (auto InteractionSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UInteractionSystem>())
+	if (auto InteractionSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UUISystem>())
 	{
-		InteractionSubsystem->OnStartDialogueAction.RemoveDynamic(this, &AMPlayerController::OnDialogueStarted);
-		InteractionSubsystem->OnFinishDialogueAction.RemoveDynamic(this, &AMPlayerController::OnDialogueFinished);
+		InteractionSubsystem->RequestInput.RemoveDynamic(this, &AMPlayerController::UIInputRequested);
 	}
 }
 
@@ -59,7 +58,7 @@ void AMPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 	BindDefaultContextActions();
-	BindDialogueContextActions();
+	BindUIContextActions();
 }
 
 void AMPlayerController::OnGameLoaded()
@@ -82,11 +81,12 @@ void AMPlayerController::BindDefaultContextActions()
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &AMPlayerController::OnInteractInput);
 	}
 }
-void AMPlayerController::BindDialogueContextActions()
+void AMPlayerController::BindUIContextActions()
 {
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
 	{
-		EnhancedInputComponent->BindAction(AdvanceAction, ETriggerEvent::Triggered, this, &AMPlayerController::OnAdvanceInput);
+		EnhancedInputComponent->BindAction(UIAdvanceAction, ETriggerEvent::Triggered, this, &AMPlayerController::OnAdvanceInput_UI);
+		EnhancedInputComponent->BindAction(UIExitAction, ETriggerEvent::Triggered, this, &AMPlayerController::OnExitInput_UI);
 	}
 }
 
@@ -113,11 +113,18 @@ void AMPlayerController::OnInteractInput(const FInputActionValue& Value)
 	}
 }
 
-void AMPlayerController::OnAdvanceInput(const FInputActionValue& Value)
+void AMPlayerController::OnAdvanceInput_UI(const FInputActionValue& Value)
 {
-	if (auto InteractionSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UInteractionSystem>())
+	if (auto UI = GetWorld()->GetGameInstance()->GetSubsystem<UUISystem>())
 	{
-		InteractionSubsystem->AdvanceDialogueAction();
+		UI->Advance();
+	}
+}
+void AMPlayerController::OnExitInput_UI(const FInputActionValue& Value)
+{
+	if (auto UI = GetWorld()->GetGameInstance()->GetSubsystem<UUISystem>())
+	{
+		UI->Exit();
 	}
 }
 
@@ -136,30 +143,27 @@ void AMPlayerController::OnUnPossess()
 }
 
 
-void AMPlayerController::OnDialogueStarted(AActor* Caller, UDialogueWidget* WidgetClass)
+void AMPlayerController::UIInputRequested(bool InputNeeded)
 {
 	if (auto SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		if (InputContextMap.Contains(EInputContext::Dialogue) && InputContextMap[EInputContext::Dialogue])
 		{
-			SubSystem->AddMappingContext(InputContextMap[EInputContext::Dialogue].Get(), 1);
+ 		   if(InputNeeded)
+			{
+				SubSystem->AddMappingContext(InputContextMap[EInputContext::Dialogue].Get(), 1);
+ 		   	    SubSystem->RemoveMappingContext(InputContextMap[EInputContext::Default]);
 
-			bShowMouseCursor = true;
-			bEnableClickEvents = true;
-			bEnableMouseOverEvents = true;
-		}
-	}
-}
-
-void AMPlayerController::OnDialogueFinished(AActor* Caller, UDialogueWidget* WidgetClass)
-{
-	if (auto SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
-	{
-		if (InputContextMap.Contains(EInputContext::Dialogue) && InputContextMap[EInputContext::Dialogue])
-		{
-			SubSystem->RemoveMappingContext(InputContextMap[EInputContext::Dialogue].Get()); 
-
-			bShowMouseCursor =  bEnableClickEvents =  bEnableMouseOverEvents = false;
+				bShowMouseCursor = true;
+				bEnableClickEvents = true;
+				bEnableMouseOverEvents = true;
+			}
+			else
+			{
+				SubSystem->AddMappingContext(InputContextMap[EInputContext::Default], 0);
+				SubSystem->RemoveMappingContext(InputContextMap[EInputContext::Dialogue].Get()); 
+				bShowMouseCursor =  bEnableClickEvents =  bEnableMouseOverEvents = false;
+			}
 		}
 	}
 }

@@ -40,7 +40,7 @@ void AActorSpawner::SpawnActors(const TArray<FActorDescription>& Actors)
 		for (int i = 0; i < Actors.Num(); i++)
 		{
 			FVector SpawnLocation = GetActorLocation() + GetActorRightVector() * (i*Spacing);
-			FRotator SpawnRotation = FRotator::ZeroRotator;
+			FRotator SpawnRotation = FRotator(0.f, 180.f, 0.f);
 			FTransform SpawnTransform(SpawnRotation, SpawnLocation);
 			
 			/* don't have enough character models to be selective with eyecolour,haircolour etc. */
