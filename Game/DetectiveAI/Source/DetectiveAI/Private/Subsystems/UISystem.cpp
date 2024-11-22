@@ -2,7 +2,7 @@
 
 #include "Subsystems/UISystem.h"
 #include "Blueprint/UserWidget.h"
-#include "Settings/InteractionSettings.h"
+#include "Settings/WidgetClassSettings.h"
 #include "Interfaces/WidgetInterface.h"
 
 #pragma region  Init
@@ -152,11 +152,12 @@ void UUISystem::CheckInputNeeded() const
 
 void UUISystem::LoadWidgetClasses()
 {
-	if (auto Settings = GetDefault<UInteractionSettings>())
+	if (auto Settings = GetDefault<UWidgetClassSettings>())
 	{
-		WidgetMap.Add(EUIElementType::NPCDialogue, {Settings->DialogueWidgetClass});
-		WidgetMap.Add(EUIElementType::LockpickMiniGame, {Settings->LockpickMiniGameClass});
-		WidgetMap.Add(EUIElementType::Loading, {Settings->LoadingWidgetClass});
+		WidgetMap.Add(EUIElementType::NPCDialogue, {Settings->DialogueBox});
+		WidgetMap.Add(EUIElementType::LockpickMiniGame, {Settings->LockpickMiniGame});
+		WidgetMap.Add(EUIElementType::Loading, {Settings->LoadingGame});
+		WidgetMap.Add(EUIElementType::MicFeedback, {Settings->MicFeedback});
 	}
 }
 	

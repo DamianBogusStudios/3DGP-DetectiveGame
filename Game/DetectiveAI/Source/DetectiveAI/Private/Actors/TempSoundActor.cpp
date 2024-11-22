@@ -29,7 +29,7 @@ void ATempSoundActor::BeginPlay()
 	if(TTSService)
 	{
 		VoiceDelegate.BindUObject(this, &ATempSoundActor::VoiceReceived);
-		TTSService->SendTextToVoice(GetWorld()->GetFirstPlayerController(), VoiceMsg, VoiceDelegate);
+		// TTSService->SendTextToVoice(GetWorld()->GetFirstPlayerController(), VoiceMsg, VoiceDelegate);
 	}
 	/********/
 }

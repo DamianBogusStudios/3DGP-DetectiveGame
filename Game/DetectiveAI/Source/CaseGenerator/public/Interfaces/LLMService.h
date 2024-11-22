@@ -28,10 +28,12 @@ public:
 	virtual void SendCustomInstructions(UObject* const Caller,const FString& Message) = 0;
 
 	virtual void SendMessage( UObject* const Caller, const FString& Message,
-				FMessageDelegate& Delegate) = 0;
+				FMessageDelegate Callback,
+				FErrorReceivedDelegate ErrorCallback) = 0;
 
 	virtual void SendStructuredMessage(UObject* const Caller, const FString& Message, UScriptStruct* StructSchema,
-				 FStructuredMessageDelegate& Delegate) = 0;
+				FStructuredMessageDelegate Callback,
+				FErrorReceivedDelegate ErrorCallback) = 0;
 
 
 	

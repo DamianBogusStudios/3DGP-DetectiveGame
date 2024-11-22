@@ -17,7 +17,7 @@ struct FHttpGPTChatMessage;
 class UHttpGPTChatRequest;
 class UDataTable;
 
-USTRUCT(BlueprintType)
+USTRUCT()
 struct FMessageRequest
 {
 	GENERATED_BODY()
@@ -79,10 +79,10 @@ public:
 	virtual void SendCustomInstructions(UObject* const Caller, const FString& Message) override;
 
 	virtual void SendMessage( UObject* const Caller, const FString& Message,
-				FMessageDelegate& Delegate) override;
+				FMessageDelegate Callback, FErrorReceivedDelegate ErrorCallback) override;
 
 	virtual void SendStructuredMessage(UObject* const Caller, const FString& Message, UScriptStruct* StructSchema,
-				FStructuredMessageDelegate& Delegate) override;
+				FStructuredMessageDelegate Callback, FErrorReceivedDelegate ErrorCallback) override;
 
 	// virtual void SendMessage(UObject* Caller, FString& Message) override;
 	// virtual void SendStructuredMessage(UObject* const WorldObject, const FString& Message,  UScriptStruct* Struct) override;

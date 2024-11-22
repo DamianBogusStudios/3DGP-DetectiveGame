@@ -9,6 +9,45 @@
 
 class USoundWaveProcedural;
 class UHttpGPTVoiceRequest;
+
+USTRUCT()
+struct FVoiceRequest
+{
+	GENERATED_BODY()
+	
+	
+	TWeakObjectPtr<UObject> Caller;
+	FString Message;
+	FVoiceDelegate OnVoiceReceived;
+	FErrorReceivedDelegate OnErrorReceived;
+	
+	double StartTime = 0;
+	double EndTime = 0;
+	
+	FVoiceRequest(UObject* InCaller, const FString& InMessage, const FVoiceDelegate& Callback, const FErrorReceivedDelegate& OnErrorReceived)
+		: Caller(InCaller), Message(InMessage), OnVoiceReceived(Callback), OnErrorReceived(OnErrorReceived)
+	{
+		StartTime = FPlatformTime::Seconds();
+	}
+
+	FVoiceRequest()
+	{
+		
+	}
+
+	void ExecuteCallback(USoundWaveProcedural* VoiceAudio)
+	{
+		EndTime = FPlatformTime::Seconds();
+		
+		OnVoiceReceived.ExecuteIfBound(VoiceAudio);
+	}
+
+	void ExecuteError(FString ErrorMsg) const
+	{
+		OnErrorReceived.ExecuteIfBound(ErrorMsg, nullptr);
+	}
+};
+
 /**
  * 
  */
@@ -20,21 +59,18 @@ class CASEGENERATOR_API UGPTVoiceHandler : public UObject, public ITTSService
 public:
 
 	UGPTVoiceHandler();
-
-	FVoiceDelegate OnVoiceReceived;
-
-	/* text -> voice*/
-	virtual void SendTextToVoice(UObject* const Caller, const FString& Message, FVoiceDelegate Delegate) override;
+	
+	virtual void SendTextToVoice(UObject* const Caller, const FString& Message, FVoiceDelegate Callback, FErrorReceivedDelegate ErrorCallback) override;
 
 private:
-
-	void SendTextForVoiceResponse(UObject* const Caller, const FString& Message);
-
-	void BindCallbacks(UHttpGPTVoiceRequest* Request);
 	
+	FVoiceRequest VoiceRequest;
+
 	UFUNCTION()
-	void OnErrorReceived(const FString& ErrorMsg);
+	void BindCallbacks(UHttpGPTVoiceRequest* Request);
 	UFUNCTION()
-	void OnSpeechSynthesized(USoundWaveProcedural* AudioData);
+	void OnErrorReceivedInternal(const FString& ErrorMsg) ;
+	UFUNCTION()
+	void OnSpeechSynthesizedInternal(USoundWaveProcedural* AudioData);
 
 };

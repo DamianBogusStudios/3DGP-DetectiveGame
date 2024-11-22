@@ -35,12 +35,13 @@ void UDialogueComponent::GetServices()
 {
 	LLMService = UServiceLocator::GetService_LLM();
 	TTSService = UServiceLocator::GetService_TTS();
+	STTService = UServiceLocator::GetService_STT();
 }
 
 void UDialogueComponent::BindCallbacks()
 {
-	MessageDelegate.BindUObject(this, &UDialogueComponent::OnMessageReceived);
-	VoiceDelegate.BindUObject(this, &UDialogueComponent::OnVoiceReceived);
+	// MessageDelegate.BindUObject(this, &UDialogueComponent::OnMessageReceived);
+	// VoiceDelegate.BindUObject(this, &UDialogueComponent::OnVoiceReceived);
 }
 
 
@@ -77,7 +78,7 @@ void UDialogueComponent::SendMessageToActor(const FString& Prompt)
 	
 	if(LLMService && bActorRegistered)
 	{
-		LLMService->SendMessage(this, Prompt, MessageDelegate);
+		// LLMService->SendMessage(this, Prompt, MessageDelegate);
 	}
 }
 
@@ -88,11 +89,11 @@ void UDialogueComponent::OnMessageReceived(FString& Message)
 {
 	UE_LOG(LogTemp, Display, TEXT("Actor Spoke %s"), *Message);
 
-	MessageRelayDelegate.ExecuteIfBound(Message);
+	// MessageRelayDelegate.ExecuteIfBound(Message);
 	
 	if(TTSService)
 	{
-		TTSService->SendTextToVoice(this, Message, VoiceDelegate);
+		// TTSService->SendTextToVoice(this, Message, VoiceDelegate);
 	}
 }
 

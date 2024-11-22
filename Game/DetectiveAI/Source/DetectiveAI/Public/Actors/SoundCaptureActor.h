@@ -42,9 +42,7 @@ class DETECTIVEAI_API ASoundCaptureActor : public AActor, public IAudioBufferLis
 public:
 	// Sets default values for this actor's properties
 	ASoundCaptureActor();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget")
-	TSubclassOf<UUserWidget> WidgetClass;
+	
 	UPROPERTY()
 	TObjectPtr<UAudioCaptureComponent> AudioCaptureComponent;
 	UPROPERTY()
@@ -110,5 +108,7 @@ private:
 	void GenerateWavData();
 
 	UFUNCTION()
-	void TranscriptReceived(const FString& Transcript);
+	void TranscriptReceived(FString& Transcript);
+	UFUNCTION()
+	void ErrorReceived(FString& ErrorMessage, UScriptStruct* Schema);
 };

@@ -58,6 +58,15 @@ void ULockpickMiniGame::PickPin()
 	}
 }
 
+void ULockpickMiniGame::RaisePin(float Percentage)
+{
+	if(CurrentPin < Pins.Num())
+	{
+		Pins[CurrentPin].TargetY = 0;
+		Pins[CurrentPin].bMovingUp = true;
+	}
+}
+
 void ULockpickMiniGame::SecurePin()
 {
 	if(CurrentPin < Pins.Num())

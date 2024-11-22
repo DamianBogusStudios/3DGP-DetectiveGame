@@ -9,8 +9,9 @@
 #include "DialogueComponent.generated.h"
 
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FMessageRelayDelegate, const FString&, MessageRelay);
+// DECLARE_DYNAMIC_DELEGATE_OneParam(FMessageRelayDelegate, const FString&, MessageRelay);
 
+class ISTTService;
 class ITTSService;
 class ILLMService;
 class UDialogueWidget;
@@ -25,16 +26,16 @@ public:
 	// Sets default values for this component's properties
 	UDialogueComponent();
 	
-	// UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AI)
-	// TObjectPtr<UBehaviorTree> DialogueTree;
-	//
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NPC")
 	FActorDescription ActorDescription;
 
-	FMessageDelegate MessageDelegate;
-	FVoiceDelegate VoiceDelegate;
+	UPROPERTY()
+	TScriptInterface<ILLMService> LLMService;
+	UPROPERTY()
+	TScriptInterface<ITTSService> TTSService;
+	UPROPERTY()
+	TScriptInterface<ISTTService> STTService;
 	
-	FMessageRelayDelegate MessageRelayDelegate;
 
 	UFUNCTION()
 	void SetDescription(const FActorDescription& Description);
@@ -46,11 +47,6 @@ public:
 	void SendMessageToActor(const FString& Message);
 	
 protected:
-
-	UPROPERTY()
-	TScriptInterface<ILLMService> LLMService;
-	UPROPERTY()
-	TScriptInterface<ITTSService> TTSService;
 
 	UPROPERTY()
 	TObjectPtr<USoundWaveProcedural> ProcessedSoundWave;
@@ -72,42 +68,4 @@ protected:
 	void RegisterWitness();
 	void OnMessageReceived(FString& Message);
 	void OnVoiceReceived(USoundWaveProcedural* SoundWave);
-	
-	//
-	// UFUNCTION()
-	// void OnDialogueStarted(AActor* Caller, UUserWidget* Widget);
-	//
-	// UFUNCTION()
-	// void OnAdvanceDialogue(AActor* Caller, UUserWidget* Widget);
-	//
-	// UFUNCTION()
-	// void OnFinishDialogue(AActor* Caller, UUserWidget* Widget);
-	//
-	// // UFUNCTION()
-	// // void OnMessageReceived(TObjectPtr<UActorDescription>);
-	//
-	// UFUNCTION()
-	// void OnDialogueOptionsReceived(FDialogueOptions& InDialogueOptions);
-	//
-	// UFUNCTION(BlueprintCallable)
-	// FString GetGreeting();
-	//
-	// UFUNCTION(BlueprintCallable)
-	// FDialogueOptions GetDialogueOptions();
-	
-
-	// FDialogueOptionsDelegate DialogueOptionsDelegate;
-	
-// protected:
-//
-// 	// virtual void BeginPlay() override;
-// 	// virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-// private:
-
-	// TScriptInterface<IDialogueProvider> DialogueProvider; 
-	// bool bInDialogue = false;
-	//
-	// void BindDialogueDelegates();
-	// void UnBindDialogueDelegates();
-
 	};

@@ -96,6 +96,9 @@ public:
 	void PickPin();
 
 	UFUNCTION(BlueprintCallable)
+	void RaisePin(float Percentage);
+
+	UFUNCTION(BlueprintCallable)
 	void MovePick(bool bLeft);
 
 	

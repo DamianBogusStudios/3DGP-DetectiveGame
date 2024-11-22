@@ -9,7 +9,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FUIActionDelegate, AActor*, Caller, UUserWidget*, Widget);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRequestInputDelegate, bool, bInputNeeded);
 
-class UInteractionSettings;
+class UWidgetClassSettings;
 class UActorComponent;
 
 UENUM(BlueprintType)
@@ -19,7 +19,8 @@ enum class EUIElementType : uint8
 	LockpickMiniGame,
 	PauseMenu,
 	HUD,
-	Loading
+	Loading,
+	MicFeedback
 };
 
 USTRUCT(BlueprintType)

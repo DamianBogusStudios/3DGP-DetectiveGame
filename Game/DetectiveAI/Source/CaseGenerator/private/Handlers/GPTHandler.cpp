@@ -255,19 +255,20 @@ void UGPTHandler::SendCustomInstructions(UObject* const Caller, const FString& M
 	AddMessageToHistory(Caller, EHttpGPTChatRole::System, Message);
 }
 
-void UGPTHandler::SendMessage(UObject* const Caller, const FString& Message, FMessageDelegate& Delegate)
+void UGPTHandler::SendMessage(UObject* const Caller, const FString& Message, 
+				FMessageDelegate Callback, FErrorReceivedDelegate ErrorCallback)
 {
 	FMessageRequest Request = FMessageRequest(Caller, Message, nullptr);
-	Request.OnMessageReceived = Delegate;
+	Request.OnMessageReceived = Callback;
 	AddMessageToHistory(Caller, EHttpGPTChatRole::User, Message);
 	AddNewRequest(Request);
 }
 
 void UGPTHandler::SendStructuredMessage(UObject* const WorldObject, const FString& Message, UScriptStruct* Struct,
-	 FStructuredMessageDelegate& Delegate)
+				FStructuredMessageDelegate Callback, FErrorReceivedDelegate ErrorCallback)
 {
 	FMessageRequest Request = FMessageRequest(WorldObject, Message, Struct);
-	Request.OnStructuredMessageReceived = Delegate;
+	Request.OnStructuredMessageReceived = Callback;
 	
 	AddMessageToHistory(WorldObject, EHttpGPTChatRole::User, Message);
 	AddNewRequest(Request);

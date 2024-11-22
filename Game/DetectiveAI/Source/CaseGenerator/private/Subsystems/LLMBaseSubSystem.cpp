@@ -14,7 +14,6 @@ void ULLMBaseSubSystem::Initialize(FSubsystemCollectionBase& Collection)
 	LLMService = UServiceLocator::GetService_LLM();
 
 	GetConfigFiles();
-	BindCallbacks();
 	PostInit();
 }
 
@@ -37,6 +36,12 @@ void ULLMBaseSubSystem::StructuredMessageReceived(FString& Message, UScriptStruc
 	UE_LOG(LogTemp, Warning, TEXT("ULLMBaseSubSystem:StructuredMessageReceived Called. Function should be overriden by derived class"));
 #endif
 }
+void ULLMBaseSubSystem::ErrorReceived(FString& Message, UScriptStruct* Schema)
+{
+#if UE_EDITOR
+	UE_LOG(LogTemp, Warning, TEXT("ULLMBaseSubSystem:ErrorReceived Called. Function should be overriden by derived class"));
+#endif
+}
 #pragma endregion
 
 void ULLMBaseSubSystem::Deinitialize()
@@ -54,11 +59,11 @@ void ULLMBaseSubSystem::GetConfigFiles()
 	}
 }
 
-void ULLMBaseSubSystem::BindCallbacks()
-{
-	MessageDelegate.BindUObject(this, &ULLMBaseSubSystem::MessagedReceivedDelegate);
-	StructuredMessageDelegate.BindUObject(this, &ULLMBaseSubSystem::StructuredMessageReceivedDelegate);
-}
+// void ULLMBaseSubSystem::BindCallbacks()
+// {
+// 	MessageDelegate.BindUObject(this, &ULLMBaseSubSystem::MessagedReceivedDelegate);
+// 	StructuredMessageDelegate.BindUObject(this, &ULLMBaseSubSystem::StructuredMessageReceivedDelegate);
+// }
 #pragma endregion
 
 #pragma region Requests
@@ -75,29 +80,48 @@ void ULLMBaseSubSystem::SendMessage(const FString& Prompt)
 {
 	if(LLMService)
 	{
-		LLMService->SendMessage(this, Prompt, MessageDelegate);
+		LLMService->SendMessage(this, Prompt,
+			FMessageDelegate::CreateUObject(this, &ULLMBaseSubSystem::OnMessagedReceivedInternal),
+			FErrorReceivedDelegate::CreateUObject(this, &ULLMBaseSubSystem::OnErrorReceivedInternal)
+		);
 	}
 }
+
+// void ULLMBaseSubSystem::SendMessage(const FString& Prompt)
+// {
+// 	if(LLMService)
+// 	{
+// 		LLMService->SendMessage(this, Prompt, MessageDelegate);
+// 	}
+// }
 
 void ULLMBaseSubSystem::SendStructuredMessage(const FString& Prompt, UScriptStruct* Schema)
 {
 	if(LLMService)
 	{
-		LLMService->SendStructuredMessage(this, Prompt, Schema, StructuredMessageDelegate);
+		LLMService->SendStructuredMessage(this, Prompt, Schema, 
+		FStructuredMessageDelegate::CreateUObject(this, &ULLMBaseSubSystem::OnStructuredMessageReceivedInternal),
+			FErrorReceivedDelegate::CreateUObject(this, &ULLMBaseSubSystem::OnErrorReceivedInternal)
+		);
 	}
 }
 
 #pragma endregion 
 
 #pragma region Callbacks
-void ULLMBaseSubSystem::MessagedReceivedDelegate(FString& Message)
+void ULLMBaseSubSystem::OnMessagedReceivedInternal(FString& Message)
 {
 	this->MessageReceived(Message);
 }
 
-void ULLMBaseSubSystem::StructuredMessageReceivedDelegate(FString& Message, UScriptStruct* Struct)
+void ULLMBaseSubSystem::OnStructuredMessageReceivedInternal(FString& Message, UScriptStruct* Struct)
 {
 	this->StructuredMessageReceived(Message, Struct);
+}
+
+void ULLMBaseSubSystem::OnErrorReceivedInternal(FString& Message, UScriptStruct* Struct)
+{
+	this->ErrorReceived(Message, Struct);
 }
 
 // void ULLMBaseSubSystem::FunctionCallReceived(UObject* Caller, FString& Message, FName& FunctionName, TArray<FString>& ArgNames, TArray<FString>& ArgValues)

@@ -3,7 +3,7 @@
 
 #include "Handlers/ServiceLocator.h"
 #include "Handlers/GPTHandler.h"
-#include "Handlers/GPTSpeechHandler.h"
+#include "Handlers/GPTTranscriptHandler.h"
 #include "Handlers/GPTVoiceHandler.h"
 #include "Handlers/NullLLMService.h"
 #include "Handlers/NullVoiceHandler.h"
@@ -135,7 +135,7 @@ void UServiceLocator::InitializeSTTService()
 		switch (Settings->GetActiveTTS())
 		{
 		case EActiveTTS::OpenAI:
-			Handler = NewObject<UGPTSpeechHandler>();
+			Handler = NewObject<UGPTTranscriptHandler>();
 			break;
 		default:
 			//Handler = NewObject<UNullVoiceHandler>();

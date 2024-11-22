@@ -1,4 +1,5 @@
-﻿// SubmixBufferListener.h
+﻿#pragma once
+
 #include "CoreMinimal.h"
 #include "ISubmixBufferListener.h"
 #include "Actors/SoundCaptureActor.h"

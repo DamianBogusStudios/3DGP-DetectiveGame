@@ -3,10 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Types/CommonCaseTypes.h"
 #include "UObject/Interface.h"
 #include "STTService.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTranscriptDelegate, const FString&, TranscribedText);
+// DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTranscriptDelegate, const FString&, TranscribedText);
 
 // This class does not need to be modified.
 UINTERFACE()
@@ -25,7 +26,7 @@ class CASEGENERATOR_API ISTTService
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	virtual void SendSpeechForTranscript(UObject* const Caller, TArray<uint8>& AudioData) = 0;
-
-	virtual FTranscriptDelegate& GetDelegate() = 0;
+	virtual void SendSpeechForTranscript(UObject* const Caller, TArray<uint8>& AudioData,
+		FTranscriptDelegate Callback,
+		FErrorReceivedDelegate ErrorCallback) = 0;
 };

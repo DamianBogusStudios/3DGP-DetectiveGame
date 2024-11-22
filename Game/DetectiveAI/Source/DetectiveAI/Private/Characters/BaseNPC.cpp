@@ -2,7 +2,7 @@
 
 
 #include "Characters/BaseNPC.h"
-#include "GameClasses/MGameInstance.h"
+#include "GameClasses/AGPGameInstance.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "ActorComponents/DialogueComponent.h"
 
@@ -68,7 +68,7 @@ void ABaseNPC::OnFocus_Implementation()
 {
 	if(GetMesh())
 	{
-		UMGameInstance* GameInstance = Cast<UMGameInstance>(GetGameInstance());
+		UAGPGameInstance* GameInstance = Cast<UAGPGameInstance>(GetGameInstance());
 
 		if(GameInstance)
 		{

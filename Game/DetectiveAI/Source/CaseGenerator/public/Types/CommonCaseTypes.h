@@ -7,6 +7,8 @@
 
 /* used for runtime lookup */
 
+class USoundWaveProcedural;
+
 USTRUCT(BlueprintType)
 struct FDescriptionTableRow : public FTableRowBase
 {
@@ -266,16 +268,23 @@ struct CASEGENERATOR_API FCaseFile
 #pragma region DELEGATES
 
 DECLARE_DELEGATE_OneParam(FMessageDelegate,
-	FString& /* Message */ );
+FString& /* Message */ );
+
+DECLARE_DELEGATE_OneParam(FTranscriptDelegate,
+FString& /* Message */ );
+
+DECLARE_DELEGATE_OneParam(FVoiceDelegate,
+	USoundWaveProcedural* /* VoiceAudioData */ );
 
 DECLARE_DELEGATE_TwoParams(FStructuredMessageDelegate,
 	FString& /*Message*/,
 	UScriptStruct* /* StructSchema*/);
 
-
 DECLARE_DELEGATE_TwoParams(FErrorReceivedDelegate,
 	FString& /*Message*/,
 	UScriptStruct* /* StructSchema*/);
+
+
 
 DECLARE_DYNAMIC_DELEGATE_FiveParams(FFunctionCallDelegate,
 	UObject*, Caller,
@@ -284,7 +293,7 @@ DECLARE_DYNAMIC_DELEGATE_FiveParams(FFunctionCallDelegate,
 	TArray<FString>&, ArgumentNames,
 	TArray<FString>&, ArgumentValues);
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDialogueOptionsDelegate,
-	FDialogueOptions&, DialogueOptions);
+// DECLARE_DYNAMIC_DELEGATE_OneParam(FDialogueOptionsDelegate,
+// 	FDialogueOptions&, DialogueOptions);
 
 #pragma endregion 

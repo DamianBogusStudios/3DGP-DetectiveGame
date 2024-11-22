@@ -6,7 +6,7 @@
 #include "Components/Button.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
-#include "GameClasses/MGameInstance.h"
+#include "GameClasses/AGPGameInstance.h"
 #include "Subsystems/CaseSystem.h"
 #include "Subsystems/UISystem.h"
 
@@ -15,7 +15,7 @@ void ULoadingWidget::NativeConstruct()
 	Super::NativeConstruct();
 	StartGameBtn->OnClicked.AddDynamic(this, &ULoadingWidget::OnStartGamePressed);
 
-	if(auto GI = Cast<UMGameInstance>(GetWorld()->GetGameInstance()))
+	if(auto GI = Cast<UAGPGameInstance>(GetWorld()->GetGameInstance()))
 	{
 		GI->OnGameFinishedLoading.AddDynamic(this, &ULoadingWidget::OnGameLoaded);
 		GI->OnGenProgressUpdated.AddDynamic(this, &ULoadingWidget::OnProgressUpdated);
@@ -24,7 +24,7 @@ void ULoadingWidget::NativeConstruct()
 
 void ULoadingWidget::OnStartGamePressed()
 {
-	if(auto GameInstance = Cast<UMGameInstance>(GetGameInstance()))
+	if(auto GameInstance = Cast<UAGPGameInstance>(GetGameInstance()))
 	{
 		GameInstance->StartGame();
 		StartGameBtn->SetVisibility(ESlateVisibility::Hidden);

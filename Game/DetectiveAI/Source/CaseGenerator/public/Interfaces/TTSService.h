@@ -3,13 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Types/CommonCaseTypes.h"
 #include "UObject/Interface.h"
 #include "TTSService.generated.h"
 
 class USoundWaveProcedural;
 
-DECLARE_DELEGATE_OneParam(FVoiceDelegate,
-                          USoundWaveProcedural* /* Message */);
+// DECLARE_DELEGATE_OneParam(FVoiceDelegate,
+//                           USoundWaveProcedural* /* Message */);
 
 // This class does not need to be modified.
 UINTERFACE()
@@ -28,6 +29,8 @@ class CASEGENERATOR_API ITTSService
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	virtual void SendTextToVoice(UObject* const Caller, const FString& Message, FVoiceDelegate Delegate) = 0;
+	virtual void SendTextToVoice(UObject* const Caller, const FString& Message,
+		FVoiceDelegate Callback,
+		FErrorReceivedDelegate ErrorCallback) = 0;
 	
 };

@@ -21,12 +21,13 @@ void UNullLLMService::SendCustomInstructions(UObject* const Caller, const FStrin
 {
 }
 
-void UNullLLMService::SendMessage(UObject* const Caller, const FString& Message, FMessageDelegate& Delegate)
+void UNullLLMService::SendMessage(UObject* const Caller, const FString& Message,
+	FMessageDelegate Delegate, FErrorReceivedDelegate ErrorCallback)
 {
 }
 
 void UNullLLMService::SendStructuredMessage(UObject* const WorldObject, const FString& Message, UScriptStruct* Struct,
-	FStructuredMessageDelegate& Delegate)
+	FStructuredMessageDelegate Delegate, FErrorReceivedDelegate ErrorCallback)
 {
 }
 

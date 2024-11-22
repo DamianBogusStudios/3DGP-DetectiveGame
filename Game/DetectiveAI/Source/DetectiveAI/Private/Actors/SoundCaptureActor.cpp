@@ -25,31 +25,30 @@ ASoundCaptureActor::ASoundCaptureActor()
 void ASoundCaptureActor::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if(auto Widget = CreateWidget(GetWorld()->GetFirstPlayerController(), WidgetClass))
-	{
-		Widget->AddToViewport();
-	}
-
-	AudioSubmix = NewObject<USoundSubmix>(USoundSubmix::StaticClass());
-	STTService = UServiceLocator::GetService_STT();
-	STTService->GetDelegate().AddDynamic(this, &ASoundCaptureActor::TranscriptReceived);
 	
+	STTService = UServiceLocator::GetService_STT();
+
+	if(auto UI = GetGameInstance()->GetSubsystem<UUISystem>())
+	{
+		UI->RequestStartWidget(GetWorld()->GetFirstPlayerController(), EUIElementType::MicFeedback);
+	}
+	
+	AudioSubmix = NewObject<USoundSubmix>(USoundSubmix::StaticClass());
 	if (AudioCaptureComponent)
 	{
-		// FAudioDevice* AudioDevice = GetWorld()->GetAudioDeviceRaw();
-		//
-		// BufferListener = MakeShared<FSubmixBufferListener>(TWeakObjectPtr<ASoundCaptureActor>(this));
-		// // ISubmixBufferListener* BufferListenerPtr = BufferListener.Get();
-		//
-		// AudioCaptureComponent->SoundSubmix = AudioSubmix;
-		// AudioCaptureComponent->SetOutputToBusOnly(true);
-		// AudioCaptureComponent->Start();
+		FAudioDevice* AudioDevice = GetWorld()->GetAudioDeviceRaw();
 		
-		// if (AudioDevice && AudioSubmix)
-		// {
-		// 	AudioDevice->RegisterSubmixBufferListener(BufferListener.ToSharedRef(), *AudioSubmix);
-		// }
+		BufferListener = MakeShared<FSubmixBufferListener>(TWeakObjectPtr<ASoundCaptureActor>(this));
+		// ISubmixBufferListener* BufferListenerPtr = BufferListener.Get();
+		
+		AudioCaptureComponent->SoundSubmix = AudioSubmix;
+		AudioCaptureComponent->SetOutputToBusOnly(true);
+		AudioCaptureComponent->Start();
+		
+		if (AudioDevice && AudioSubmix)
+		{
+			AudioDevice->RegisterSubmixBufferListener(BufferListener.Get(), AudioSubmix);
+		}
 	}
 }
 
@@ -60,11 +59,11 @@ void ASoundCaptureActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		AudioCaptureComponent->Stop();
 	}
 
-	FAudioDevice* AudioDevice = GetWorld()->GetAudioDeviceRaw();
-	if (AudioDevice && AudioSubmix)
-	{
-		AudioDevice->UnregisterSubmixBufferListener(BufferListener.ToSharedRef(), AudioDevice->GetMainSubmixObject());
-	}
+	// FAudioDevice* AudioDevice = GetWorld()->GetAudioDeviceRaw();
+	// if (AudioDevice && AudioSubmix)
+	// {
+	// 	AudioDevice->UnregisterSubmixBufferListener(BufferListener.ToSharedRef(), AudioDevice->GetMainSubmixObject());
+	// }
 
 	Super::EndPlay(EndPlayReason);
 }
@@ -144,7 +143,9 @@ void ASoundCaptureActor::StopRecording()
 	if(STTService)
 	{
 		StartTranscriptionTime = GetWorld()->GetTimeSeconds();
-		STTService->SendSpeechForTranscript(this, FinalAudioData);
+		STTService->SendSpeechForTranscript(this, FinalAudioData,
+		FTranscriptDelegate::CreateUObject(this, &ASoundCaptureActor::TranscriptReceived),
+				FErrorReceivedDelegate::CreateUObject(this, &ASoundCaptureActor::ErrorReceived));
 	}
 	
 	UE_LOG(LogTemp, Log, TEXT("Recording stopped."));
@@ -218,7 +219,7 @@ void ASoundCaptureActor::GenerateWavData()
     UE_LOG(LogTemp, Log, TEXT("Audio data converted to WAV format. Size: %d bytes"), FinalAudioData.Num());
 }
 
-void ASoundCaptureActor::TranscriptReceived(const FString& Transcript)
+void ASoundCaptureActor::TranscriptReceived(FString& Transcript)
 {
 	if(auto UI = GetGameInstance()->GetSubsystem<UUISystem>())
 	{
@@ -239,6 +240,11 @@ void ASoundCaptureActor::TranscriptReceived(const FString& Transcript)
 	}
 	
 }
+
+void ASoundCaptureActor::ErrorReceived(FString& ErrorMessage, UScriptStruct* Schema)
+{
+}
+
 
 void ASoundCaptureActor::ToggleVoiceCapture(bool InEnableVoiceCapture)
 {

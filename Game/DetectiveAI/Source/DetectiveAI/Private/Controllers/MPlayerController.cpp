@@ -7,7 +7,7 @@
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"
-#include "GameClasses/MGameInstance.h"
+#include "GameClasses/AGPGameInstance.h"
 #include "PlayStation/DualSenseController.h"
 // #include "Subsystems/InteractionSystem.h"
 #include "Subsystems/UISystem.h"
@@ -31,7 +31,7 @@ void AMPlayerController::BeginPlay()
 
 	if(auto GameInstance = GetWorld()->GetGameInstance())
 	{
-		if(auto CustomGameInstance = Cast<UMGameInstance>(GameInstance))
+		if(auto CustomGameInstance = Cast<UAGPGameInstance>(GameInstance))
 		{
 			CustomGameInstance->OnGameFinishedLoading.AddDynamic(this, &AMPlayerController::OnGameLoaded);
 		}

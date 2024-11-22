@@ -2,7 +2,7 @@
 
 
 #include "Subsystems/InteractionSystem.h"
-#include "Settings/InteractionSettings.h"
+#include "Settings/WidgetClassSettings.h"
 #include "UI/DialogueWidget.h"
 #include "UI/LockpickMiniGame.h"
 
@@ -15,7 +15,7 @@ void UInteractionSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	if (const UInteractionSettings* Settings = GetDefault<UInteractionSettings>())
+	if (const UWidgetClassSettings* Settings = GetDefault<UWidgetClassSettings>())
 	{
 	//	DialogueWidgetClass = Settings->GetDialogueWidgetClass();
 	 //   LockpickMiniGameClass = Settings->GetLockpickMiniGameClass();

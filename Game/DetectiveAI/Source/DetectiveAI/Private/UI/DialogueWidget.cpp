@@ -20,7 +20,7 @@ void UDialogueWidget::Setup_Implementation(UObject* Caller)
 
 	if (DialogueComponent)
 	{
-		DialogueComponent->MessageRelayDelegate.BindDynamic(this, &UDialogueWidget::SpeechReceived);	
+		// DialogueComponent->MessageRelayDelegate.BindDynamic(this, &UDialogueWidget::SpeechReceived);	
 		Speak("Hello");
 	}
 	else
@@ -51,7 +51,7 @@ void UDialogueWidget::Cleanup_Implementation()
 {
 	if (DialogueComponent)
 	{
-		DialogueComponent->MessageRelayDelegate.Unbind();
+		// DialogueComponent->MessageRelayDelegate.Unbind();
 		DialogueComponent = nullptr;
 	}
 	ResetDialogueWidget();

@@ -18,9 +18,12 @@ class CASEGENERATOR_API UNullLLMService : public UObject, public ILLMService
 
 public:
 	virtual void SendCustomInstructions(UObject* const Caller, const FString& Message) override;
-	virtual void SendMessage(UObject* const Caller, const FString& Message, FMessageDelegate& Delegate) override;
-	virtual void SendStructuredMessage(UObject* const WorldObject, const FString& Message,
-		UScriptStruct* Struct, FStructuredMessageDelegate& Delegate) override;
+	virtual void SendMessage(UObject* const Caller, const FString& Message,
+				FMessageDelegate Callback,
+				FErrorReceivedDelegate ErrorCallback) override;
+	virtual void SendStructuredMessage(UObject* const Caller, const FString& Message, UScriptStruct* StructSchema,
+				FStructuredMessageDelegate Callback,
+				FErrorReceivedDelegate ErrorCallback) override;
 
 	
 	virtual void AddFunction(const FName& InName, const FString& InDescription) override;

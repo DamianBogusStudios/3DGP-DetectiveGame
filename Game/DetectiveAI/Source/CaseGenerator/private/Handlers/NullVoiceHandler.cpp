@@ -3,6 +3,6 @@
 
 #include "Handlers/NullVoiceHandler.h"
 
-void UNullVoiceHandler::SendTextToVoice(UObject* const Caller, const FString& Message, FVoiceDelegate VoiceDelegate)
+void UNullVoiceHandler::SendTextToVoice(UObject* const Caller, const FString& Message, FVoiceDelegate VoiceDelegate, FErrorReceivedDelegate ErrorDelegate)
 {
 }

@@ -8,8 +8,8 @@ public class DetectiveAITarget : TargetRules
 	public DetectiveAITarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Game;
-		DefaultBuildSettings = BuildSettingsVersion.V5;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_4;
+		DefaultBuildSettings = BuildSettingsVersion.V2;
+		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_3;
 		ExtraModuleNames.Add("DetectiveAI");
 		ExtraModuleNames.Add("CaseGenerator");
 		ExtraModuleNames.Add("InventorySystem");
