@@ -146,8 +146,7 @@ UUserWidget* UUISystem::GetWidget(EUIElementType WidgetType)
 
 void UUISystem::CheckInputNeeded() const
 {
-	bool bInputNeeded = (WidgetQueue.Contains(EUIElementType::LockpickMiniGame) || WidgetQueue.Contains(EUIElementType::NPCDialogue));
-	RequestInput.Broadcast(bInputNeeded);
+	RequestInput.Broadcast(WidgetQueue);
 }
 
 void UUISystem::LoadWidgetClasses()

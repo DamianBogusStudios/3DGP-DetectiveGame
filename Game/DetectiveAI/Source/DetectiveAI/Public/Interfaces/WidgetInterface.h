@@ -24,13 +24,12 @@ class DETECTIVEAI_API IWidgetInterface
 public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "UI")
-	void Cleanup();
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "UI")
 	void Setup(UObject* Caller);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "UI")
 	void Advance();
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "UI")
+	void Cleanup();
 
 };

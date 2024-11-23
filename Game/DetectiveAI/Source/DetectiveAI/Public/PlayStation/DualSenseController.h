@@ -6,6 +6,7 @@
 #include "UObject/Object.h"
 #include "DualSenseController.generated.h"
 
+
 /**
  * 
  */
@@ -21,7 +22,12 @@ public:
 
 
 	UFUNCTION(Blueprintable, Category = "DualSense")
-	static void SetTriggerEffectProperty(int StartPos, int EndPos, int Strength, int Trigger);
+	static void SetTriggerEffectProperty(uint8 StartPos, uint8 EndPos, uint8 Strength, int Trigger,int Effect);
+
+	UFUNCTION(Blueprintable, Category = "DualSense")
+	static void ResetTriggers();
+	
+	
 private:
 
 	UPROPERTY(EditAnywhere, Category = "Logging")

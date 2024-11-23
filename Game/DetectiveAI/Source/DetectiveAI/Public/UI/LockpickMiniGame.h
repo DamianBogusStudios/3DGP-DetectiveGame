@@ -4,10 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Interfaces/MiniGameInputInterface.h"
 #include "Interfaces/WidgetInterface.h"
 #include "LockpickMiniGame.generated.h"
 
+// static void SetTriggerEffectProperty(int StartPos, int EndPos, int Strength, int Trigger);
 
+class AMainPlayerController;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMiniGameFinishedDelegate, bool, bSuccess);
 
 class UImage;
@@ -18,6 +21,14 @@ enum class ELockState : uint8
 	Locked,
 	Tensioned,
 	Unlocked
+};
+
+UENUM(BlueprintType)
+enum class EPinState : uint8
+{
+	Loose,
+	Binding,
+	Set
 };
 
 USTRUCT(BlueprintType)
@@ -32,38 +43,27 @@ struct FLockPin
 	TObjectPtr<UImage> TargetZone;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MinY;
+	float SetPosition;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MaxY;
-
+	float TargetPosition = 230;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float TargetY;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float TargetZoneSize;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bSet;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bMovingUp;
+	EPinState PinState = EPinState::Loose;
 };
 /**
  * 
  */
 UCLASS()
-class DETECTIVEAI_API ULockpickMiniGame : public UUserWidget, public IWidgetInterface
+class DETECTIVEAI_API ULockpickMiniGame : public UUserWidget, public IWidgetInterface, public IMiniGameInputInterface
 {
 	GENERATED_BODY()
 
 public:
 
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MiniGame Settings")
-	float PinFallSpeed = 4.2f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MiniGame Settings")
-	float PinRiseSpeed = 5.0f;
+	float PinFallSpeed = 8.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "MiniGame Settings")
 	bool bDrawDebugElements = true;
@@ -71,52 +71,65 @@ public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<UImage> Pick;
 
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	TObjectPtr<UImage> TensionWrench;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	TArray<FLockPin> Pins;
 
 	UPROPERTY(VisibleAnywhere)
 	FMiniGameFinishedDelegate OnMiniGameFinished;
 
-	UFUNCTION(BlueprintNativeEvent, meta = (DisplayName = "PreInit"))
-	void ReceivePreInitialisation();
+	UFUNCTION(BlueprintImplementableEvent, Category = "Initialisation")
+	void InitialisePins();
 
-	UFUNCTION(BlueprintNativeEvent, meta = (DisplayName = "Reset MiniGame"))
-	void ReceiveReset();
+	/* IWidgetInterface */
+	virtual void Advance_Implementation() override;
+	virtual void Setup_Implementation(UObject* Caller) override;
+	virtual void Cleanup_Implementation() override;
 	
-	UFUNCTION(BlueprintCallable)
-	void TensionLock();
-
-	UFUNCTION(BlueprintCallable)
-	void TensionReleased();
-
-	UFUNCTION(BlueprintCallable)
-	void SecurePin();
-	
-	UFUNCTION(BlueprintCallable)
-	void PickPin();
-
-	UFUNCTION(BlueprintCallable)
-	void RaisePin(float Percentage);
-
-	UFUNCTION(BlueprintCallable)
-	void MovePick(bool bLeft);
+	/* IMiniGameInputInterface*/
+	virtual void HandleApplyTension_MiniGame(float Value) override;
+	virtual void HandleApplyTensionCompleted_MiniGame() override;
+	virtual void HandleRaisePin_MiniGame(float Value) override;
+	virtual void HandleRaisePinCompleted_MiniGame() override;
+	virtual void HandleMovePin_MiniGame(bool Right) override;
 
 	
-
-	virtual void NativeConstruct() override;
+protected:
 	
+	// virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
-	virtual void Cleanup_Implementation() override;
 private:
+
+	TObjectPtr<AMainPlayerController> PlayerController;
 	
 	uint8 CurrentPin = 0;
 	ELockState LockState = ELockState::Locked;
 
-	void InitialisePins();
 	void MovePins();
 	void MovePinToTarget(FLockPin& Pin);
 
+	void BindRandomPin();
+	void UpdateTriggerEffect();
+	void UpdateCurrentPin(int Value);
+	
 	void CheckLockStatus();
-	void SetLockState(ELockState InState);	
+	void SetLockState(ELockState InState);
+
+	TArray<int> GetNotSetPins()
+	{
+		TArray<int> UnsetPins;
+	
+		for (int Index = 0; Index < Pins.Num(); ++Index)
+		{
+			if (Pins[Index].PinState != EPinState::Set)
+			{
+				UnsetPins.Add(Index); 
+			}
+		}
+
+		return UnsetPins;
+	}
 };

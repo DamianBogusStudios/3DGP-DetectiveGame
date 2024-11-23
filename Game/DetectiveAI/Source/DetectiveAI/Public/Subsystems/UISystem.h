@@ -6,8 +6,6 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "UISystem.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FUIActionDelegate, AActor*, Caller, UUserWidget*, Widget);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRequestInputDelegate, bool, bInputNeeded);
 
 class UWidgetClassSettings;
 class UActorComponent;
@@ -35,6 +33,8 @@ struct FWidgetInfo
 	TObjectPtr<UUserWidget> WidgetInstance;
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FUIActionDelegate, AActor*, Caller, UUserWidget*, Widget);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRequestInputDelegate, const TArray<EUIElementType>&, UIElements);
 /**
  * 
  */
