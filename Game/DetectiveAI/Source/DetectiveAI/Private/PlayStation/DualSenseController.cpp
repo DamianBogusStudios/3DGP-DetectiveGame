@@ -10,7 +10,7 @@
 
 
 #if PLATFORM_PS5
-PS5 DevKit
+//PS5 DevKit
 
 #include "SonyApplication.h"
 #include "PS5Application.h"
@@ -27,9 +27,9 @@ void UDualSenseController::SetLightBarColour(const FColor& LightColour)
 {
 	FSonyInputInterface* SonyInputInterface = TryGetPlatformInputInterface();
 
-	if(ensure(SonyInputInterafe !+ nullptr))
+	if(ensure(SonyInputInterface != nullptr))
 	{
-		SonyInputInterface->SetLightColour(0, LightColour);
+		SonyInputInterface->SetLightColor(0, LightColour);
 		UE_LOG(LogTemp, Warning, TEXT("Lightbar Colour Set"));
 	}
 }
@@ -40,28 +40,28 @@ Vibration	Simulates vibrations like engine or terrain feedback.
 Custom	Use for complex, multi-layered interactions requiring zones of resistance.
 Feedback	Basic tactile feedback for general actions.
 */
-void UDualSenseController::SetTriggerEffectProperty(uint8 StartPos, uint8 EndPos, uint8 Strength, int Trigger,int Effect)
+void UDualSenseController::SetTriggerEffectProperty(uint8 StartPos, uint8 EndPos, uint8 Strength, int Trigger, int Effect)
 {
-	FPS5TriggerEffectProperty TriggerProperty(SetTrigger(Trigger));
+	FPS5TriggerEffectProperty TriggerProperty(SetTrigger((Trigger));
 
-	switch (TriggerEffect.Effect)
+	switch (Effect)
 	{
-	case ETriggerEffect::Weapon:
+	case 0:
 		TriggerProperty.SetWeapon(StartPos, EndPos, Strength);
 		break;
 
-	case ETriggerEffect::Vibration:
-		TriggerProperty.SetVibration(StartPos, Strength);
+	case 1:
+		TriggerProperty.SetVibration(StartPos, EndPos, Strength);
 		break;
 
-	case ETriggerEffect::Feedback:
+	case 2:
 		TriggerProperty.SetFeedback(StartPos, EndPos, Strength);
 		break;
 	}
 	TriggerProperty.SetWeapon(StartPos, EndPos, Strength);
 	TriggerProperty.SetUseEffectForThreshold(true);
 
-	SendTriggerEffectProperty(TriggerProperty);
+	FPS5TriggerEffectProperty::SendTriggerEffectProperty(TriggerProperty);
 }
 
 void UDualSenseController::ResetTriggers()
@@ -77,7 +77,7 @@ void UDualSenseController::ResetTriggers()
 	// SendTriggerEffectProperty(TriggerPropertyLeft);
 	// SendTriggerEffectProperty(TriggerPropertyRight);
 }
-#endif
+#else
 
 
 void UDualSenseController::SetLightBarColour(const FColor& LightColour)
@@ -129,3 +129,4 @@ void UDualSenseController::ResetTriggers()
 // 	SonyInputInterface->SetDeviceProperty(0, &DeviceProperty);
 // 	return true;
 // }
+#endif

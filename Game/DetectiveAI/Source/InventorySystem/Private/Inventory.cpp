@@ -167,7 +167,7 @@ bool UInventory::AddItem_Implementation(const FName& ItemId, int32 Quantity)
 bool UInventory::RemoveItem_Implementation(const FName& ItemId, int32 Quantity)
 {
 	Item & enough Quantity is in inventory
-	/*if (CanRemoveItem(ItemId, Quantity))
+	if (CanRemoveItem(ItemId, Quantity))
 	{
 		UAssetManager& AssetManager = UAssetManager::Get();
 

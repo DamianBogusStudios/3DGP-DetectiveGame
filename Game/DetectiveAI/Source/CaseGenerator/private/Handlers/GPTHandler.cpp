@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 #include "Handlers/GPTHandler.h"
 
-#include "AssetTypeCategories.h"
+//#include "AssetTypeCategories.h"
 #include "KismetCastingUtils.h"
 #include "Utils/HttpGPTHelper.h"
 #include "Structures/HttpGPTChatTypes.h"

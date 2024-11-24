@@ -13,7 +13,7 @@ class UTextBlock;
  * 
  */
 UCLASS()
-class DETECTIVEAI_API ULoadingWidget : public UUserWidget
+class DETECTIVEAI_API ULoadingWidget : public UUserWidget, public IWidgetInterface
 {
 	GENERATED_BODY()
 
@@ -36,6 +36,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Loading")
 	float BarSpeed = 0.8f;
 	
+
+
+	/* IWidgetInterface */
+	virtual void Advance_Implementation() override;
+	virtual void Setup_Implementation(UObject* Caller) override;
+	virtual void Cleanup_Implementation() override;
 	
 	UFUNCTION()
 	void OnStartGamePressed();

@@ -22,6 +22,17 @@ void ULoadingWidget::NativeConstruct()
 	}
 }
 
+
+void ULoadingWidget::Advance_Implementation() 
+{
+	OnStartGamePressed();
+}
+void ULoadingWidget::Setup_Implementation(UObject* Caller) 
+{}
+void ULoadingWidget::Cleanup_Implementation() {}
+
+
+
 void ULoadingWidget::OnStartGamePressed()
 {
 	if(auto GameInstance = Cast<UAGPGameInstance>(GetGameInstance()))

@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.3",
+	"EngineAssociation": "{D3ACD71F-4B6B-EFCA-F4DD-09B4A961A293}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -36,14 +36,6 @@
 		{
 			"Name": "HttpGPT",
 			"Enabled": true
-		},
-		{
-			"Name": "VisualStudioTools",
-			"Enabled": true,
-			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/362651520df94e4fa65492dbcba44ae2",
-			"SupportedTargetPlatforms": [
-				"Win64"
-			]
 		}
 	]
 }
