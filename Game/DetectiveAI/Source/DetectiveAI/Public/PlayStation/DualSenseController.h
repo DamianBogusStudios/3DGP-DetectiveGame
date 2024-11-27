@@ -20,16 +20,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "DualSense")
 	static void SetLightBarColour(const FColor& LightColour);
 
-
 	UFUNCTION(Blueprintable, Category = "DualSense")
 	static void SetTriggerEffectProperty(uint8 StartPos, uint8 EndPos, uint8 Strength, int Trigger,int Effect);
 
 	UFUNCTION(Blueprintable, Category = "DualSense")
 	static void ResetTriggers();
-	
-	
-private:
 
-	UPROPERTY(EditAnywhere, Category = "Logging")
-	FString PlatformWarningPrefix = "Platform not set to PS5: ";
+	
+protected:
+	
+	UFUNCTION(Blueprintable, Category = "DualSense")
+	static void LogFunctionCall(const FString& CallingFunction, FString Message);
 };

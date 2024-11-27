@@ -15,7 +15,7 @@ class IMiniGameInputInterface;
 class UDualSenseController;
 class UDialogueWidget;
 class APawn;
-class ABaseCharacter;
+class AMainCharacter;
 class UInputMappingContext;
 class UInputAction;
 class UBehaviorTree;
@@ -157,7 +157,7 @@ protected:
 	FMiniGameInputActions MiniGameInputActions;
 
 	UPROPERTY()
-	TObjectPtr<ABaseCharacter> BaseCharacter;
+	TObjectPtr<AMainCharacter> BaseCharacter;
 	UPROPERTY()
 	TObjectPtr<UDualSenseController> DualSense;
 	

@@ -1,12 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Characters/BaseCharacter.h"
+#include "Characters/MainCharacter.h"
 #include "Components/SphereComponent.h"
 #include "Interfaces/InteractInterface.h"
 
 // Sets default values
-ABaseCharacter::ABaseCharacter(const FObjectInitializer & ObjectInitializer)
+AMainCharacter::AMainCharacter(const FObjectInitializer & ObjectInitializer)
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -17,30 +17,30 @@ ABaseCharacter::ABaseCharacter(const FObjectInitializer & ObjectInitializer)
 }
  
 // Called when the game starts or when spawned
-void ABaseCharacter::BeginPlay()
+void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
 
-	InteractionSphere->OnComponentBeginOverlap.AddDynamic(this, &ABaseCharacter::OnBeginInteractionOverlap);
-	InteractionSphere->OnComponentEndOverlap.AddDynamic(this, &ABaseCharacter::OnEndInteractionOverlap);
-	GetWorldTimerManager().SetTimer(UpdateTimerHandle, this, &ABaseCharacter::SortFocusedActors, FocusUpdateFrequency, true);
+	InteractionSphere->OnComponentBeginOverlap.AddDynamic(this, &AMainCharacter::OnBeginInteractionOverlap);
+	InteractionSphere->OnComponentEndOverlap.AddDynamic(this, &AMainCharacter::OnEndInteractionOverlap);
+	GetWorldTimerManager().SetTimer(UpdateTimerHandle, this, &AMainCharacter::SortFocusedActors, FocusUpdateFrequency, true);
 }
 
 // Called every frame
-void ABaseCharacter::Tick(float DeltaTime)
+void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
 // Called to bind functionality to input
-void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
 
-void ABaseCharacter::OnBeginInteractionOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+void AMainCharacter::OnBeginInteractionOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if(OtherActor && OtherActor->Implements<UInteractInterface>())
@@ -49,7 +49,7 @@ void ABaseCharacter::OnBeginInteractionOverlap(UPrimitiveComponent* OverlappedCo
 	}
 }
 
-void ABaseCharacter::OnEndInteractionOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
+void AMainCharacter::OnEndInteractionOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) 
 {
 	if (OtherActor && OtherActor->Implements<UInteractInterface>() && InteractableActors.Contains(OtherActor))
@@ -62,7 +62,7 @@ void ABaseCharacter::OnEndInteractionOverlap(UPrimitiveComponent* OverlappedComp
 	}
 }
 
-void ABaseCharacter::SortFocusedActors()
+void AMainCharacter::SortFocusedActors()
 {
 	float BestScore = -1; 
 	TSoftObjectPtr<AActor> CachedActor;
@@ -87,7 +87,7 @@ void ABaseCharacter::SortFocusedActors()
 	}
 }
 
-void ABaseCharacter::SelectFocusedActor(TSoftObjectPtr<AActor> NewFocusedActor)
+void AMainCharacter::SelectFocusedActor(TSoftObjectPtr<AActor> NewFocusedActor)
 {
 	if(NewFocusedActor == FocusedActor)
 	{
@@ -110,7 +110,7 @@ void ABaseCharacter::SelectFocusedActor(TSoftObjectPtr<AActor> NewFocusedActor)
 }
 
 
-void ABaseCharacter::Interact()
+void AMainCharacter::Interact()
 {
 	//final check
 	if (FocusedActor && FocusedActor->Implements<UInteractInterface>())

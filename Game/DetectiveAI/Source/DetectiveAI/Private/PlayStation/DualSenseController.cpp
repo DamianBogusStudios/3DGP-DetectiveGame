@@ -1,5 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
+DECLARE_LOG_CATEGORY_EXTERN(LogDualSense, Log, All);
+DEFINE_LOG_CATEGORY(LogDualSense);
 
 #ifndef PLATFORM_PS5
 #define PLATFORM_PS5 0 // Define it as 0 (false)
@@ -10,7 +12,6 @@
 
 
 #if PLATFORM_PS5
-//PS5 DevKit
 
 #include "SonyApplication.h"
 #include "PS5Application.h"
@@ -30,9 +31,43 @@ void UDualSenseController::SetLightBarColour(const FColor& LightColour)
 	if(ensure(SonyInputInterface != nullptr))
 	{
 		SonyInputInterface->SetLightColor(0, LightColour);
-		UE_LOG(LogTemp, Warning, TEXT("Lightbar Colour Set"));
+		LogFunctionCall(__FUNCTION__, LightColour.ToString());
 	}
 }
+
+FPS5TriggerEffectProperty::TriggerMask SetTrigger(int trigger)
+{
+	FPS5TriggerEffectProperty Property;
+
+	switch (trigger)
+	{
+	case 0:
+		Property.Triggers = FPS5TriggerEffectProperty::TriggerMask::None;
+		break;
+	case 1:
+		Property.Triggers = FPS5TriggerEffectProperty::TriggerMask::Left;
+		break;
+	case 2:
+		Property.Triggers = FPS5TriggerEffectProperty::TriggerMask::Right;
+		break;
+	case 3:
+		Property.Triggers = FPS5TriggerEffectProperty::TriggerMask::Both;
+		break;
+	}
+
+	return Property.Triggers;
+}
+
+bool SendTriggerEffectProperty(const FPS5TriggerEffectProperty&  DeviceProperty)
+{
+	if (FSonyInputInterface* SonyInputInterface = TryGetPlatformInputInterface())
+	{
+		SonyInputInterface->SetDeviceProperty(0, &DeviceProperty);
+		return true;
+	}
+	return false;
+}
+
 /*
 Resistance	Simulates constant resistance for tension mechanics like pulling or braking.
 Weapon	Adds a click or recoil for shooting or mechanical actions.
@@ -42,91 +77,65 @@ Feedback	Basic tactile feedback for general actions.
 */
 void UDualSenseController::SetTriggerEffectProperty(uint8 StartPos, uint8 EndPos, uint8 Strength, int Trigger, int Effect)
 {
-	FPS5TriggerEffectProperty TriggerProperty(SetTrigger((Trigger));
+	FPS5TriggerEffectProperty TriggerProperty;
+	TriggerProperty.Triggers = SetTrigger(Trigger);
 
 	switch (Effect)
 	{
-	case 0:
-		TriggerProperty.SetWeapon(StartPos, EndPos, Strength);
-		break;
-
 	case 1:
 		TriggerProperty.SetVibration(StartPos, EndPos, Strength);
 		break;
-
 	case 2:
 		TriggerProperty.SetFeedback(StartPos, EndPos, Strength);
 		break;
+	default:
+		TriggerProperty.SetWeapon(StartPos, EndPos, Strength);
+		break;
 	}
-	TriggerProperty.SetWeapon(StartPos, EndPos, Strength);
-	TriggerProperty.SetUseEffectForThreshold(true);
 
-	FPS5TriggerEffectProperty::SendTriggerEffectProperty(TriggerProperty);
+	TriggerProperty.SetUseEffectForThreshold(true);
+	bool bSuccess = SendTriggerEffectProperty(TriggerProperty);
+
+	LogFunctionCall(__FUNCTION__, bSuccess);
 }
 
 void UDualSenseController::ResetTriggers()
 {
-	// FPS5TriggerEffectProperty TriggerPropertyLeft(SetTrigger(static_cast<int>(ETrigger::Left)));
-	// FPS5TriggerEffectProperty TriggerPropertyRight(SetTrigger(static_cast<int>(ETrigger::Right)));
-	//
-	// // Reset effects for both triggers
-	// TriggerPropertyLeft.ResetEffect();
-	// TriggerPropertyRight.ResetEffect();
-	//
-	// // Send the reset properties to the DualSense controller
-	// SendTriggerEffectProperty(TriggerPropertyLeft);
-	// SendTriggerEffectProperty(TriggerPropertyRight);
+	FPS5TriggerEffectProperty TriggerProperty(SetTrigger(3));	
+	TriggerProperty.ResetEffect();
+	bool bSuccess = SendTriggerEffectProperty(TriggerProperty);
+	
+	LogFunctionCall(__FUNCTION__, bSuccess);
 }
+
 #else
 
 
 void UDualSenseController::SetLightBarColour(const FColor& LightColour)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("%s SetLightBarColour()", *PlatformWarningPrefix));
+	LogFunctionCall(__FUNCTION__, LightColour.ToString());
 }
 void UDualSenseController::SetTriggerEffectProperty(uint8 StartPos, uint8 EndPos, uint8 Strength, int Trigger,int Effect)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Trigger Effect Applied"));
+	FString Msg = FString::Printf( TEXT("StartPos: %d, EndPos: %d, Strength: %d, Trigger: %d, Effect: %d"),
+		StartPos, EndPos, Strength, Trigger, Effect);
+	LogFunctionCall(__FUNCTION__, Msg);
 }
 void UDualSenseController::ResetTriggers()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Trigger Effect Reset"));
+	LogFunctionCall(__FUNCTION__, "");
 }
 
-// FPS5TriggerEffectProperty::TriggerMask SetTrigger(int trigger)
-// {
-// 	FPS5TriggerEffectProperty Property;
-//
-// 	switch (trigger)
-// 	{
-// 	case 0:
-// 		Property.Triggers = FPS5TriggerEffectProperty::TriggerMask::None;
-// 		break;
-// 	case 1:
-// 		Property.Triggers = FPS5TriggerEffectProperty::TriggerMask::Left;
-// 		break;
-// 	case 2:
-// 		Property.Triggers = FPS5TriggerEffectProperty::TriggerMask::Right;
-// 		break;
-// 	case 3:
-// 		Property.Triggers = FPS5TriggerEffectProperty::TriggerMask::Both;
-// 		break;
-// 	}
-//
-// 	return Property.Triggers;
-// }
-//
-// bool SendTriggerEffectProperty(const FPS5TriggerEffectProperty& DeviceProperty)
-// {
-// 	FSonyInputInterface* SonyInputInterface = TryGetPlayformInputInterface();
-//
-// 	if(SonyInputInterface == nullptr)
-// 	{
-// 		UE_LOG(LogTemp, Warning, TEXT("no interface found"));
-// 		return false;
-// 	}
-//
-// 	SonyInputInterface->SetDeviceProperty(0, &DeviceProperty);
-// 	return true;
-// }
+
 #endif
+
+
+void UDualSenseController::LogFunctionCall(const FString& CallingFunction,FString Message)
+{
+#if PLATFORM_PS5
+	UE_LOG(LogDualSense, Log, TEXT("PS5: %s %s"), *CallingFunction, *Message);
+#else
+	UE_LOG(LogDualSense, Log, TEXT("Non-PS5 Platform: %s %s"), *CallingFunction, *Message);
+#endif
+}
+

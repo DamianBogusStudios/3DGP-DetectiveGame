@@ -2,7 +2,7 @@
 
 
 #include "Controllers/MainPlayerController.h"
-#include "Characters/BaseCharacter.h"
+#include "Characters/MainCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
@@ -114,7 +114,7 @@ void AMainPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	BaseCharacter = Cast<ABaseCharacter>(InPawn);
+	BaseCharacter = Cast<AMainCharacter>(InPawn);
 	if(UCameraComponent* Camera = InPawn->GetComponentByClass<UCameraComponent>())
 	{
 		CachedCameraRotation = FRotator(0, Camera->GetComponentRotation().Yaw, 0);

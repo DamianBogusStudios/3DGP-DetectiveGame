@@ -5,20 +5,20 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Containers/Array.h"
-#include "BaseCharacter.generated.h"
+#include "MainCharacter.generated.h"
 
 
 class USphereComponent;
 class InteractInterface;
 
 UCLASS()
-class DETECTIVEAI_API ABaseCharacter : public ACharacter
+class DETECTIVEAI_API AMainCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
-	ABaseCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	AMainCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Interaction)
 	USphereComponent* InteractionSphere;
