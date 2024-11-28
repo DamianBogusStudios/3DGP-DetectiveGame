@@ -11,8 +11,6 @@
 // static void SetTriggerEffectProperty(int StartPos, int EndPos, int Strength, int Trigger);
 
 class AMainPlayerController;
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMiniGameFinishedDelegate, bool, bSuccess);
-
 class UImage;
 
 UENUM(BlueprintType)
@@ -51,6 +49,8 @@ struct FLockPin
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EPinState PinState = EPinState::Loose;
 };
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMiniGameFinishedDelegate, bool, bSuccess);
 /**
  * 
  */
@@ -77,9 +77,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	TArray<FLockPin> Pins;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(BlueprintAssignable)
 	FMiniGameFinishedDelegate OnMiniGameFinished;
-
+	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Initialisation")
 	void InitialisePins();
 
@@ -93,12 +93,11 @@ public:
 	virtual void HandleApplyTensionCompleted_MiniGame() override;
 	virtual void HandleRaisePin_MiniGame(float Value) override;
 	virtual void HandleRaisePinCompleted_MiniGame() override;
-	virtual void HandleMovePin_MiniGame(bool Right) override;
+	virtual void HandleMovePick_MiniGame(bool Right) override;
 
 	
 protected:
 	
-	// virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 private:
@@ -112,11 +111,13 @@ private:
 	void MovePinToTarget(FLockPin& Pin);
 
 	void BindRandomPin();
-	void UpdateTriggerEffect();
+	void UpdateRightTriggerEffect();
+	void UpdateLeftTriggerEffect();
 	void UpdateCurrentPin(int Value);
-	
-	void CheckLockStatus();
+
+	void SetPin(FLockPin& Pin);
 	void SetLockState(ELockState InState);
+	
 
 	TArray<int> GetNotSetPins()
 	{

@@ -105,7 +105,7 @@ void AMainPlayerController::BindMiniGameActions()
 		EnhancedInputComponent->BindAction(MiniGameInputActions.RaisePin, ETriggerEvent::Completed,
 			this, &AMainPlayerController::HandleRaisePinCompleted_MiniGame);
 		EnhancedInputComponent->BindAction(MiniGameInputActions.MovePin, ETriggerEvent::Triggered,
-			this, &AMainPlayerController::HandleMovePin_MiniGame);
+			this, &AMainPlayerController::HandleMovePick_MiniGame);
 	}
 }
 
@@ -257,12 +257,12 @@ void AMainPlayerController::HandleRaisePin_MiniGame(const FInputActionValue& Val
 		MiniGameInputInterface->HandleRaisePin_MiniGame(Input);
 	}
 }
-void AMainPlayerController::HandleMovePin_MiniGame(const FInputActionValue& Value)
+void AMainPlayerController::HandleMovePick_MiniGame(const FInputActionValue& Value)
 {
 	if(MiniGameInputInterface)
 	{
 		float Input = Value.Get<float>();
-		MiniGameInputInterface->HandleMovePin_MiniGame(Input == 1 ? true : false);
+		MiniGameInputInterface->HandleMovePick_MiniGame(Input == 1 ? true : false);
 	}
 }
 
@@ -282,9 +282,9 @@ void AMainPlayerController::SetAdaptiveTriggerEffect(FAdaptiveTriggerEffect Trig
 	DualSense->SetTriggerEffectProperty(StartPos, EndPos, Strength, Trigger, Effect);
 }
 
-void AMainPlayerController::ResetTriggerEffect()
+void AMainPlayerController::ResetTriggerEffect(ETrigger Trigger)
 {
-	DualSense->ResetTriggers();
+	DualSense->ResetTrigger(static_cast<int>(Trigger));
 }
 #pragma endregion
 

@@ -136,7 +136,7 @@ public:
 	UFUNCTION()
 	void SetAdaptiveTriggerEffect(FAdaptiveTriggerEffect TriggerEffect);
 	UFUNCTION()
-	void ResetTriggerEffect();
+	void ResetTriggerEffect(ETrigger Trigger);
 	UFUNCTION()
 	void RequestInputContext(EInputContext Context, bool bRemove = false);
 	UFUNCTION()
@@ -189,7 +189,7 @@ protected:
 	void HandleApplyTensionCompleted_MiniGame(const FInputActionValue& Value);
 	void HandleRaisePin_MiniGame(const FInputActionValue& Value);
 	void HandleRaisePinCompleted_MiniGame(const FInputActionValue& Value);
-	void HandleMovePin_MiniGame(const FInputActionValue& Value);
+	void HandleMovePick_MiniGame(const FInputActionValue& Value);
 
 private:
 

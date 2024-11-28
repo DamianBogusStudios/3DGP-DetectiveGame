@@ -24,7 +24,7 @@ public:
 	static void SetTriggerEffectProperty(uint8 StartPos, uint8 EndPos, uint8 Strength, int Trigger,int Effect);
 
 	UFUNCTION(Blueprintable, Category = "DualSense")
-	static void ResetTriggers();
+	static void ResetTrigger(int Trigger);
 
 	
 protected:

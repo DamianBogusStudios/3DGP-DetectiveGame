@@ -99,9 +99,9 @@ void UDualSenseController::SetTriggerEffectProperty(uint8 StartPos, uint8 EndPos
 	LogFunctionCall(__FUNCTION__, bSuccess);
 }
 
-void UDualSenseController::ResetTriggers()
+void UDualSenseController::ResetTrigger(int Trigger)
 {
-	FPS5TriggerEffectProperty TriggerProperty(SetTrigger(3));	
+	FPS5TriggerEffectProperty TriggerProperty(SetTrigger(Trigger));	
 	TriggerProperty.ResetEffect();
 	bool bSuccess = SendTriggerEffectProperty(TriggerProperty);
 	
@@ -121,9 +121,9 @@ void UDualSenseController::SetTriggerEffectProperty(uint8 StartPos, uint8 EndPos
 		StartPos, EndPos, Strength, Trigger, Effect);
 	LogFunctionCall(__FUNCTION__, Msg);
 }
-void UDualSenseController::ResetTriggers()
+void UDualSenseController::ResetTrigger(int Trigger)
 {
-	LogFunctionCall(__FUNCTION__, "");
+	LogFunctionCall(__FUNCTION__, FString::FromInt(Trigger));
 }
 
 

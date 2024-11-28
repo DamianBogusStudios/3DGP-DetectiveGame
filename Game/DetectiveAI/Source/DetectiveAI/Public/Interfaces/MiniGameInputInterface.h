@@ -26,6 +26,6 @@ public:
 	virtual void HandleApplyTensionCompleted_MiniGame() = 0;
 	virtual void HandleRaisePin_MiniGame(float Value) = 0;
 	virtual void HandleRaisePinCompleted_MiniGame() = 0;
-	virtual void HandleMovePin_MiniGame(bool Right) = 0;
+	virtual void HandleMovePick_MiniGame(bool Right) = 0;
 	
 };
