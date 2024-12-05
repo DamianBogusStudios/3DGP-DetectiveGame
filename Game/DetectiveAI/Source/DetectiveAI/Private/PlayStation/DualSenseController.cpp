@@ -130,7 +130,7 @@ void UDualSenseController::ResetTrigger(int Trigger)
 #endif
 
 
-void UDualSenseController::LogFunctionCall(const FString& CallingFunction,FString Message)
+void UDualSenseController::LogFunctionCall(const FString& CallingFunction, FString Message)
 {
 #if PLATFORM_PS5
 	UE_LOG(LogDualSense, Log, TEXT("PS5: %s %s"), *CallingFunction, *Message);

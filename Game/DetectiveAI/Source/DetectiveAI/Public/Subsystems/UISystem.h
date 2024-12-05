@@ -18,7 +18,8 @@ enum class EUIElementType : uint8
 	PauseMenu,
 	HUD,
 	Loading,
-	MicFeedback
+	MicFeedback,
+	Pickup
 };
 
 USTRUCT(BlueprintType)

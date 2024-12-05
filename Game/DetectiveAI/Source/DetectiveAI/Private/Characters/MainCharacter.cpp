@@ -3,7 +3,7 @@
 
 #include "Characters/MainCharacter.h"
 #include "Components/SphereComponent.h"
-#include "Interfaces/InteractInterface.h"
+#include "Interfaces/Interactable.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter(const FObjectInitializer & ObjectInitializer)
@@ -20,7 +20,6 @@ AMainCharacter::AMainCharacter(const FObjectInitializer & ObjectInitializer)
 void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
 
 	InteractionSphere->OnComponentBeginOverlap.AddDynamic(this, &AMainCharacter::OnBeginInteractionOverlap);
 	InteractionSphere->OnComponentEndOverlap.AddDynamic(this, &AMainCharacter::OnEndInteractionOverlap);
@@ -43,16 +42,16 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 void AMainCharacter::OnBeginInteractionOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if(OtherActor && OtherActor->Implements<UInteractInterface>())
+	if(OtherActor && OtherActor->Implements<UInteractable>())
 	{
 		InteractableActors.Add(OtherActor);
-	}
+	}//
 }
 
 void AMainCharacter::OnEndInteractionOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) 
 {
-	if (OtherActor && OtherActor->Implements<UInteractInterface>() && InteractableActors.Contains(OtherActor))
+	if (OtherActor && OtherActor->Implements<UInteractable>() && InteractableActors.Contains(OtherActor))
 	{
 		if (OtherActor == FocusedActor)
 		{
@@ -93,29 +92,27 @@ void AMainCharacter::SelectFocusedActor(TSoftObjectPtr<AActor> NewFocusedActor)
 	{
 		return;
 	}
-	else
-	{
-		if(FocusedActor)
-		{
-			IInteractInterface::Execute_EndFocus(FocusedActor.Get());
-		}
-	
-		if (NewFocusedActor && NewFocusedActor->Implements<UInteractInterface>()) //Check
-		{
-			IInteractInterface::Execute_OnFocus(NewFocusedActor.Get());
-		}
 
-		FocusedActor = NewFocusedActor;
+	
+	if(FocusedActor)
+	{
+		IInteractable::Execute_EndFocus(FocusedActor.Get());
 	}
+	if (NewFocusedActor && NewFocusedActor->Implements<UInteractable>())
+	{
+		IInteractable::Execute_OnFocus(NewFocusedActor.Get());
+	}
+
+	FocusedActor = NewFocusedActor;
 }
 
 
 void AMainCharacter::Interact()
 {
 	//final check
-	if (FocusedActor && FocusedActor->Implements<UInteractInterface>())
+	if (FocusedActor && FocusedActor->Implements<UInteractable>())
 	{
-		IInteractInterface::Execute_Interact(FocusedActor.Get(), this);
+		IInteractable::Execute_Interact(FocusedActor.Get(), this);
 	}
 }
 

@@ -32,14 +32,8 @@ public:
 	UPROPERTY(Config, EditDefaultsOnly, BlueprintReadOnly, Category = "UI", 
 		AdvancedDisplay)
 	TSubclassOf<UUserWidget> MicFeedback;
-public:
 
-	
-	// /*obselete*/
-	// UFUNCTION(BlueprintCallable, Category = "UI")
-	// TSubclassOf<UDialogueWidget> GetDialogueWidgetClass() const { return DialogueWidgetClass; }
-	//
-	// /*obselete*/
-	// UFUNCTION(BlueprintCallable, Category = "UI")
-	// TSubclassOf<ULockpickMiniGame> GetLockpickMiniGameClass() const { return LockpickMiniGameClass; }
+	UPROPERTY(Config, EditDefaultsOnly, BlueprintReadOnly, Category = "UI", 
+		AdvancedDisplay)
+	TSubclassOf<UUserWidget> Pickup;
 };

@@ -217,7 +217,7 @@ void ULockpickMiniGame::SetPin(FLockPin& Pin)
 		FVector2D CurrentPosition = Pin.Pin->GetRenderTransform().Translation;
 		Pin.Pin->SetRenderTranslation(FVector2D(CurrentPosition.X, Pin.TargetPosition));
 		
-		Pins[CurrentPin].PinState = EPinState::Set;
+		Pin.PinState = EPinState::Set;
 		UpdateRightTriggerEffect();
 		BindRandomPin();
 		//todo play sound effect.

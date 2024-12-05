@@ -246,6 +246,21 @@ void UGPTHandler::AddFunctionParam(const FName& FuncName, const FName& InName, c
 	}
 }
 
+TArray<FHttpGPTFunction> UGPTHandler::GetFunctions()
+{
+	if(Functions.IsEmpty())
+		return {};
+	
+	TArray<FHttpGPTFunction> FunctionArray;
+	for(auto& Function : Functions)
+	{
+		FunctionArray.Add(*Function.Value);
+	}
+	Functions.Empty();
+	return FunctionArray;
+	return {};
+}
+
 
 void UGPTHandler::SendCustomInstructions(UObject* const Caller, const FString& Message)
 {
@@ -255,7 +270,7 @@ void UGPTHandler::SendCustomInstructions(UObject* const Caller, const FString& M
 void UGPTHandler::SendMessage(UObject* const Caller, const FString& Message, 
 				FMessageDelegate Callback, FErrorReceivedDelegate ErrorCallback)
 {
-	FMessageRequest Request = FMessageRequest(Caller, Message, nullptr);
+	FMessageRequest Request = FMessageRequest(Caller, Message, nullptr, GetFunctions());
 	Request.OnMessageReceived = Callback;
 	AddMessageToHistory(Caller, EHttpGPTChatRole::User, Message);
 	AddNewRequest(Request);
@@ -264,29 +279,14 @@ void UGPTHandler::SendMessage(UObject* const Caller, const FString& Message,
 void UGPTHandler::SendStructuredMessage(UObject* const WorldObject, const FString& Message, UScriptStruct* Struct,
 				FStructuredMessageDelegate Callback, FErrorReceivedDelegate ErrorCallback)
 {
-	FMessageRequest Request = FMessageRequest(WorldObject, Message, Struct);
+	FMessageRequest Request = FMessageRequest(WorldObject, Message, Struct, GetFunctions());
 	Request.OnStructuredMessageReceived = Callback;
 	
 	AddMessageToHistory(WorldObject, EHttpGPTChatRole::User, Message);
 	AddNewRequest(Request);
 }
 
-// FMessageDelegate& UGPTHandler::GetMessageDelegate()
-// {
-// 	return OnMessageReceived;
-// }
-//
-// FStructuredMessageDelegate& UGPTHandler::GetStructuredMessageDelegate()
-// {
-// 	return OnStructuredMessageReceived;
-// }
-//
-// FFunctionCallDelegate& UGPTHandler::GetFunctionCalledDelegate()
-// {
-// 	return OnFunctionCalled;
-// }
-
-#pragma endregion ILLMService
+#pragma endregion 
 
 #pragma region Request Queue Management
 
@@ -314,13 +314,13 @@ void UGPTHandler::ProcessNextRequest()
 	
 	if(Request.StructSchema == nullptr)
 	{
-		SendMessageDefault(Caller, *GetChatHistory(Caller));
+		SendMessageDefault(Caller, *GetChatHistory(Caller), Request.Functions);
 	}
 	else
 	{
 		auto StructuredResponse = UStructToStructuredResponse(Request.StructSchema);
 		auto ResponseSchema = StructuredResponseToJson(StructuredResponse);
-		SendMessageStructured(Caller, *GetChatHistory(Caller), ResponseSchema);
+		SendMessageStructured(Caller, *GetChatHistory(Caller), ResponseSchema, Request.Functions);
 	}
 	
 	Request.StartTime = FPlatformTime::Seconds();
@@ -330,48 +330,18 @@ void UGPTHandler::ProcessNextRequest()
 
 
 void UGPTHandler::SendMessageStructured(UObject* const WorldObject, const TArray<FHttpGPTChatMessage>& Messages,
-	TSharedPtr<FJsonObject> ResponseSchema)
+		const TSharedPtr<FJsonObject>& StructuredResponseSchema, TArray<FHttpGPTFunction>& FunctionCalls)
 {
-	
-	bStructuredMessageRequested = true;
-	auto Request = UHttpGPTChatRequest::SendMessagesStructured(WorldObject, Messages, GetFunctions(), ResponseSchema);
+	auto Request = UHttpGPTChatRequest::SendMessagesStructured(WorldObject, Messages, FunctionCalls, StructuredResponseSchema);
 	BindCallbacks(Request);
 	Request->Activate(); 	
 }
-
-/* obsolete */
- // void UGPTHandler::SendMessageStructured(UObject* const WorldObject, const TArray<FHttpGPTChatMessage>& Messages,
- // 	const FHttpGPTStructuredResponse& StructuredResponse)
- // {
-	// bStructuredMessageRequested = true;
- // 	auto Request = UHttpGPTChatRequest::SendMessagesStructured(WorldObject, Messages, GetFunctions(), StructuredResponse);
- // 	BindCallbacks(Request);
- // 	Request->Activate(); 	
- // }
-
-void UGPTHandler::SendMessageDefault(UObject* const WorldObject, const TArray<FHttpGPTChatMessage>& Messages)
+void UGPTHandler::SendMessageDefault(UObject* const WorldObject, const TArray<FHttpGPTChatMessage>& Messages, TArray<FHttpGPTFunction> FunctionCalls)
  {
-	bStructuredMessageRequested = false;
- 	auto Request = UHttpGPTChatRequest::SendMessages_DefaultOptions(WorldObject, Messages, GetFunctions());
+ 	auto Request = UHttpGPTChatRequest::SendMessages_DefaultOptions(WorldObject, Messages, FunctionCalls);
  	BindCallbacks(Request);
  	Request->Activate();
  }
-
-TArray<FHttpGPTFunction> UGPTHandler::GetFunctions()
-{
-	if(Functions.IsEmpty())
-		return {};
-
-	TArray<FHttpGPTFunction> FunctionArray;
-
-	for(auto& Function : Functions)
-	{
-		FunctionArray.Add(*Function.Value);
-	}
-	
-	return FunctionArray;
-}
-
 #pragma region Chat History
 
 void UGPTHandler::AddMessageToHistory(TWeakObjectPtr<UObject> WorldObject, const EHttpGPTChatRole Role, const FString& Message)
@@ -416,29 +386,31 @@ TArray<FHttpGPTChatMessage>* UGPTHandler::GetChatHistory(TWeakObjectPtr<UObject>
 			Request.ExecuteCallbacks(Message);
 		}
 
-		// if(Choice.FinishReason.IsEqual("function_call", ENameCase::IgnoreCase))
-		// {
-		// 	FString Message = Choice.Message.Content;
-		// 	AddMessageToHistory(RequestCaller, EHttpGPTChatRole::Function, Message);
-		// 	
-		// 	FHttpGPTFunctionCall FuncCall = Choice.Message.FunctionCall;
-		// 	TArray<FString> ArgNames;
-		// 	TArray<FString> ArgValues;
-		//
-		// 	TSharedPtr<FJsonObject> JsonObject;
-		// 	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(FuncCall.Arguments);
-		//
-		// 	if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
-		// 	{
-		// 		for (auto& Element : JsonObject->Values)
-		// 		{
-		// 			ArgNames.Add(Element.Key);
-		// 			ArgValues.Add(Element.Value->AsString());
-		// 		}
-		// 	}
-		//
-		// 	OnFunctionCalled.Broadcast(RequestCaller, Message, FuncCall.Name,ArgNames, ArgValues);
-		// }//
+		if(Choice.FinishReason.IsEqual("function_call", ENameCase::IgnoreCase))
+		{
+			// auto Request = RequestQueue.Pop();
+			//
+			// FString Message = Choice.Message.Content;
+			// AddMessageToHistory(Request.Caller, EHttpGPTChatRole::Function, Message);
+			//
+			FHttpGPTFunctionCall FuncCall = Choice.Message.FunctionCall;
+			TArray<FString> ArgNames;
+			TArray<FString> ArgValues;
+		
+			TSharedPtr<FJsonObject> JsonObject;
+			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(FuncCall.Arguments);
+		
+			if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+			{
+				for (auto& Element : JsonObject->Values)
+				{
+					ArgNames.Add(Element.Key);
+					ArgValues.Add(Element.Value->AsString());
+				}
+			}
+			UE_LOG(LogTemp, Log, TEXT("FunctionCall Called: %s"), *FuncCall.Name.ToString());
+			//OnFunctionCalled.Broadcast(RequestCaller, Message, FuncCall.Name,ArgNames, ArgValues);
+		}//
 	}
 }
 

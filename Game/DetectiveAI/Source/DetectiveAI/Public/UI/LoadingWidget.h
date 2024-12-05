@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Interfaces/WidgetInterface.h"
 #include "LoadingWidget.generated.h"
 
 class UProgressBar;

@@ -3,10 +3,7 @@
 #include "CoreMinimal.h"
 #include "CommonCaseTypes.generated.h"
 
-
-
 /* used for runtime lookup */
-
 class USoundWaveProcedural;
 
 USTRUCT(BlueprintType)
@@ -134,6 +131,19 @@ enum class EVictimFamiliarity : uint8
 	Victim
 };
 
+UENUM(BlueprintType)
+enum class ERoom : uint8
+{
+	Atrium,
+	Corridor,
+	Bathroom,
+	Bedroom,
+	MasterBedroom,
+	DiningRoom,
+	Kitchen,
+	MAX UMETA(Hidden)
+};
+
 USTRUCT(BlueprintType)
 struct CASEGENERATOR_API  FDialogueOptions
 {
@@ -211,6 +221,9 @@ struct CASEGENERATOR_API FClue
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Meta = (LLMDescription = "The type of clue that this is"))
 	EClueType ClueType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Meta = (LLMDescription = "Where the clue is located"))
+	ERoom Room;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Meta = (LLMDescription = "detailed description of the context of this clue in the case"))
 	FString Description;

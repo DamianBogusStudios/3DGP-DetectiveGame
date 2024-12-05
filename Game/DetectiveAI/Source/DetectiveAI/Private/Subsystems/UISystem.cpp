@@ -157,6 +157,7 @@ void UUISystem::LoadWidgetClasses()
 		WidgetMap.Add(EUIElementType::LockpickMiniGame, {Settings->LockpickMiniGame});
 		WidgetMap.Add(EUIElementType::Loading, {Settings->LoadingGame});
 		WidgetMap.Add(EUIElementType::MicFeedback, {Settings->MicFeedback});
+		WidgetMap.Add(EUIElementType::Pickup, {Settings->Pickup});
 	}
 }
 	

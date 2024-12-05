@@ -4,14 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Interfaces/InteractInterface.h"
+#include "Interfaces/Interactable.h"
 #include "BaseNPC.generated.h"
 
 struct FActorDescription;
 class UDialogueComponent;
 
 UCLASS()
-class DETECTIVEAI_API ABaseNPC : public ACharacter, public IInteractInterface
+class DETECTIVEAI_API ABaseNPC : public ACharacter, public IInteractable
 {
 	GENERATED_BODY()
 

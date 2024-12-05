@@ -25,17 +25,18 @@ struct FMessageRequest
 	TWeakObjectPtr<UObject> Caller;
 	FString Message;
 	UScriptStruct* StructSchema;
+	TArray<FHttpGPTFunction> Functions;
 	
 	FMessageDelegate OnMessageReceived;
 	FStructuredMessageDelegate OnStructuredMessageReceived;
 	FFunctionCallDelegate OnFunctionCalled;
 	FErrorReceivedDelegate OnErrorReceived;
 
-	double StartTime;
-	double EndTime;
+	double StartTime = 0;
+	double EndTime = 0;
 	
-	FMessageRequest(UObject* InCaller, const FString& InMessage, UScriptStruct* InSchemaStruct)
-		: Caller(InCaller), Message(InMessage), StructSchema(InSchemaStruct)
+	FMessageRequest(UObject* InCaller, const FString& InMessage, UScriptStruct* InSchemaStruct, TArray<FHttpGPTFunction> InFunctions)
+		: Caller(InCaller), Message(InMessage), StructSchema(InSchemaStruct), Functions(InFunctions)
 	{
 	}
 
@@ -84,15 +85,9 @@ public:
 	virtual void SendStructuredMessage(UObject* const Caller, const FString& Message, UScriptStruct* StructSchema,
 				FStructuredMessageDelegate Callback, FErrorReceivedDelegate ErrorCallback) override;
 
-	// virtual void SendMessage(UObject* Caller, FString& Message) override;
-	// virtual void SendStructuredMessage(UObject* const WorldObject, const FString& Message,  UScriptStruct* Struct) override;
 	virtual void AddFunction(const FName& InName, const FString& InDescription) override;
 	virtual void AddFunctionParam(const FName& FuncName, const FName& InName, const FString& InDescription, const FString& InType, const UEnum* InEnum) override;
 	
-
-	// virtual FMessageDelegate& GetMessageDelegate() override;
-	// virtual FStructuredMessageDelegate& GetStructuredMessageDelegate() override;
-	// virtual FFunctionCallDelegate& GetFunctionCalledDelegate() override;
 	/***********************/
 	
 	/* delegates */
@@ -108,26 +103,18 @@ private:
 	UPROPERTY()
 	TArray<FMessageRequest> RequestQueue;
 
+	/*chat log*/
 	TMap<TWeakObjectPtr<UObject>, TSharedPtr<TArray<FHttpGPTChatMessage>>> ChatMessages;
-	
-	// UPROPERTY()
-	// TObjectPtr<UObject> RequestCaller;
-	//
-	// UPROPERTY()
-	// TObjectPtr<UScriptStruct> ProvidedSchemaStruct;
-	
+	/*function calling*/
 	TMap<FName, TUniquePtr<FHttpGPTFunction>> Functions;
 
-
+	
 	void AddNewRequest(FMessageRequest& Request);
 	void ProcessNextRequest();
-
 	
-	
-	bool bStructuredMessageRequested = false;
-	void SendMessageDefault(UObject* const WorldObject, const TArray<FHttpGPTChatMessage>& Messages);
-	// void SendMessageStructured(UObject* const WorldObject, const TArray<FHttpGPTChatMessage>& Messages, const FHttpGPTStructuredResponse& StructuredResponse);
-	void SendMessageStructured(UObject* const WorldObject, const TArray<FHttpGPTChatMessage>& Messages, TSharedPtr<FJsonObject> StructuredResponseSchema);
+	void SendMessageDefault(UObject* const WorldObject, const TArray<FHttpGPTChatMessage>& Messages, TArray<FHttpGPTFunction> Functions);
+	void SendMessageStructured(UObject* const WorldObject, const TArray<FHttpGPTChatMessage>& Messages,
+		const TSharedPtr<FJsonObject>& StructuredResponseSchema, TArray<FHttpGPTFunction>& Functions);
 
 	/* chat history functions */
 	void AddMessageToHistory(TWeakObjectPtr<UObject> WorldObject, const EHttpGPTChatRole Role, const FString& Message);

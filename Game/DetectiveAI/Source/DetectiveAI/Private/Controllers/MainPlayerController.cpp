@@ -55,7 +55,7 @@ void AMainPlayerController::OnGameLoaded()
 
 	if (auto UI = GetGameInstance()->GetSubsystem<UUISystem>())
 	{
-		UI->RequestStartWidget(this, EUIElementType::LockpickMiniGame);
+		// UI->RequestStartWidget(this, EUIElementType::LockpickMiniGame);
 	}
 }
 

@@ -6,6 +6,7 @@
 #include "Interfaces/TTSService.h"
 #include "Types/CommonCaseTypes.h"
 #include "Data/PromptConfigData.h"
+#include "Interfaces/LLMService.h"
 #include "Utilities/GenAIUtilities.h"
 //todo error checking.
 #pragma region Initalisation
@@ -20,8 +21,8 @@ void UCaseSystem::PostInit()
 #pragma region Generation
 void UCaseSystem::StartCaseGeneration()
 {
-	OnCaseGenerationFinished.Broadcast(FPlatformTime::Seconds());
-	// GenerateCase();
+	OnCaseGenerationFinished.Broadcast(FPlatformTime::Seconds() - GenStartTime);
+	//GenerateCase();
 }
 void UCaseSystem::GenerateCase()
 {
@@ -93,7 +94,7 @@ void UCaseSystem::GenerateActor()
 void UCaseSystem::GenerateClues()
 {	
 	FString CluePrompt = PromptConfig->Clues;
-	CluePrompt.ReplaceInline(TEXT("{NumOfClues}"), *FString::FromInt(NumOfClues));	
+	CluePrompt.ReplaceInline(TEXT("{NumOfClues}"), *FString::FromInt(NumOfClues));
 	SendStructuredMessage(CluePrompt, FClueCollection::StaticStruct());
 }
 
