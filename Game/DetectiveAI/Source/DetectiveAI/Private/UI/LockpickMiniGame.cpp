@@ -5,15 +5,15 @@
 #include "Components/Image.h"
 #include "Components/PanelWidget.h"
 #include "Controllers/MainPlayerController.h"
+#include "Interfaces/MiniGameCallbackInterface.h"
 
 #pragma region IWidgetInterface
 
 void ULockpickMiniGame::Setup_Implementation(UObject* Caller)
 {
-	InitialisePins();
-	PlayerController = Cast<AMainPlayerController>(GetWorld()->GetFirstPlayerController());
-
-	if (PlayerController)
+	ResetPins();
+	
+	if ((PlayerController = Cast<AMainPlayerController>(GetWorld()->GetFirstPlayerController())))
 	{
 		PlayerController->MiniGameInputInterface.SetObject(this); 
 		PlayerController->MiniGameInputInterface.SetInterface(Cast<IMiniGameInputInterface>(this)); 
@@ -21,27 +21,63 @@ void ULockpickMiniGame::Setup_Implementation(UObject* Caller)
 		PlayerController->RequestInputContext(EInputContext::MiniGame, false);
 	}
 
-	SetLockState(ELockState::Locked);
+	if(Caller->Implements<UMiniGameCallbackInterface>())
+	{
+		CallbackInterface.SetInterface(Cast<IMiniGameCallbackInterface>(Caller));
+		CallbackInterface.SetObject(Caller);
+	}
+	
+
 	
 	FVector2D CurrentPosition = Pick->GetRenderTransform().Translation;
 	Pick->SetRenderTranslation(FVector2D(50, CurrentPosition.Y));
+
+
+	
 	UpdateRightTriggerEffect();
 	UpdateLeftTriggerEffect();
+	bRunTick = true;
+}
+
+void ULockpickMiniGame::ResetPins()
+{
+	LockState = ELockState::Locked;
+	for(auto& Pin : Pins)
+	{
+		Pin.PinState = EPinState::Loose;
+		Pin.SetPosition = FMath::FRandRange(50.0f, 100.0f);
+		Pin.TargetPosition = 230;
+		FVector2D CurrentPosition = Pin.Pin->GetRenderTransform().Translation;
+		Pin.Pin->SetRenderTranslation(FVector2D(CurrentPosition.X, 230));
+	}
 }
 
 void ULockpickMiniGame::Advance_Implementation()
 {
-
+	if(bAllowForceUnlock)
+	{
+		for(auto& Pin : Pins)
+		{
+			Pin.PinState = EPinState::Set;
+		}
+			SetLockState(ELockState::Unlocked);
+	}
 }
+
 
 
 void ULockpickMiniGame::Cleanup_Implementation()
 {
+	bRunTick = false;
+
+	ResetPins();
+	
 	if (PlayerController)
 	{
 		PlayerController->MiniGameInputInterface.SetObject(nullptr); 
 		PlayerController->MiniGameInputInterface.SetInterface(nullptr); 
 	}
+
 }
 
 #pragma endregion
@@ -88,6 +124,19 @@ void ULockpickMiniGame::HandleMovePick_MiniGame(bool Right)
 	FVector2D CurrentPosition = Pick->GetRenderTransform().Translation;	
 	Pick->SetRenderTranslation(FVector2D(50 + (100 * (CurrentPin)), CurrentPosition.Y));
 }
+void ULockpickMiniGame::HandleSetPin_MiniGame()
+{
+	if(CurrentPin < Pins.Num())
+	{
+		auto& Pin = Pins[CurrentPin];
+		FVector2D CurrentPosition = Pin.Pin->GetRenderTransform().Translation;
+
+		if (FMath::IsNearlyEqual(CurrentPosition.Y, Pin.TargetPosition, 1.0f))
+		{
+			SetPin(Pin);
+		}
+	}
+}
 #pragma endregion
 
 
@@ -95,7 +144,11 @@ void ULockpickMiniGame::NativeTick(const FGeometry& MyGeometry, float InDeltaTim
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
-	MovePins();
+	if(bRunTick)
+	{
+		MovePins();
+		DebugStateToScreen();
+	}
 }
 
 void ULockpickMiniGame::SetLockState(ELockState InState)
@@ -111,7 +164,15 @@ void ULockpickMiniGame::SetLockState(ELockState InState)
 	}
 	else if(LockState == ELockState::Unlocked && GetNotSetPins().Num() == 0)
 	{
-		OnMiniGameFinished.Broadcast(true);
+		if(CallbackInterface)
+		{
+			CallbackInterface->OnMiniGameFinished(true);
+		}
+
+		if(auto UI = GetGameInstance()->GetSubsystem<UUISystem>())
+		{
+			UI->RequestFinishWidget(this, EUIElementType::LockpickMiniGame);
+		}
 	}
 }
 
@@ -136,8 +197,15 @@ void ULockpickMiniGame::BindRandomPin()
 		{
 			if (Pins[i].PinState == EPinState::Set)
 				continue;
-			
-			Pins[i].PinState = i == OriginalArrayIndex ? EPinState::Binding : EPinState::Loose;
+
+			if(i == OriginalArrayIndex)
+			{
+				Pins[i].PinState = EPinState::Binding;
+			}
+			else
+			{
+				Pins[i].PinState = EPinState::Loose;
+			}
 		}
 	}
 	else
@@ -152,7 +220,7 @@ void ULockpickMiniGame::UpdateRightTriggerEffect()
 	{
 		FLockPin* Pin = &Pins[CurrentPin];
 
-		if (Pin->PinState == EPinState::Binding)
+		if (Pin->PinState == EPinState::Binding && LockState == ELockState::Tensioned)
 		{
 			float Start = (1.0f / (250 - (Pin->SetPosition / 250.0f)));
 			float End = Start + 50.0f;
@@ -204,15 +272,11 @@ void ULockpickMiniGame::MovePinToTarget(FLockPin& Pin)
 	float NewY = FMath::FInterpTo(CurrentPosition.Y, Pin.TargetPosition, GetWorld()->GetDeltaSeconds(), InterpSpeed); 
 	Pin.Pin->SetRenderTranslation(FVector2D(CurrentPosition.X, NewY));
 	
-	if (FMath::IsNearlyEqual(NewY, Pin.TargetPosition, 1.0f))
-	{
-		SetPin(Pin);
-	}
 }
 
 void ULockpickMiniGame::SetPin(FLockPin& Pin)
 {
-	if (Pin.PinState == EPinState::Binding)
+	if (Pin.PinState == EPinState::Binding && LockState == ELockState::Tensioned)
 	{
 		FVector2D CurrentPosition = Pin.Pin->GetRenderTransform().Translation;
 		Pin.Pin->SetRenderTranslation(FVector2D(CurrentPosition.X, Pin.TargetPosition));
@@ -222,4 +286,66 @@ void ULockpickMiniGame::SetPin(FLockPin& Pin)
 		BindRandomPin();
 		//todo play sound effect.
 	}
+}
+
+void ULockpickMiniGame::DebugStateToScreen()
+{
+    if (!GEngine) return;
+
+    FString DebugMessage = "=== LockpickMiniGame Debug State ===\n";
+	
+    DebugMessage += FString::Printf(TEXT("Lock State: %s\n"), *UEnum::GetValueAsString(LockState));
+    DebugMessage += FString::Printf(TEXT("Current Pin: %d\n"), CurrentPin);
+
+    // // Callback Interface
+    // DebugMessage += FString::Printf(TEXT("Callback Interface: %s\n"), CallbackInterface.GetObject() ? TEXT("Set") : TEXT("Unset"));
+    //
+    // // Run Tick Status
+    // DebugMessage += FString::Printf(TEXT("Run Tick: %s\n"), bRunTick ? TEXT("True") : TEXT("False"));
+
+    // Pin States
+    DebugMessage += "Pins:\n";
+    for (int i = 0; i < Pins.Num(); ++i)
+    {
+        const auto& Pin = Pins[i];
+        FString PinState = UEnum::GetValueAsString(Pin.PinState);
+        DebugMessage += FString::Printf(TEXT("  Pin %d: State=%s, SetPos=%.2f, TargetPos=%.2f\n"), 
+                                        i, *PinState, Pin.SetPosition, Pin.TargetPosition);
+
+        if (Pin.Pin)
+        {
+            FVector2D Translation = Pin.Pin->GetRenderTransform().Translation;
+            DebugMessage += FString::Printf(TEXT("    Position: X=%.2f, Y=%.2f\n"), Translation.X, Translation.Y);
+        }
+        else
+        {
+            DebugMessage += "    Pin Widget: Null\n";
+        }
+    }
+    //
+    // // Pick Position
+    // if (Pick)
+    // {
+    //     FVector2D PickPosition = Pick->GetRenderTransform().Translation;
+    //     DebugMessage += FString::Printf(TEXT("Pick Position: X=%.2f, Y=%.2f\n"), PickPosition.X, PickPosition.Y);
+    // }
+    // else
+    // {
+    //     DebugMessage += "Pick Widget: Null\n";
+    // }
+
+    // Tension Wrench Position
+    if (TensionWrench)
+    {
+        FVector2D TensionPosition = TensionWrench->GetRenderTransform().Translation;
+        DebugMessage += FString::Printf(TEXT("Tension Wrench Position: X=%.2f, Y=%.2f\n"), TensionPosition.X, TensionPosition.Y);
+    }
+    else
+    {
+        DebugMessage += "Tension Wrench Widget: Null\n";
+    }
+
+    // Collapse by assigning a unique key
+    static const int32 DebugMessageKey = 1;
+    GEngine->AddOnScreenDebugMessage(DebugMessageKey, 0.f, FColor::Cyan, DebugMessage);
 }

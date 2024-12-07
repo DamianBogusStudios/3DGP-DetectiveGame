@@ -82,3 +82,4 @@ Game/Art/*
 *.backup
 *.temp
 *.tmp
+Game/DetectiveAI/StructuredResponse.json

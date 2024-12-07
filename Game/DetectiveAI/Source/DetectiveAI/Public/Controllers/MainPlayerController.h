@@ -90,6 +90,9 @@ struct FMiniGameInputActions
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UInputAction* MovePin;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UInputAction* SetPin;
 };
 
 USTRUCT()
@@ -138,7 +141,7 @@ public:
 	UFUNCTION()
 	void ResetTriggerEffect(ETrigger Trigger);
 	UFUNCTION()
-	void RequestInputContext(EInputContext Context, bool bRemove = false);
+	void RequestInputContext(EInputContext Context, bool bAdd = false);
 	UFUNCTION()
 	void RequestUIInput(const TArray<EUIElementType>& UIElements);
 	
@@ -190,6 +193,7 @@ protected:
 	void HandleRaisePin_MiniGame(const FInputActionValue& Value);
 	void HandleRaisePinCompleted_MiniGame(const FInputActionValue& Value);
 	void HandleMovePick_MiniGame(const FInputActionValue& Value);
+	void HandleSetPin_MiniGame(const FInputActionValue& Value);
 
 private:
 

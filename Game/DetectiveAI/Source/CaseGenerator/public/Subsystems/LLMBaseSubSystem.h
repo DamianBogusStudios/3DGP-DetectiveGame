@@ -3,12 +3,38 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Types/CommonCaseTypes.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "LLMBaseSubSystem.generated.h"
 
 class UPromptConfigData;
 class ILLMService;
+
+USTRUCT()
+struct FPromptBuffer
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FString Message;
+	UPROPERTY()
+	UScriptStruct* Schema = nullptr;
+
+	FPromptBuffer()
+	{
+		Message = "";
+	}
+
+	FPromptBuffer(FString InMessage) : Message(InMessage)
+	{
+		
+	}
+
+	FPromptBuffer(FString InMessage, UScriptStruct* InSchema) : Message(InMessage), Schema(InSchema)
+	{
+		
+	}
+};
+
 
 /**
  * 
@@ -24,6 +50,12 @@ protected:
 	TScriptInterface<ILLMService> LLMService;
 	UPROPERTY()
 	TObjectPtr<UPromptConfigData> PromptConfig;
+	UPROPERTY()
+	bool bSkipGeneration;
+
+	UPROPERTY()
+	FPromptBuffer LastRequest;
+
 
 	/* virtual functions to be overriden */
 	virtual void PostInit();	
@@ -36,12 +68,13 @@ protected:
 	virtual void Deinitialize() override;
 	
 	void GetConfigFiles();
-	// void BindCallbacks();
+	//void BindCallbacks();
 	
 	/* requests */
 	void SendCustomInstructions(const FString& Prompt);
 	void SendMessage(const FString& Prompt);
 	void SendStructuredMessage(const FString& Prompt, UScriptStruct* Schema);
+	void RetryLastMessage();
 	
 private:
 	/*Callback Functions */

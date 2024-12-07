@@ -2,6 +2,8 @@
 
 
 #include "Characters/MainCharacter.h"
+
+#include "ActorComponents/BasicInventory.h"
 #include "Components/SphereComponent.h"
 #include "Interfaces/Interactable.h"
 
@@ -10,10 +12,11 @@ AMainCharacter::AMainCharacter(const FObjectInitializer & ObjectInitializer)
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	InteractionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Overlap Sphere")); 
 	
+	BasicInventory = CreateDefaultSubobject<UBasicInventory>(TEXT("Inventory"));
+	InteractionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Overlap Sphere")); 
 	InteractionSphere->SetupAttachment(RootComponent);
+	
 }
  
 // Called when the game starts or when spawned

@@ -86,6 +86,4 @@ private:
 	void GenerateClues();
 	void GenerateConnections();
 	void FinishGeneration();
-
-	void SpawnClue(ERoom Room);
 };

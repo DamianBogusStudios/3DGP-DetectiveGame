@@ -14,6 +14,7 @@ void UPickupWidget::Advance_Implementation()
 }
 void UPickupWidget::Setup_Implementation(UObject* Caller)
 {
+	SetRenderOpacity(1.0f);
 	if (const auto Inventory = Cast<UBasicInventory>(Caller))
 	{
 		FClue Clue;

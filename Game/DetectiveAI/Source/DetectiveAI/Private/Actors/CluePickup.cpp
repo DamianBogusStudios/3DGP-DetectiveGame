@@ -7,6 +7,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameClasses/AGPGameInstance.h"
+#include "Subsystems/UISystem.h"
 
 ACluePickup::ACluePickup()
 {
@@ -15,7 +16,8 @@ ACluePickup::ACluePickup()
 	TriggerArea = CreateDefaultSubobject<USphereComponent>(TEXT("ProximitySphere"));
 	TriggerArea->OnComponentBeginOverlap.AddDynamic(this, &ACluePickup::OnBeginOverlap);
 	TriggerArea->OnComponentEndOverlap.AddDynamic(this, &ACluePickup::OnEndOverlap);
-	
+
+	SetRootComponent(TriggerArea);
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(TriggerArea);
 }
@@ -32,18 +34,25 @@ void ACluePickup::OnEndOverlap_Implementation(UPrimitiveComponent* OverlappedCom
 
 void ACluePickup::Interact_Implementation(AActor* Caller)
 {
-	if (bIsFocused)
+	if (bInRange && bIsFocused)
 	{
-		if (UBasicInventory* Inventory = Caller->FindComponentByClass<UBasicInventory>())
+		FocusedActor = Caller;
+		if(auto UI = GetGameInstance()->GetSubsystem<UUISystem>())
 		{
-			Inventory->AddClue(Clue);
-			
-			if(bDestroyOnPickup) Destroy();
+			UI->RequestStartWidget(this, EUIElementType::LockpickMiniGame);
 		}
+		
+		// if (UBasicInventory* Inventory = Caller->FindComponentByClass<UBasicInventory>())
+		// {
+		// 	Inventory->AddClue(Clue);
+		// 	
+		// 	if(bDestroyOnPickup) Destroy();
+		// }
 	}
 }
 void ACluePickup::OnFocus_Implementation()
 {
+	bIsFocused = true;
 	if(Mesh)
 	{
 		if(UAGPGameInstance* GameInstance = Cast<UAGPGameInstance>(GetGameInstance()))
@@ -56,8 +65,22 @@ void ACluePickup::OnFocus_Implementation()
 
 void ACluePickup::EndFocus_Implementation()
 {
+	bIsFocused = false;
 	if (Mesh)
 	{
 		Mesh->SetOverlayMaterial(nullptr);
+	}
+}
+
+void ACluePickup::OnMiniGameFinished(bool bSuccess)
+{
+	if(!FocusedActor)
+		return;
+
+	
+	if (UBasicInventory* Inventory = FocusedActor->FindComponentByClass<UBasicInventory>())
+	{
+		Inventory->AddClue(Clue);
+		if(bDestroyOnPickup) Destroy();
 	}
 }

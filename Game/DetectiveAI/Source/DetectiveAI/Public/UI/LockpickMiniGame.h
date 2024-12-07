@@ -10,6 +10,7 @@
 
 // static void SetTriggerEffectProperty(int StartPos, int EndPos, int Strength, int Trigger);
 
+class IMiniGameCallbackInterface;
 class AMainPlayerController;
 class UImage;
 
@@ -61,6 +62,8 @@ class DETECTIVEAI_API ULockpickMiniGame : public UUserWidget, public IWidgetInte
 
 public:
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MiniGame Settings")
+	bool bAllowForceUnlock = true;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MiniGame Settings")
 	float PinFallSpeed = 8.0f;
@@ -80,9 +83,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FMiniGameFinishedDelegate OnMiniGameFinished;
 	
-	UFUNCTION(BlueprintImplementableEvent, Category = "Initialisation")
-	void InitialisePins();
-
+	UFUNCTION(BlueprintCallable, Category = "Blueprints")
+	void ResetPins();
+	
 	/* IWidgetInterface */
 	virtual void Advance_Implementation() override;
 	virtual void Setup_Implementation(UObject* Caller) override;
@@ -94,6 +97,7 @@ public:
 	virtual void HandleRaisePin_MiniGame(float Value) override;
 	virtual void HandleRaisePinCompleted_MiniGame() override;
 	virtual void HandleMovePick_MiniGame(bool Right) override;
+	virtual void HandleSetPin_MiniGame() override;
 
 	
 protected:
@@ -102,7 +106,11 @@ protected:
 
 private:
 
+
+	bool bRunTick = false;
+
 	TObjectPtr<AMainPlayerController> PlayerController;
+	TScriptInterface<IMiniGameCallbackInterface> CallbackInterface; 
 	
 	uint8 CurrentPin = 0;
 	ELockState LockState = ELockState::Locked;
@@ -117,7 +125,7 @@ private:
 
 	void SetPin(FLockPin& Pin);
 	void SetLockState(ELockState InState);
-	
+	void DebugStateToScreen();
 
 	TArray<int> GetNotSetPins()
 	{

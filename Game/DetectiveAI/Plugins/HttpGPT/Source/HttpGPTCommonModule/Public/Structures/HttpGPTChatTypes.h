@@ -44,7 +44,7 @@ struct HTTPGPTCOMMONMODULE_API FHttpGPTFunctionProperty
 	EHttpGPTPropertyType InnerType = EHttpGPTPropertyType::String;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "HttpGPT | Chat", Meta = (DisplayName = "Inner Schema"))
-	UScriptStruct* InnerTypeSchema;
+	UScriptStruct* InnerTypeSchema = nullptr;
 };
 
 USTRUCT(BlueprintType, Category = "HttpGPT | Chat", Meta = (DisplayName = "HttpGPT Function"))

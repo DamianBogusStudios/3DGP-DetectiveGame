@@ -27,5 +27,5 @@ public:
 	virtual void HandleRaisePin_MiniGame(float Value) = 0;
 	virtual void HandleRaisePinCompleted_MiniGame() = 0;
 	virtual void HandleMovePick_MiniGame(bool Right) = 0;
-	
+	virtual void HandleSetPin_MiniGame() = 0;
 };

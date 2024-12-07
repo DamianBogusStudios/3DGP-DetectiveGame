@@ -8,6 +8,7 @@
 #include "MainCharacter.generated.h"
 
 
+class UBasicInventory;
 class USphereComponent;
 class InteractInterface;
 
@@ -22,6 +23,9 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Interaction)
 	USphereComponent* InteractionSphere;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Interaction)
+	UBasicInventory* BasicInventory;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction)
 	float FocusUpdateFrequency = 0.5f;

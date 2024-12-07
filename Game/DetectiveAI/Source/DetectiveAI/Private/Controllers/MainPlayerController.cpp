@@ -1,6 +1,4 @@
 
-
-
 #include "Controllers/MainPlayerController.h"
 #include "Characters/MainCharacter.h"
 #include "Camera/CameraComponent.h"
@@ -30,6 +28,7 @@ void AMainPlayerController::BeginPlay()
 	
 	BindCallbacks();
 
+	RequestInputContext(EInputContext::UI, true);
 	DualSense = NewObject<UDualSenseController>(this, UDualSenseController::StaticClass());
 	DualSense->SetLightBarColour(FColor::Yellow);	
 }
@@ -51,11 +50,11 @@ void AMainPlayerController::SetupInputComponent()
 
 void AMainPlayerController::OnGameLoaded()
 {
-	RequestInputContext(EInputContext::DefaultContext, 0);
+	RequestInputContext(EInputContext::DefaultContext, true);
 
 	if (auto UI = GetGameInstance()->GetSubsystem<UUISystem>())
 	{
-		// UI->RequestStartWidget(this, EUIElementType::LockpickMiniGame);
+		//UI->RequestStartWidget(this, EUIElementType::LockpickMiniGame);
 	}
 }
 
@@ -105,7 +104,9 @@ void AMainPlayerController::BindMiniGameActions()
 		EnhancedInputComponent->BindAction(MiniGameInputActions.RaisePin, ETriggerEvent::Completed,
 			this, &AMainPlayerController::HandleRaisePinCompleted_MiniGame);
 		EnhancedInputComponent->BindAction(MiniGameInputActions.MovePin, ETriggerEvent::Triggered,
-			this, &AMainPlayerController::HandleMovePick_MiniGame);
+		this, &AMainPlayerController::HandleMovePick_MiniGame);
+		EnhancedInputComponent->BindAction(MiniGameInputActions.SetPin, ETriggerEvent::Triggered,
+			this, &AMainPlayerController::HandleSetPin_MiniGame);
 	}
 }
 
@@ -127,18 +128,20 @@ void AMainPlayerController::OnUnPossess()
 	BaseCharacter = nullptr;
 }
 
-void AMainPlayerController::RequestInputContext(EInputContext Context, bool bRemove)
+void AMainPlayerController::RequestInputContext(EInputContext Context, bool bAdd)
 {
 	if (auto EnhancedInput = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		if (InputContextMap[Context])
 		{
-			if (!bRemove && !EnhancedInput->HasMappingContext(InputContextMap[Context].Get()))
+			if (bAdd && !EnhancedInput->HasMappingContext(InputContextMap[Context].Get()))
 			{
+				UE_LOG(LogTemp, Log, TEXT("Context Added: %s"), *UEnum::GetValueAsString(Context));
 				EnhancedInput->AddMappingContext(InputContextMap[Context].Get(), static_cast<int>(Context));
 			}
-			else if (bRemove && EnhancedInput->HasMappingContext(InputContextMap[Context].Get()))
+			else if (!bAdd && EnhancedInput->HasMappingContext(InputContextMap[Context].Get()))
 			{
+				UE_LOG(LogTemp, Log, TEXT("Context Removed: %s"), *UEnum::GetValueAsString(Context));
 				EnhancedInput->RemoveMappingContext(InputContextMap[Context].Get());
 			}
 		}
@@ -177,8 +180,9 @@ TSet<EInputContext> AMainPlayerController::UIToInputContext(EUIElementType Conte
 		case EUIElementType::NPCDialogue:
 			return {EInputContext::UI, EInputContext::Dialogue};
 		case EUIElementType::LockpickMiniGame:
-			return {EInputContext::UI, EInputContext::Dialogue};
+			return {EInputContext::UI, EInputContext::MiniGame};
 		case EUIElementType::Loading:
+		case EUIElementType::Pickup:
 			return {EInputContext::UI};
 		default:
 			return {};
@@ -226,7 +230,6 @@ void AMainPlayerController::HandleExit_UI(const FInputActionValue& Value)
 	}
 }
 
-
 void AMainPlayerController::HandleApplyTensionCompleted_MiniGame(const FInputActionValue& Value)
 {
 	if(MiniGameInputInterface)
@@ -265,7 +268,13 @@ void AMainPlayerController::HandleMovePick_MiniGame(const FInputActionValue& Val
 		MiniGameInputInterface->HandleMovePick_MiniGame(Input == 1 ? true : false);
 	}
 }
-
+void AMainPlayerController::HandleSetPin_MiniGame(const FInputActionValue& Value)
+{
+	if(MiniGameInputInterface)
+	{
+		MiniGameInputInterface->HandleSetPin_MiniGame();
+	}
+}
 
 
 #pragma endregion 

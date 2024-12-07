@@ -56,6 +56,7 @@ void ULLMBaseSubSystem::GetConfigFiles()
 	if(const ULLMSettings* Settings = GetDefault<ULLMSettings>())
 	{
 		PromptConfig = Settings->GetPromptConfigData();
+		bSkipGeneration = Settings->SkipGeneration();
 	}
 }
 
@@ -80,6 +81,7 @@ void ULLMBaseSubSystem::SendMessage(const FString& Prompt)
 {
 	if(LLMService)
 	{
+		LastRequest = FPromptBuffer(Prompt);
 		LLMService->SendMessage(this, Prompt,
 			FMessageDelegate::CreateUObject(this, &ULLMBaseSubSystem::OnMessagedReceivedInternal),
 			FErrorReceivedDelegate::CreateUObject(this, &ULLMBaseSubSystem::OnErrorReceivedInternal)
@@ -87,18 +89,11 @@ void ULLMBaseSubSystem::SendMessage(const FString& Prompt)
 	}
 }
 
-// void ULLMBaseSubSystem::SendMessage(const FString& Prompt)
-// {
-// 	if(LLMService)
-// 	{
-// 		LLMService->SendMessage(this, Prompt, MessageDelegate);
-// 	}
-// }
-
 void ULLMBaseSubSystem::SendStructuredMessage(const FString& Prompt, UScriptStruct* Schema)
 {
 	if(LLMService)
 	{
+		LastRequest = FPromptBuffer(Prompt, Schema);
 		LLMService->SendStructuredMessage(this, Prompt, Schema, 
 		FStructuredMessageDelegate::CreateUObject(this, &ULLMBaseSubSystem::OnStructuredMessageReceivedInternal),
 			FErrorReceivedDelegate::CreateUObject(this, &ULLMBaseSubSystem::OnErrorReceivedInternal)
@@ -106,6 +101,17 @@ void ULLMBaseSubSystem::SendStructuredMessage(const FString& Prompt, UScriptStru
 	}
 }
 
+void ULLMBaseSubSystem::RetryLastMessage()
+{
+	// if(LastRequest.Schema == nullptr)
+	// {
+	// 	SendMessage("Retry Last Prompt" + LastRequest.Message);
+	// }
+	// else
+	// {
+	// 	SendStructuredMessage("Retry Last Prompt" + LastRequest.Message, LastRequest.Schema);
+	// }
+}
 
 
 #pragma endregion 

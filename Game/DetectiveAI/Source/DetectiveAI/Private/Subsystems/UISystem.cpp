@@ -37,7 +37,6 @@ UUserWidget* UUISystem::RequestStartWidget(UObject* InCaller, EUIElementType Wid
 		{
 			Widget->AddToViewport();
 			ActiveUObject = InCaller;
-			//OnStartUIAction.Broadcast(ActiveComponent, Widget);
 
 			if(Widget->Implements<UWidgetInterface>())
 			{

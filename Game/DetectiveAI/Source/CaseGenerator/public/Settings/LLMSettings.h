@@ -41,6 +41,9 @@ private:
 	UPROPERTY(Config, EditDefaultsOnly, Category = "LLM")
 	TSoftObjectPtr<UPromptConfigData> PromptConfigData;
 
+	UPROPERTY(Config, EditDefaultsOnly, Category = "DEBUGGING")
+	bool bSkipGeneration;
+
 public:
 
 	TEnumAsByte<EActiveLLM> GetActiveLLM() const
@@ -60,6 +63,11 @@ public:
 			return PromptConfigData.LoadSynchronous();
 		}
 		return PromptConfigData.Get();
+	}
+
+	bool SkipGeneration() const
+	{
+		return bSkipGeneration;
 	}
 	// UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "LLM", meta = (MultiLine="true"))
 	// FString CustomInstructions;

@@ -2,12 +2,10 @@
 
 
 #include "Subsystems/CaseSystem.h"
-#include "Handlers/ServiceLocator.h"
-#include "Interfaces/TTSService.h"
 #include "Types/CommonCaseTypes.h"
 #include "Data/PromptConfigData.h"
-#include "Interfaces/LLMService.h"
 #include "Utilities/GenAIUtilities.h"
+
 //todo error checking.
 #pragma region Initalisation
 void UCaseSystem::PostInit()
@@ -21,8 +19,10 @@ void UCaseSystem::PostInit()
 #pragma region Generation
 void UCaseSystem::StartCaseGeneration()
 {
-	OnCaseGenerationFinished.Broadcast(FPlatformTime::Seconds() - GenStartTime);
-	//GenerateCase();
+	if(bSkipGeneration)
+		OnCaseGenerationFinished.Broadcast(FPlatformTime::Seconds() - GenStartTime);
+	else
+		GenerateCase();
 }
 void UCaseSystem::GenerateCase()
 {
@@ -127,6 +127,11 @@ void UCaseSystem::StructuredMessageReceived(FString& Message, UScriptStruct* Str
 			GeneratedActorSchemas.Add(Message);
 			GenerateActor();
 		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("JSON CONVERSION FAILED FActorDescription"));
+			RetryLastMessage();
+		}
 	}
 	else if(Struct == FClueCollection::StaticStruct())
 	{
@@ -138,6 +143,11 @@ void UCaseSystem::StructuredMessageReceived(FString& Message, UScriptStruct* Str
 
 			CaseFile.Clues = ClueCollection.Clues;
 			GenerateConnections();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("JSON CONVERSION FAILED FClueCollection"));
+			RetryLastMessage();
 		}
 	}
 	else if(Struct == FContextCollection::StaticStruct())
@@ -155,9 +165,14 @@ void UCaseSystem::StructuredMessageReceived(FString& Message, UScriptStruct* Str
 					CaseFile.Actors[i].Context += "\n[UPDATED]\n" + ContextCollection.KnowledgeBases[i].KnowledgeBase;
 				}	
 			}
+			FinishGeneration();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("JSON CONVERSION FAILED FContextCollection"));
+			RetryLastMessage();
 		}
 
-		FinishGeneration();
 	}
 	else
 	{
@@ -166,6 +181,8 @@ void UCaseSystem::StructuredMessageReceived(FString& Message, UScriptStruct* Str
 #endif
 	}
 }
+
+
 
 // void UCaseSystem::FunctionCallReceived(UObject* Caller, FString& Message, FName& FunctionName, TArray<FString>& ArgNames, TArray<FString>& ArgValues)
 // {

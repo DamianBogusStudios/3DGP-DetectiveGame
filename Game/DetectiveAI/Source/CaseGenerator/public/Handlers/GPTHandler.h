@@ -123,8 +123,8 @@ private:
 	/* helper functions */
 	TArray<FHttpGPTFunction> GetFunctions();
 	
-	FHttpGPTFunctionProperty FPropertyToHttpFunctionProperty(const FProperty& InProperty, const FString& InDescription);
-	FHttpGPTFunctionProperty FunctionParamToHttpFunctionProperty(const FName& InName, const FString& InDescription, const FString& InType, const UEnum* InEnum);
+	static FHttpGPTFunctionProperty FPropertyToHttpFunctionProperty(const FProperty& InProperty, const FString& InDescription);
+	static FHttpGPTFunctionProperty FunctionParamToHttpFunctionProperty(const FName& InName, const FString& InDescription, const FString& InType, const UEnum* InEnum);
 	FHttpGPTStructuredResponse UStructToStructuredResponse(const UScriptStruct* StructType, bool Nested = false);
 	TSharedPtr<FJsonObject> FunctionPropertyToJson(const FHttpGPTFunctionProperty& Prop);
 	TSharedPtr<FJsonObject> StructuredResponseToJson(const FHttpGPTStructuredResponse& StructuredResponse);
@@ -133,7 +133,7 @@ private:
 	
 
 	FString GetDescription(const FProperty& InProperty) const;
-	FString GetDescription(const UScriptStruct* InStruct) const;
+	 FString GetDescription(const UScriptStruct* InStruct) const;
 	
 	/* callbacks */
 	UFUNCTION()

@@ -5,12 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Interfaces/Interactable.h"
+#include "Interfaces/MiniGameCallbackInterface.h"
 #include "Types/CommonCaseTypes.h"
 #include "CluePickup.generated.h"
 
 
 UCLASS()
-class DETECTIVEAI_API ACluePickup : public AActor, public IInteractable
+class DETECTIVEAI_API ACluePickup : public AActor, public IInteractable, public IMiniGameCallbackInterface
 {
 	GENERATED_BODY()
 
@@ -31,6 +32,8 @@ public:
 	virtual void OnFocus_Implementation() override;
 	virtual void EndFocus_Implementation() override;
 
+	
+	virtual void OnMiniGameFinished(bool bSuccess) override;
 protected:
 	
 	UFUNCTION(BlueprintNativeEvent, Category = Colision)
