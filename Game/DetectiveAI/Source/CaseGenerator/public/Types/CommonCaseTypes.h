@@ -168,25 +168,25 @@ struct CASEGENERATOR_API FActorDescription
 	FString Name;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EActorGender Gender;
+	EActorGender Gender = EActorGender::Male;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EEyeColour EyeColour;
+	EEyeColour EyeColour = EEyeColour::Brown;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EHairColour HairColour;
+	EHairColour HairColour = EHairColour::Brown;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	uint8 Age;
+	uint8 Age = 30;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EMyersBriggsType MyersBriggsType;
+	EMyersBriggsType MyersBriggsType = EMyersBriggsType::ENFJ;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (LLMDescription = "Roles that the character has in the stories, can have multiple"))
 	TArray<EActorRole> Roles;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EVictimFamiliarity VictimFamiliarity;
+	EVictimFamiliarity VictimFamiliarity = EVictimFamiliarity::Stranger;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (LLMDescription = "Description of the current world and knowledge from the perspective of this character. Some characters may know more than others. can be later used in dialogue to acquire information"))
 	FString Context;
@@ -220,10 +220,10 @@ struct CASEGENERATOR_API FClue
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Meta = (LLMDescription = "The type of clue that this is"))
-	EClueType ClueType;
+	EClueType ClueType = EClueType::Item;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Meta = (LLMDescription = "Where the clue is located"))
-	ERoom Room;
+	ERoom Room = ERoom::Atrium;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Meta = (LLMDescription = "detailed description of the context of this clue in the case"))
 	FString Description;
@@ -263,10 +263,10 @@ struct CASEGENERATOR_API FCaseFile
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EMotive Motive;
+	EMotive Motive = EMotive::PersonalVendetta;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EMurderWeapon MurderWeapon;
+	EMurderWeapon MurderWeapon = EMurderWeapon::Arsenic;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FActorDescription> Actors;

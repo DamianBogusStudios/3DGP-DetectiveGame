@@ -42,7 +42,7 @@ struct FLockPin
 	TObjectPtr<UImage> TargetZone;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float SetPosition;
+	float SetPosition = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float TargetPosition = 230;

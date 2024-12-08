@@ -85,9 +85,6 @@ void UDualSenseController::SetTriggerEffectProperty(uint8 StartPos, uint8 EndPos
 	case 1:
 		TriggerProperty.SetVibration(StartPos, EndPos, Strength);
 		break;
-	case 2:
-		TriggerProperty.SetFeedback(StartPos, EndPos, Strength);
-		break;
 	default:
 		TriggerProperty.SetWeapon(StartPos, EndPos, Strength);
 		break;
@@ -96,16 +93,18 @@ void UDualSenseController::SetTriggerEffectProperty(uint8 StartPos, uint8 EndPos
 	TriggerProperty.SetUseEffectForThreshold(true);
 	bool bSuccess = SendTriggerEffectProperty(TriggerProperty);
 
-	LogFunctionCall(__FUNCTION__, bSuccess);
+	FString Msg = bSuccess ? "Success" : "Failed";
+	LogFunctionCall(__FUNCTION__, Msg);
 }
 
 void UDualSenseController::ResetTrigger(int Trigger)
 {
 	FPS5TriggerEffectProperty TriggerProperty(SetTrigger(Trigger));	
-	TriggerProperty.ResetEffect();
+	TriggerProperty.SetOff();
 	bool bSuccess = SendTriggerEffectProperty(TriggerProperty);
-	
-	LogFunctionCall(__FUNCTION__, bSuccess);
+
+	FString Msg = bSuccess ? "Success" : "Failed";
+	LogFunctionCall(__FUNCTION__, Msg);
 }
 
 #else

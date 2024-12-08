@@ -19,13 +19,13 @@ struct INVENTORYSYSTEM_API FItemDataRow : public FTableRowBase
 	FString DisplayName;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	EItemType ItemType;
+	EItemType ItemType = EItemType::Consumable;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float Weight;
+	float Weight = 1;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	int32 Value;
+	int32 Value = 1;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftObjectPtr<UTexture2D> Icon;
