@@ -282,13 +282,19 @@ void AMainPlayerController::HandleSetPin_MiniGame(const FInputActionValue& Value
 #pragma region DualSense
 void AMainPlayerController::SetAdaptiveTriggerEffect(FAdaptiveTriggerEffect TriggerEffect)
 {
-	uint8 StartPos = FMath::RoundToInt(TriggerEffect.StartPos * 255);
-	uint8 EndPos = FMath::RoundToInt(TriggerEffect.EndPos * 255);
-	uint8 Strength = FMath::RoundToInt(TriggerEffect.Strength * 255);
+	//(start position: 2 - 7, end position range: 3 - 8, strength range: 0 - 8)
+
+	/*uint8 StartPos = NormaliseToRange(TriggerEffect.StartPos, 2, 7);
+	uint8 EndPos = NormaliseToRange(TriggerEffect.EndPos, 3, 8);
+	uint8 Strength = NormaliseToRange(TriggerEffect.Strength , 0, 8);*/
+
+	uint8 Start, End, Strength;
+	TriggerEffect.GetConvertedValues(Start, End, Strength);
 	int Trigger = static_cast<int>(TriggerEffect.Trigger);
 	int Effect = static_cast<int>(TriggerEffect.Effect);
 	
-	DualSense->SetTriggerEffectProperty(StartPos, EndPos, Strength, Trigger, Effect);
+	UE_LOG(LogTemp, Log, TEXT("SetTriggerEffectProperty(): Start=%u, End=%u, Strength=%u, Trigger=%d, Effect=%d"), Start, End, Strength, Trigger, Effect);
+	DualSense->SetTriggerEffectProperty(Start, End, Strength, Trigger, Effect);
 }
 
 void AMainPlayerController::ResetTriggerEffect(ETrigger Trigger)

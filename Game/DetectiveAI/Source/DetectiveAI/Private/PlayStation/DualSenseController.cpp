@@ -85,6 +85,8 @@ void UDualSenseController::SetTriggerEffectProperty(uint8 StartPos, uint8 EndPos
 	case 1:
 		TriggerProperty.SetVibration(StartPos, EndPos, Strength);
 		break;
+	case 2:
+		TriggerProperty.SetFeedback(StartPos, Strength);
 	default:
 		TriggerProperty.SetWeapon(StartPos, EndPos, Strength);
 		break;

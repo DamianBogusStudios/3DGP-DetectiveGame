@@ -45,7 +45,7 @@ void ULockpickMiniGame::ResetPins()
 	for(auto& Pin : Pins)
 	{
 		Pin.PinState = EPinState::Loose;
-		Pin.SetPosition = FMath::FRandRange(50.0f, 100.0f);
+		Pin.SetPosition = FMath::FRandRange(75.0f, 200.0f);
 		Pin.TargetPosition = 230;
 		FVector2D CurrentPosition = Pin.Pin->GetRenderTransform().Translation;
 		Pin.Pin->SetRenderTranslation(FVector2D(CurrentPosition.X, 230));
@@ -222,8 +222,8 @@ void ULockpickMiniGame::UpdateRightTriggerEffect()
 
 		if (Pin->PinState == EPinState::Binding && LockState == ELockState::Tensioned)
 		{
-			float Start = (1.0f / (250 - (Pin->SetPosition / 250.0f)));
-			float End = Start + 50.0f;
+			float Start = (1.0f / (230 - (Pin->SetPosition / 230.0f)));
+			float End = 0.2f;// +50.0f;
 			
 			FAdaptiveTriggerEffect TriggerEffect(ETrigger::Right, ETriggerEffect::Weapon,
 				1.0f, Start, End);
@@ -238,7 +238,7 @@ void ULockpickMiniGame::UpdateRightTriggerEffect()
 
 void ULockpickMiniGame::UpdateLeftTriggerEffect()
 {
-	FAdaptiveTriggerEffect TriggerEffect(ETrigger::Left, ETriggerEffect::Feedback,0.5f,
+	FAdaptiveTriggerEffect TriggerEffect(ETrigger::Left, ETriggerEffect::Feedback, 1.0f,
 		0, 1);			
 	PlayerController->SetAdaptiveTriggerEffect(TriggerEffect);
 }

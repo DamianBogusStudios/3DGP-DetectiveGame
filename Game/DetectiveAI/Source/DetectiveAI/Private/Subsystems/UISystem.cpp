@@ -21,6 +21,8 @@ void UUISystem::Initialize(FSubsystemCollectionBase& Collection)
 	FString Message = FString::Printf(TEXT("UI System Initialised"));
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, Message);
 #endif
+
+	UE_LOG(LogTemp, Log, TEXT("UI System Initialised"));
 }
 
 void UUISystem::Deinitialize()
@@ -116,7 +118,7 @@ UUserWidget* UUISystem::GetWidget(EUIElementType WidgetType)
 {
 	if(WidgetMap.Contains(WidgetType))
 	{
-		if(WidgetMap[WidgetType].WidgetInstance)
+		if(WidgetMap[WidgetType].WidgetInstance != nullptr)
 		{
 			return WidgetMap[WidgetType].WidgetInstance;
 		}
@@ -157,7 +159,11 @@ void UUISystem::LoadWidgetClasses()
 		WidgetMap.Add(EUIElementType::Loading, {Settings->LoadingGame});
 		WidgetMap.Add(EUIElementType::MicFeedback, {Settings->MicFeedback});
 		WidgetMap.Add(EUIElementType::Pickup, {Settings->Pickup});
+
+
+		UE_LOG(LogTemp, Log, TEXT("Found Widgets"));
 	}
+
 }
 	
 

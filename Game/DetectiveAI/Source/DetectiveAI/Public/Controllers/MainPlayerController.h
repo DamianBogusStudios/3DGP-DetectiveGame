@@ -114,8 +114,38 @@ struct FAdaptiveTriggerEffect
 		, EndPos(FMath::Clamp(InEndPos, 0.0f, 1.0f))     
 	{
 	}
-
 	FAdaptiveTriggerEffect() {}
+
+	void GetConvertedValues(uint8& OutStart, uint8& OutEnd, uint8& OutStrength) 
+	{
+		switch(Effect)
+		{
+			//start <= 9, strength <= 8
+			case ETriggerEffect::Feedback:
+				OutStart = NormaliseToRange(StartPos, 2, 9);
+				OutEnd = 8;
+				OutStrength = NormaliseToRange(Strength, 0, 8);
+				break;
+			//ensure(StartPosition >= 2 && StartPosition <= 7);
+			//ensure(EndPosition >= StartPosition + 1 && EndPosition <= 8);
+			//ensure(Strength <= 8);
+			default:
+				OutStart = NormaliseToRange(StartPos, 2, 7);
+				OutEnd = NormaliseToRange(EndPos, OutStart + 1, 8);
+				OutStrength = NormaliseToRange(Strength, 0, 8);
+				break;
+		}
+	}
+
+	static int NormaliseToRange(float Value, float MinRange, float MaxRange)
+	{
+		// Clamp the input to ensure it stays within [0, 1]
+		Value = FMath::Clamp(Value, 0.0f, 1.0f);
+
+		// Scale and shift the value to the new range
+		return FMath::RoundToInt(MinRange + (MaxRange - MinRange) * Value);
+	}
+
 };
 
 
@@ -209,5 +239,6 @@ private:
 		bShowMouseCursor = bEnableClickEvents = bEnableMouseOverEvents = bEnableMouse;
 	}
 
+	
 	
 };
