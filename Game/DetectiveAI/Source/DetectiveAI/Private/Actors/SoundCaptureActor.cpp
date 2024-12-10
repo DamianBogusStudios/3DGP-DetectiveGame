@@ -4,7 +4,6 @@
 #include "Actors/SoundCaptureActor.h"
 #include "AudioCaptureComponent.h"
 #include "AudioDevice.h"
-#include "AudioMixerDevice.h"
 #include "Sound/SoundSubmix.h"
 #include "Handlers/ServiceLocator.h"
 #include "Interfaces/STTService.h"
@@ -34,19 +33,15 @@ void ASoundCaptureActor::BeginPlay()
 	}
 	
 	AudioSubmix = NewObject<USoundSubmix>(USoundSubmix::StaticClass());
-	if (AudioCaptureComponent)
+	if (AudioCaptureComponent && AudioSubmix)
 	{
-		FAudioDevice* AudioDevice = GetWorld()->GetAudioDeviceRaw();
-		
-		BufferListener = MakeShared<FSubmixBufferListener>(TWeakObjectPtr<ASoundCaptureActor>(this));
-		// ISubmixBufferListener* BufferListenerPtr = BufferListener.Get();
-		
 		AudioCaptureComponent->SoundSubmix = AudioSubmix;
 		AudioCaptureComponent->SetOutputToBusOnly(true);
 		AudioCaptureComponent->Start();
-		
-		if (AudioDevice && AudioSubmix)
+
+		if (FAudioDevice* AudioDevice = GetWorld()->GetAudioDeviceRaw())
 		{
+			BufferListener = MakeShared<FSubmixBufferListener>(TWeakObjectPtr<ASoundCaptureActor>(this));
 			AudioDevice->RegisterSubmixBufferListener(BufferListener.Get(), AudioSubmix);
 		}
 	}
@@ -58,13 +53,6 @@ void ASoundCaptureActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		AudioCaptureComponent->Stop();
 	}
-
-	// FAudioDevice* AudioDevice = GetWorld()->GetAudioDeviceRaw();
-	// if (AudioDevice && AudioSubmix)
-	// {
-	// 	AudioDevice->UnregisterSubmixBufferListener(BufferListener.ToSharedRef(), AudioDevice->GetMainSubmixObject());
-	// }
-
 	Super::EndPlay(EndPlayReason);
 }
 

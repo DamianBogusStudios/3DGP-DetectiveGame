@@ -70,6 +70,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "MiniGame Settings")
 	bool bDrawDebugElements = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SFX")
+	USoundBase* SetSound;
 	
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<UImage> Pick;

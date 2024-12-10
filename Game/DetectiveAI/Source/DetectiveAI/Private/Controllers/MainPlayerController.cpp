@@ -235,6 +235,9 @@ void AMainPlayerController::HandleApplyTensionCompleted_MiniGame(const FInputAct
 	if(MiniGameInputInterface)
 	{
 		MiniGameInputInterface->HandleApplyTensionCompleted_MiniGame();
+
+		float FloatValue = Value.Get<float>();
+		DualSense->SetLightBarColour(FColor(255,255,255,255 * FloatValue));
 	}
 }
 void AMainPlayerController::HandleRaisePinCompleted_MiniGame(const FInputActionValue& Value)

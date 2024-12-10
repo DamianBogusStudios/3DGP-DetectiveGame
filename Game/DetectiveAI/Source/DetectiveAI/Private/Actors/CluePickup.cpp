@@ -53,23 +53,23 @@ void ACluePickup::Interact_Implementation(AActor* Caller)
 void ACluePickup::OnFocus_Implementation()
 {
 	bIsFocused = true;
-	/*if(Mesh)
+	if(Mesh)
 	{
 		if(UAGPGameInstance* GameInstance = Cast<UAGPGameInstance>(GetGameInstance()))
 		{
 			Mesh->SetOverlayMaterial(GameInstance->GetOverlayMaterial(true));
 		}
-	}*/
+	}
 
 }
 
 void ACluePickup::EndFocus_Implementation()
 {
 	bIsFocused = false;
-	/*if (Mesh)
+	if (Mesh)
 	{
 		Mesh->SetOverlayMaterial(nullptr);
-	}*/
+	}
 }
 
 void ACluePickup::OnMiniGameFinished(bool bSuccess)

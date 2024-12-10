@@ -99,8 +99,6 @@ private:
 
 	double StartTranscriptionTime;
 	
-	// void OnSubmixAudio(const USoundWave* OwningSoundWave, const float* AudioData, int32 NumSamples, int32 NumChannels, const int32 SampleRate, double AudioClock);
-	
 	void StartRecording();
 	void StopRecording();
 	

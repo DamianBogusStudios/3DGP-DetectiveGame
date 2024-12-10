@@ -6,6 +6,7 @@
 #include "Components/PanelWidget.h"
 #include "Controllers/MainPlayerController.h"
 #include "Interfaces/MiniGameCallbackInterface.h"
+#include "Kismet/GameplayStatics.h"
 
 #pragma region IWidgetInterface
 
@@ -284,7 +285,11 @@ void ULockpickMiniGame::SetPin(FLockPin& Pin)
 		Pin.PinState = EPinState::Set;
 		UpdateRightTriggerEffect();
 		BindRandomPin();
-		//todo play sound effect.
+
+		if (SetSound)
+		{
+			UGameplayStatics::PlaySound2D(this, SetSound);
+		}
 	}
 }
 
