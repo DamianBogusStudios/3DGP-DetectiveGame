@@ -21,10 +21,12 @@ UHttpGPTVoiceRequest* UHttpGPTVoiceRequest::StartTextToSpeech(UObject* const Wor
 UHttpGPTVoiceRequest* UHttpGPTVoiceRequest::StartTextToSpeech(
 UObject* const WorldContextObject, const FString InText, const FHttpGPTVoiceOptions VoiceOptions)
 {
-    UHttpGPTVoiceRequest* NewRequest = NewObject<UHttpGPTVoiceRequest>();
+    UHttpGPTVoiceRequest* const NewRequest = NewObject<UHttpGPTVoiceRequest>();
     NewRequest->TextToSynthesize = InText;
     NewRequest->VoiceOptions = VoiceOptions;
+    
     NewRequest->RegisterWithGameInstance(WorldContextObject);
+
     return NewRequest;
 }
 

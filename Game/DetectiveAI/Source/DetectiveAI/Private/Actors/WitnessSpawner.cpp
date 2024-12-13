@@ -39,6 +39,9 @@ void AWitnessSpawner::SpawnActors(const TArray<FActorDescription>& Actors)
 
 		for (int i = 0; i < Actors.Num(); i++)
 		{
+			if (Actors[i].Roles.Contains(EActorRole::Victim))
+				continue;
+			
 			FVector SpawnLocation = GetActorLocation() + GetActorRightVector() * (i*Spacing);
 			FRotator SpawnRotation = FRotator(0.f, 180.f, 0.f);
 			FTransform SpawnTransform(SpawnRotation, SpawnLocation);

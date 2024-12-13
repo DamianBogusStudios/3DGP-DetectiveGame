@@ -7,6 +7,7 @@
 #include "UObject/Object.h"
 #include "GPTVoiceHandler.generated.h"
 
+enum class EHttpGPTSynthVoice : uint8;
 class USoundWaveProcedural;
 class UHttpGPTVoiceRequest;
 
@@ -18,14 +19,15 @@ struct FVoiceRequest
 	
 	TWeakObjectPtr<UObject> Caller;
 	FString Message;
+	EVoiceType VoiceType = EVoiceType::BritishMale;
 	FVoiceDelegate OnVoiceReceived;
 	FErrorReceivedDelegate OnErrorReceived;
 	
 	double StartTime = 0;
 	double EndTime = 0;
 	
-	FVoiceRequest(UObject* InCaller, const FString& InMessage, const FVoiceDelegate& Callback, const FErrorReceivedDelegate& OnErrorReceived)
-		: Caller(InCaller), Message(InMessage), OnVoiceReceived(Callback), OnErrorReceived(OnErrorReceived)
+	FVoiceRequest(UObject* InCaller, const FString& InMessage, EVoiceType InVoiceType, const FVoiceDelegate& Callback, const FErrorReceivedDelegate& OnErrorReceived)
+		: Caller(InCaller), Message(InMessage), VoiceType(InVoiceType), OnVoiceReceived(Callback), OnErrorReceived(OnErrorReceived)
 	{
 		StartTime = FPlatformTime::Seconds();
 	}
@@ -60,7 +62,8 @@ public:
 
 	UGPTVoiceHandler();
 	
-	virtual void SendTextToVoice(UObject* const Caller, const FString& Message, FVoiceDelegate Callback, FErrorReceivedDelegate ErrorCallback) override;
+	virtual void SendTextToVoice(UObject* const Caller, const FString& Message, EVoiceType VoiceType,
+		FVoiceDelegate Callback, FErrorReceivedDelegate ErrorCallback) override;
 
 private:
 	
@@ -73,4 +76,6 @@ private:
 	UFUNCTION()
 	void OnSpeechSynthesizedInternal(USoundWaveProcedural* AudioData);
 
+
+	static EHttpGPTSynthVoice VoiceTypeToSynthVoice(EVoiceType VoiceType);
 };

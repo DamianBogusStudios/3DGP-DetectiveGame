@@ -18,7 +18,7 @@ ABaseNPC::ABaseNPC()
 void ABaseNPC::InitialiseActor(FActorDescription ActorDescription, USkeletalMesh* SkeletalMesh)
 {
 	PendingMesh = SkeletalMesh;
-	PendingActorDescription = &ActorDescription;
+	PendingActorDescription = FActorDescription(ActorDescription);
 }
 
 // Called when the game starts or when spawned
@@ -37,10 +37,8 @@ void ABaseNPC::BeginPlay()
 		}
 	}
 
-	if(PendingActorDescription)
-	{
-		DialogueComponent->SetDescription(*PendingActorDescription);
-	}
+	DialogueComponent->SetDescription(PendingActorDescription);
+
 }
 // Called every frame
 void ABaseNPC::Tick(float DeltaTime)

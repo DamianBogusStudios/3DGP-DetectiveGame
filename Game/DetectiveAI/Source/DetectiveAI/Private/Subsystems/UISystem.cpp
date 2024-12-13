@@ -159,6 +159,7 @@ void UUISystem::LoadWidgetClasses()
 		WidgetMap.Add(EUIElementType::Loading, {Settings->LoadingGame});
 		WidgetMap.Add(EUIElementType::MicFeedback, {Settings->MicFeedback});
 		WidgetMap.Add(EUIElementType::Pickup, {Settings->Pickup});
+		WidgetMap.Add(EUIElementType::GameEnd, {Settings->GameEnd});
 
 
 		UE_LOG(LogTemp, Log, TEXT("Found Widgets"));

@@ -84,7 +84,8 @@ void ULLMBaseSubSystem::SendMessage(const FString& Prompt)
 		LastRequest = FPromptBuffer(Prompt);
 		LLMService->SendMessage(this, Prompt,
 			FMessageDelegate::CreateUObject(this, &ULLMBaseSubSystem::OnMessagedReceivedInternal),
-			FErrorReceivedDelegate::CreateUObject(this, &ULLMBaseSubSystem::OnErrorReceivedInternal)
+			FErrorReceivedDelegate::CreateUObject(this, &ULLMBaseSubSystem::OnErrorReceivedInternal),
+			nullptr
 		);
 	}
 }

@@ -32,7 +32,7 @@ void ASoundCaptureActor::BeginPlay()
 		UI->RequestStartWidget(GetWorld()->GetFirstPlayerController(), EUIElementType::MicFeedback);
 	}
 	
-	AudioSubmix = NewObject<USoundSubmix>(USoundSubmix::StaticClass());
+	//AudioSubmix = NewObject<USoundSubmix>(USoundSubmix::StaticClass());
 	if (AudioCaptureComponent && AudioSubmix)
 	{
 		AudioCaptureComponent->SoundSubmix = AudioSubmix;
@@ -44,7 +44,7 @@ void ASoundCaptureActor::BeginPlay()
 			BufferListener = MakeShared<FSubmixBufferListener>(TWeakObjectPtr<ASoundCaptureActor>(this));
 			AudioDevice->RegisterSubmixBufferListener(BufferListener.Get(), AudioSubmix);
 		}
-	}
+	}//
 }
 
 void ASoundCaptureActor::EndPlay(const EEndPlayReason::Type EndPlayReason)

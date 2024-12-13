@@ -8,15 +8,41 @@ UGPTVoiceHandler::UGPTVoiceHandler()
 {
 }
 
-void UGPTVoiceHandler::SendTextToVoice(UObject* const Caller, const FString& Message,
+void UGPTVoiceHandler::SendTextToVoice(UObject* const Caller, const FString& Message, EVoiceType VoiceType,
 	FVoiceDelegate Callback, FErrorReceivedDelegate ErrorCallback) //add voice gender needed
 {
-	VoiceRequest = FVoiceRequest(Caller, Message, Callback, ErrorCallback);
+	VoiceRequest = FVoiceRequest(Caller, Message, VoiceType, Callback, ErrorCallback);
+
+	FHttpGPTVoiceOptions HttpGptVoiceOptions;
+
+	HttpGptVoiceOptions.Voice = VoiceTypeToSynthVoice(VoiceType);
 	
-	auto Request = UHttpGPTVoiceRequest::StartTextToSpeech(Caller, Message);
+	auto Request = UHttpGPTVoiceRequest::StartTextToSpeech(Caller, Message, HttpGptVoiceOptions);
 	BindCallbacks(Request);
 	Request->Activate(); 	
 }
+
+EHttpGPTSynthVoice UGPTVoiceHandler::VoiceTypeToSynthVoice(EVoiceType VoiceType) 
+{
+	switch (VoiceType)
+	{
+	case EVoiceType::HighMale: 
+		return EHttpGPTSynthVoice::alloy;
+	case EVoiceType::StandardMale: 
+		return EHttpGPTSynthVoice::echo;
+	case  EVoiceType::BritishMale: 
+		return EHttpGPTSynthVoice::fable;
+	case EVoiceType::DeepMale: 
+		return EHttpGPTSynthVoice::onyx;
+	case EVoiceType::OlderFemale: 
+		return EHttpGPTSynthVoice::nova;
+	case EVoiceType::DeepFemale: 
+		return EHttpGPTSynthVoice::shimmer;
+	}
+
+	return EHttpGPTSynthVoice::alloy;
+}
+
 
 void UGPTVoiceHandler::BindCallbacks(UHttpGPTVoiceRequest* Request)
 {

@@ -16,6 +16,6 @@ class CASEGENERATOR_API UNullVoiceHandler : public UObject, public ITTSService
 	GENERATED_BODY()
 public:
 
-	virtual void SendTextToVoice(UObject* const Caller, const FString& Message, FVoiceDelegate VoiceDelegate,
+	virtual void SendTextToVoice(UObject* const Caller, const FString& Message, EVoiceType VoiceType, FVoiceDelegate VoiceDelegate,
 				FErrorReceivedDelegate ErrorCallback) override;
 };

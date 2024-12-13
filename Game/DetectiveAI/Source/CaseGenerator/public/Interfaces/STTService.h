@@ -7,7 +7,6 @@
 #include "UObject/Interface.h"
 #include "STTService.generated.h"
 
-// DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTranscriptDelegate, const FString&, TranscribedText);
 
 // This class does not need to be modified.
 UINTERFACE()
@@ -30,3 +29,4 @@ public:
 		FTranscriptDelegate Callback,
 		FErrorReceivedDelegate ErrorCallback) = 0;
 };
+ 

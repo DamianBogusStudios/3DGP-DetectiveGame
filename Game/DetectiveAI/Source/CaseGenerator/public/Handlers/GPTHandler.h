@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Interfaces/LLMService.h"
+#include "Structures/HttpGPTChatTypes.h"
 #include "UObject/Object.h"
 #include "Types/CommonCaseTypes.h"
 #include "GPTHandler.generated.h"
@@ -57,6 +58,11 @@ struct FMessageRequest
 			OnMessageReceived.ExecuteIfBound(Response);
 	}
 
+	void ExecuteFunctionCall(FName& FunctionToCall, TArray<FString>& ArgValues) 
+	{
+		OnFunctionCalled.ExecuteIfBound(FunctionToCall, ArgValues);
+	}
+
 	void ExecuteError()
 	{
 		OnErrorReceived.ExecuteIfBound(Message, StructSchema);
@@ -80,7 +86,7 @@ public:
 	virtual void SendCustomInstructions(UObject* const Caller, const FString& Message) override;
 
 	virtual void SendMessage( UObject* const Caller, const FString& Message,
-				FMessageDelegate Callback, FErrorReceivedDelegate ErrorCallback) override;
+				FMessageDelegate Callback, FErrorReceivedDelegate ErrorCallback, FFunctionCallDelegate FunctionCall) override;
 
 	virtual void SendStructuredMessage(UObject* const Caller, const FString& Message, UScriptStruct* StructSchema,
 				FStructuredMessageDelegate Callback, FErrorReceivedDelegate ErrorCallback) override;

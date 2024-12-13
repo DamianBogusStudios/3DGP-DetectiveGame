@@ -7,6 +7,17 @@
 #include "UObject/Interface.h"
 #include "TTSService.generated.h"
 
+UENUM()
+enum EVoiceType
+{
+	HighMale,
+	StandardMale,
+	BritishMale,
+	DeepMale,
+	OlderFemale,
+	DeepFemale
+};
+
 class USoundWaveProcedural;
 
 // DECLARE_DELEGATE_OneParam(FVoiceDelegate,
@@ -29,8 +40,10 @@ class CASEGENERATOR_API ITTSService
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	virtual void SendTextToVoice(UObject* const Caller, const FString& Message,
+	virtual void SendTextToVoice(UObject* const Caller, const FString& Message, EVoiceType VoiceType,
 		FVoiceDelegate Callback,
 		FErrorReceivedDelegate ErrorCallback) = 0;
 	
 };
+
+

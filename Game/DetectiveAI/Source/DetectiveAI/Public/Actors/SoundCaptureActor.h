@@ -45,7 +45,7 @@ public:
 	
 	UPROPERTY()
 	TObjectPtr<UAudioCaptureComponent> AudioCaptureComponent;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Voice Detection Settings")
 	TObjectPtr<USoundSubmix> AudioSubmix;
 	UPROPERTY()
 	TScriptInterface<ISTTService> STTService;

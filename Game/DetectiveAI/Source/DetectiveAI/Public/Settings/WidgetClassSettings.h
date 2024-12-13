@@ -36,4 +36,8 @@ public:
 	UPROPERTY(Config, EditDefaultsOnly, BlueprintReadOnly, Category = "UI", 
 		AdvancedDisplay)
 	TSubclassOf<UUserWidget> Pickup;
+
+	UPROPERTY(Config, EditDefaultsOnly, BlueprintReadOnly, Category = "UI", 
+		AdvancedDisplay)
+	TSubclassOf<UUserWidget> GameEnd;
 };

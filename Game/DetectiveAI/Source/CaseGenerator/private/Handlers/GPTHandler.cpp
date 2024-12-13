@@ -268,10 +268,12 @@ void UGPTHandler::SendCustomInstructions(UObject* const Caller, const FString& M
 }
 
 void UGPTHandler::SendMessage(UObject* const Caller, const FString& Message, 
-				FMessageDelegate Callback, FErrorReceivedDelegate ErrorCallback)
+				FMessageDelegate Callback, FErrorReceivedDelegate ErrorCallback, FFunctionCallDelegate FunctionCall)
 {
 	FMessageRequest Request = FMessageRequest(Caller, Message, nullptr, GetFunctions());
 	Request.OnMessageReceived = Callback;
+	Request.OnErrorReceived = ErrorCallback;
+	Request.OnFunctionCalled = FunctionCall;
 	AddMessageToHistory(Caller, EHttpGPTChatRole::User, Message);
 	AddNewRequest(Request);
 }
@@ -388,11 +390,11 @@ TArray<FHttpGPTChatMessage>* UGPTHandler::GetChatHistory(TWeakObjectPtr<UObject>
 
 		if(Choice.FinishReason.IsEqual("function_call", ENameCase::IgnoreCase))
 		{
-			// auto Request = RequestQueue.Pop();
-			//
-			// FString Message = Choice.Message.Content;
-			// AddMessageToHistory(Request.Caller, EHttpGPTChatRole::Function, Message);
-			//
+			auto Request = RequestQueue.Pop();
+			
+			FString Message = Choice.Message.Content;
+			AddMessageToHistory(Request.Caller, EHttpGPTChatRole::Function, Message);
+			
 			FHttpGPTFunctionCall FuncCall = Choice.Message.FunctionCall;
 			TArray<FString> ArgNames;
 			TArray<FString> ArgValues;
@@ -409,8 +411,8 @@ TArray<FHttpGPTChatMessage>* UGPTHandler::GetChatHistory(TWeakObjectPtr<UObject>
 				}
 			}
 			UE_LOG(LogTemp, Log, TEXT("FunctionCall Called: %s"), *FuncCall.Name.ToString());
-			//OnFunctionCalled.Broadcast(RequestCaller, Message, FuncCall.Name,ArgNames, ArgValues);
-		}//
+			Request.ExecuteFunctionCall(FuncCall.Name, ArgValues);
+		}
 	}
 }
 

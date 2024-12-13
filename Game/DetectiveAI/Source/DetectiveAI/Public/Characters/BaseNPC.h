@@ -5,9 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/Interactable.h"
+#include "Types/CommonCaseTypes.h"
 #include "BaseNPC.generated.h"
 
-struct FActorDescription;
 class UDialogueComponent;
 
 UCLASS()
@@ -51,5 +51,5 @@ public:
 private:
 
 	USkeletalMesh* PendingMesh;
-	FActorDescription* PendingActorDescription;
+	FActorDescription PendingActorDescription;
 };

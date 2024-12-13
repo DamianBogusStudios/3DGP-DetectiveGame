@@ -19,7 +19,8 @@ enum class EUIElementType : uint8
 	HUD,
 	Loading,
 	MicFeedback,
-	Pickup
+	Pickup,
+	GameEnd
 };
 
 USTRUCT(BlueprintType)

@@ -29,7 +29,7 @@ public:
 
 	virtual void SendMessage( UObject* const Caller, const FString& Message,
 				FMessageDelegate Callback,
-				FErrorReceivedDelegate ErrorCallback) = 0;
+				FErrorReceivedDelegate ErrorCallback, FFunctionCallDelegate FunctionCallDelegate) = 0;
 
 	virtual void SendStructuredMessage(UObject* const Caller, const FString& Message, UScriptStruct* StructSchema,
 				FStructuredMessageDelegate Callback,

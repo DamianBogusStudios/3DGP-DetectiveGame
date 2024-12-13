@@ -9,7 +9,8 @@
 #include "DialogueComponent.generated.h"
 
 
-// DECLARE_DYNAMIC_DELEGATE_OneParam(FMessageRelayDelegate, const FString&, MessageRelay);
+class UVoiceGenLogger;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageRelayDelegate, const FString&, MessageRelay);
 
 class ISTTService;
 class ITTSService;
@@ -28,15 +29,26 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NPC")
 	FActorDescription ActorDescription;
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NPC")
+	bool bSkipGeneratedDescription;
+	
 	UPROPERTY()
 	TScriptInterface<ILLMService> LLMService;
 	UPROPERTY()
 	TScriptInterface<ITTSService> TTSService;
 	UPROPERTY()
 	TScriptInterface<ISTTService> STTService;
-	
 
+	UPROPERTY()
+	TObjectPtr<UVoiceGenLogger> GenLogger;
+
+	UPROPERTY()
+	FMessageRelayDelegate MessageRelayDelegate;
+
+	UPROPERTY()
+	TArray<FString> FunctionParams;
+	
 	UFUNCTION()
 	void SetDescription(const FActorDescription& Description);
 	UFUNCTION()
@@ -67,5 +79,13 @@ protected:
 	void BindCallbacks();
 	void RegisterWitness();
 	void OnMessageReceived(FString& Message);
+	void OnFunctionCalled(FName& FunctionName, TArray<FString> ArgValues);
+	void OnErrorReceived(FString& ErrorMessage, UScriptStruct* Struct);
 	void OnVoiceReceived(USoundWaveProcedural* SoundWave);
-	};
+
+	UFUNCTION()
+	void OnCaseDetailsGenerated(const EMotive& Motive, const EMurderWeapon& MurderWeapon, const FString& Message);
+
+	EVoiceType GetVoiceType() const;
+};
+

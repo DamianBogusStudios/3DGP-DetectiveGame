@@ -102,12 +102,15 @@ enum class EMyersBriggsType : uint8
 UENUM(BlueprintType)
 enum class EActorRole : uint8
 {
+	Victim,
 	PoliceOfficer,
 	Witness,
 	Suspect,
 	Bystander,
 	Friend,
-	Victim
+	Partner,
+	Acquaintance,
+	Stranger,
 };
 
 UENUM(BlueprintType)
@@ -120,16 +123,16 @@ enum class EPlayerFamiliarity : uint8
 	Partner,
 };
 
-UENUM(BlueprintType)
-enum class EVictimFamiliarity : uint8
-{
-	Stranger,
-	Acquaintance,
-	Coworker,
-	Friend,
-	Partner,
-	Victim
-};
+// UENUM(BlueprintType)
+// enum class EVictimFamiliarity : uint8
+// {
+// 	Stranger,
+// 	Acquaintance,
+// 	Coworker,
+// 	Friend,
+// 	Partner,
+// 	Victim
+// };
 
 UENUM(BlueprintType)
 enum class ERoom : uint8
@@ -141,6 +144,7 @@ enum class ERoom : uint8
 	MasterBedroom,
 	DiningRoom,
 	Kitchen,
+	Study,
 	MAX UMETA(Hidden)
 };
 
@@ -185,13 +189,13 @@ struct CASEGENERATOR_API FActorDescription
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (LLMDescription = "Roles that the character has in the stories, can have multiple"))
 	TArray<EActorRole> Roles;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EVictimFamiliarity VictimFamiliarity = EVictimFamiliarity::Stranger;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	// EVictimFamiliarity VictimFamiliarity = EVictimFamiliarity::Stranger;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (LLMDescription = "Description of the current world and knowledge from the perspective of this character. Some characters may know more than others. can be later used in dialogue to acquire information"))
 	FString Context;
 
-	FString ToString()
+	FString ToString() const
 	{
 		FString Result = FString::Printf(TEXT("Name: %s\nGender: %s\nEye Colour: %s\nHair Colour: %s\nAge: %d\nMyers-Briggs Type: %s\nRoles: "),
 									 *Name,
@@ -207,9 +211,11 @@ struct CASEGENERATOR_API FActorDescription
 		}
 		Result.RemoveFromEnd(TEXT(", ")); 
 
-		Result += FString::Printf(TEXT("\nVictim Familiarity: %s\nContext: %s"),
-								  *UEnum::GetValueAsString(VictimFamiliarity),
-								  *Context);
+		// Result += FString::Printf(TEXT("\nVictim Familiarity: %s\nContext: %s"),
+		// 						  *UEnum::GetValueAsString(VictimFamiliarity),
+		// 						  *Context);
+		
+		Result += FString::Printf(TEXT("\nContext: %s"), *Context);
 		return Result;
 	}
 };
@@ -227,6 +233,15 @@ struct CASEGENERATOR_API FClue
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Meta = (LLMDescription = "detailed description of the context of this clue in the case"))
 	FString Description;
+
+	FString ToString() const
+	{
+		FString Result = FString::Printf(TEXT("Clue Type: %s\nRoom: %s\nDescription: %s"),
+									 *UEnum::GetValueAsString(ClueType),
+									 *UEnum::GetValueAsString(Room),
+									 *Description);
+		return Result;
+	}
 };
 
 USTRUCT(BlueprintType)
@@ -269,6 +284,9 @@ struct CASEGENERATOR_API FCaseFile
 	EMurderWeapon MurderWeapon = EMurderWeapon::Arsenic;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ERoom MurderRoom = ERoom::Atrium;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FActorDescription> Actors;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -276,6 +294,43 @@ struct CASEGENERATOR_API FCaseFile
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (LLMDescription = "Description of the current world. In this object the knowledge is absolute and contains all details about the case."))
 	FString Context;
+
+	FString ToString() const
+	{
+		const FString MotiveStr = UEnum::GetDisplayValueAsText(Motive).ToString();
+		const FString WeaponStr = UEnum::GetDisplayValueAsText(MurderWeapon).ToString();
+		const FString RoomStr = UEnum::GetDisplayValueAsText(MurderRoom).ToString();
+
+		FString ActorsStr;
+		for (const auto& Actor : Actors)
+		{
+			ActorsStr += Actor.ToString() + TEXT("\n,");
+		}
+		if (ActorsStr.Len() > 3)
+		{
+			ActorsStr = ActorsStr.LeftChop(3);
+		}
+
+		FString CluesStr;
+		for (const FClue& Clue : Clues)
+		{
+			CluesStr += Clue.ToString() + TEXT("\n,");
+		}
+		if (CluesStr.Len() > 3)
+		{
+			CluesStr = CluesStr.LeftChop(3);
+		}
+
+		return FString::Printf(
+			TEXT("FCaseFile:\nMotive: %s\nMurder Weapon: %s\nMurder Room: %s\nActors: [%s]\nClues: [%s]\nContext: %s"),
+			*MotiveStr,
+			*WeaponStr,
+			*RoomStr,
+			*ActorsStr,
+			*CluesStr,
+			*Context
+		);
+	}
 };
 
 #pragma region DELEGATES
@@ -297,16 +352,8 @@ DECLARE_DELEGATE_TwoParams(FErrorReceivedDelegate,
 	FString& /*Message*/,
 	UScriptStruct* /* StructSchema*/);
 
-
-
-DECLARE_DYNAMIC_DELEGATE_FiveParams(FFunctionCallDelegate,
-	UObject*, Caller,
-	FString&, Message,
-	FName&, FunctionName,
-	TArray<FString>&, ArgumentNames,
-	TArray<FString>&, ArgumentValues);
-
-// DECLARE_DYNAMIC_DELEGATE_OneParam(FDialogueOptionsDelegate,
-// 	FDialogueOptions&, DialogueOptions);
+DECLARE_DELEGATE_TwoParams(FFunctionCallDelegate,
+	FName& /*FunctionName*/,
+	TArray<FString> /*ArgumentValues*/);
 
 #pragma endregion 

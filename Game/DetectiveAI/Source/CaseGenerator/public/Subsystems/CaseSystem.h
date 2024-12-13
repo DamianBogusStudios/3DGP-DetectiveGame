@@ -9,6 +9,7 @@
 #include "CaseSystem.generated.h"
 
 
+class UCaseGenLogger;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCaseActorsDelegate, const TArray<FActorDescription>&, Actors);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCaseCluesDelegate, const TArray<FClue>&, Clues);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCaseDetailsDelegate,
@@ -22,6 +23,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCaseGenerationFinishedDelegate,
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FCaseGenerationProgressDelegate,
 	const FString&, NextTask,
 	float, Progress);
+
 /**
 * CaseSystem
 *
@@ -59,6 +61,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StartCaseGeneration();
 	
+	UFUNCTION()
+	FCaseFile GetCaseFile()
+	{
+		return CaseFile;
+	}
 	
 protected:
 
@@ -68,6 +75,8 @@ protected:
 	
 private:
 
+	TObjectPtr<UCaseGenLogger> Logger;
+	
 	FCaseFile CaseFile;
 	TArray<FString> GeneratedActorSchemas;
 	int NumOfActors;
@@ -85,5 +94,6 @@ private:
 	void GenerateActor();
 	void GenerateClues();
 	void GenerateConnections();
+	void GeneratePoliceContext();
 	void FinishGeneration();
 };

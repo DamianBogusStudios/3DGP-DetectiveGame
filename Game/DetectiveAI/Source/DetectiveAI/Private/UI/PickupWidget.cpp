@@ -20,7 +20,13 @@ void UPickupWidget::Setup_Implementation(UObject* Caller)
 		FClue Clue;
 		if (Inventory->GetLastClue(Clue))
 		{
-			TypeText->SetText(FText::FromString(UEnum::GetValueAsString(Clue.ClueType)));
+
+			//FString EnumValueString = UEnum::GetValueAsString(Clue.ClueType);
+			//EnumValueString = EnumValueString.Mid(EnumValueString.Find(TEXT("::")) + 2);
+
+			const FString ResourceString = StaticEnum<EClueType>()->GetValueAsString(Clue.ClueType);
+			
+			TypeText->SetText(FText::FromString(ResourceString));
 			DescText->SetText(FText::FromString(Clue.Description));
 		}
 	}

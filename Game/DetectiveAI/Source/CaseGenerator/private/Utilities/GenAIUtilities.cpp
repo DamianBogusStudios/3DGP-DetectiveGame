@@ -11,7 +11,36 @@ bool UGenAIUtilities::JsonToUStruct(const FString& Content, const UScriptStruct*
 
 	if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 	{
-		if(FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), Schema, OutStruct, 0, 0))
+		// Iterate over the properties of the struct
+		for (TFieldIterator<FProperty> It(Schema); It; ++It)
+		{
+			FProperty* Property = *It;
+			FName PropertyName = Property->GetFName();
+
+			// Check if the property is an enum
+			if (FEnumProperty* EnumProp = CastField<FEnumProperty>(Property))
+			{
+				const UEnum* EnumDef = EnumProp->GetEnum();
+				if (JsonObject->HasField(PropertyName.ToString()))
+				{
+					FString EnumValueString = JsonObject->GetStringField(PropertyName.ToString());
+					int64 EnumValue = EnumDef->GetIndexByName(FName(*EnumValueString));
+
+					// If invalid, set to default (0)
+					if (EnumValue == INDEX_NONE)
+					{
+						EnumValue = 0; // Default to the first value in the enum
+					}
+
+					// Set the value in the struct
+					void* ValuePtr = EnumProp->ContainerPtrToValuePtr<void>(OutStruct);
+					EnumProp->GetUnderlyingProperty()->SetIntPropertyValue(ValuePtr, EnumValue);
+				}
+			}
+		}
+
+		// Continue with the usual JsonObjectToUStruct process
+		if (FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), Schema, OutStruct, 0, 0))
 		{
 			return true;
 		}
@@ -19,6 +48,7 @@ bool UGenAIUtilities::JsonToUStruct(const FString& Content, const UScriptStruct*
 
 	return false;
 }
+
 
 bool UGenAIUtilities::UStructToJsonObjectString(const UScriptStruct* InStructType, const void* InStruct, FString& OutJsonString)
 {

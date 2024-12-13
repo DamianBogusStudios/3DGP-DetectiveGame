@@ -20,7 +20,8 @@ public:
 	virtual void SendCustomInstructions(UObject* const Caller, const FString& Message) override;
 	virtual void SendMessage(UObject* const Caller, const FString& Message,
 				FMessageDelegate Callback,
-				FErrorReceivedDelegate ErrorCallback) override;
+				FErrorReceivedDelegate ErrorCallback,
+				FFunctionCallDelegate FunctionCallDelegate) override;
 	virtual void SendStructuredMessage(UObject* const Caller, const FString& Message, UScriptStruct* StructSchema,
 				FStructuredMessageDelegate Callback,
 				FErrorReceivedDelegate ErrorCallback) override;

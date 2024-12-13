@@ -22,7 +22,7 @@ void UNullLLMService::SendCustomInstructions(UObject* const Caller, const FStrin
 }
 
 void UNullLLMService::SendMessage(UObject* const Caller, const FString& Message,
-	FMessageDelegate Delegate, FErrorReceivedDelegate ErrorCallback)
+	FMessageDelegate Delegate, FErrorReceivedDelegate ErrorCallback, FFunctionCallDelegate FunctionCall)
 {
 }
 

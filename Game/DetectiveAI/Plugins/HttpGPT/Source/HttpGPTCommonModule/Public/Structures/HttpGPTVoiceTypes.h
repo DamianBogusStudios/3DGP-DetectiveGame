@@ -39,7 +39,7 @@ struct HTTPGPTCOMMONMODULE_API FHttpGPTVoiceOptions
 	GENERATED_BODY()
 
 	FHttpGPTVoiceOptions();
-
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "HttpGPT | Voice", Meta = (DisplayName = "Model"))
 	EHttpGPTVoiceModel Model;
 
@@ -50,6 +50,8 @@ struct HTTPGPTCOMMONMODULE_API FHttpGPTVoiceOptions
 	EHttpGPTVoiceOutputFormat OutputFormat;
 
 
+
+	
 private:
 	void SetDefaults();
 };
